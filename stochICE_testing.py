@@ -30,7 +30,7 @@ locations=[[8370,520]]
 
 
 
-isabelle=ice.stochICE(prjDir=path,
+Roger=ice.stochICE(prjDir=path,
                                   batch_ID=batch_ID,
                                   ras_file=ras,
                                   geo_file=geo,
@@ -46,6 +46,25 @@ isabelle=ice.stochICE(prjDir=path,
 
 
 
+
+
+Roger.getXSectionIceParameters()
+Roger.getXSectionManning()
+Roger.getXSectionBankStations()
+Roger.getXSectionGeometry()
+Roger.getXSectionMainChannelGeometry()
+Roger.RiviceXSections()
+Roger.RiviceParameters()
+Roger.RiviceChainage()
+Roger.RiviceManning()
+Roger.RiviceXSectionMainChannelGeometry()
+Roger.RiviceReach()
+Roger.RiviceXSectionID()
+Roger.RiviceDistanceXSectionPrecedente()
+Roger.WriteRiviceCd1test()
+
+xsData=Roger.xsData
+RivicexsData = Roger.RivicexsData
 
 
 # bob.simInputPars
