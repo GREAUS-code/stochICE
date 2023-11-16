@@ -23,7 +23,7 @@ Outputs include:
 - longitudinal ice thickness profiles  
 - 2D water-level distribution geotiffs of individual ice jam events
 - 2D statistical water-level distribution geotiffs for the ensemble of simulated ice jam events
-![alt text](https://github.com/GREAUS-code/stochICE/imgs/stochMapExample.jpg?raw=true)
+![(see example here)](https://github.com/GREAUS-code/stochICE/tree/main/imgs/stochMapExample.jpg?raw=true)
 
 - descriptive statistics of the ensemble of tested ice jam scenarios in .xlsx format
 
