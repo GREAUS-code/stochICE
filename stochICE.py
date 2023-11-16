@@ -14,13 +14,14 @@ import time
 import win32com.client
 import numpy as np
 import statistics
-import rasterio
+#import rasterio
 import pandas as pd
 import re
 
 
+import stochRIVICE
 
-
+# 
 class stochICE():
 
     def __init__(self,prjDir,
@@ -34,6 +35,7 @@ class stochICE():
                       phi_range,
                       flow_range,
                       locations,
+                      code,
                       clrRes,
                       compRes):
 
@@ -52,8 +54,10 @@ class stochICE():
         self.phi=phi_range
         self.flows=flow_range
         self.locations=locations
+        self.code=code
         self.clr=clrRes
         self.compress=compRes
+        
 
         #ice variables in geo file
         self.iceVariables=['Ice Thickness',
@@ -70,17 +74,53 @@ class stochICE():
                    ]
 
 
-		#Add functions here to have them run by default
-		#These choices are flexible to help development
+		#Add functions here to run them by default
 
-        # self.printHeader()
-        # self.setupMonteCarloDir()
+        self.printHeader()
+        self.setupMonteCarloDir()
 
         # if self.clr:
         #     self.clearResults()
 
-        # self.preprocessSimulations()
-        # self.launch_HECRAS_simulations()
+        # Common functions for either HECRAS or RIVICE
+        self.preprocessSimulations()
+        self.getXSectionIceParameters()
+        self.getXSectionManning()
+        self.getXSectionBankStations()
+        self.getXSectionGeometry()
+        self.getXSectionMainChannelGeometry()
+        self.getBridgeData()
+
+
+        """
+        HECRAS specific functions will go here
+        """
+
+        if code =='HECRAS':
+            print('Using HECRAS backend')
+            # self.launch_HECRAS_simulations()
+
+        """
+        RIVICE specific functions will go here
+        """
+
+        if code =='RIVICE':
+        
+            print('Using RIVICE backend')
+            
+            #create stochRIVICE instance
+            self.stochRIVICE=stochRIVICE.StochRIVICE(self,5)
+
+            self.stochRIVICE.get_riv_xsections()
+            self.stochRIVICE.RiviceChainage()
+            self.stochRIVICE.RiviceManning()
+            self.stochRIVICE.RiviceXSectionMainChannelGeometry()
+            self.stochRIVICE.RiviceReach()
+            self.stochRIVICE.RiviceXSectionID()
+            self.stochRIVICE.RiviceDistanceXSectionPrecedente()
+            self.stochRIVICE.WriteRiviceCd1test()
+
+
 
         # if self.compress:
         #     self.compressResults()
@@ -188,7 +228,8 @@ class stochICE():
     def preprocessSimulations(self):
 
         #Import HEC-RAS Controller
-        self.RC = win32com.client.Dispatch("RAS631.HECRASCONTROLLER")
+        self.RC = win32com.client.Dispatch("RAS641.HECRASCONTROLLER")
+        # self.RC = win32com.client.Dispatch("RAS631.HECRASCONTROLLER")
 
         self.RC.Project_Open(self.ras_file)
         self.NNod, self.TabRS, self.TabNTyp = None, None, None
@@ -242,7 +283,6 @@ class stochICE():
         self.locUp=[]
         self.locDw=[]
 
-
         self.getInitGeoFileContents()
 
         for j in range(0,self.NSims):
@@ -284,8 +324,7 @@ class stochICE():
             stopwatch.start()
             self.v1,self.NMsg,self.TabMsg,self.v2 = self.RC.Compute_CurrentPlan(self.NMsg,self.TabMsg,self.block)
 			
-
-			
+            
 			#-----------------------
 			#get simulation data
 			#-----------------------
@@ -361,59 +400,6 @@ class stochICE():
 
         print('\nSimulations complete!')
 
-
-    # def getXSectionIceData(self):
-    #     """
-    #     Reads .g0* file and extracts relevant ice parameters (or any variable specified in self.iceVariables) and places them in a dictionary
-
-    #     Parameters
-    #     ----------
-    #     path : TYPE
-    #         DESCRIPTION.
-    #     variables : TYPE
-    #         DESCRIPTION.
-
-    #     Returns
-    #     -------
-    #     xsData : dict
-    #         Holds all data relevant to each cross-section. It is the most important variable.
-
-    #     """
-
-    #     self.xsData={}
-
-    #     with open(self.geo_file, 'r') as f:
-
-    #         for count,line in enumerate(f):
-
-    #             if "Type RM Length" in line:
-
-    #                 xs=line.split(",")[1].strip()
-    #                 self.xsData[xs]={}
-    #                 self.xsData[xs]['chainage']=float(xs)
-
-    #                 for variable in self.iceVariables:
-    #                     self.xsData[xs][variable]={}
-
-    #                 with open(self.geo_file, 'r') as b:
-
-    #                     for i, line2 in enumerate(b):
-
-    #                         flag=False
-
-    #                         for number, variable in enumerate(self.iceVariables):
-
-    #                             if variable in line2 and i > count:
-
-    #                                 self.xsData[xs][variable]['val']=line2.split("=")[1].strip()
-    #                                 self.xsData[xs][variable]['lnNum']=i
-
-    #                                 if number==len(self.iceVariables)-1:
-    #                                     flag=True
-    #                                     break
-    #                         if flag:
-    #                             break
-
     def getXSectionIceParameters(self):
 
         self.xsData={}
@@ -424,7 +410,7 @@ class stochICE():
 
             for count,line in enumerate(f):
 
-                if "Type RM Length" in line:
+                if "Type RM Length L Ch R = 1" in line:
 					
                     xs=line.split(",")[1].strip()
                     self.xsData[xs]={}
@@ -461,7 +447,7 @@ class stochICE():
 
             for count,line in enumerate(f):
 
-                if "Type RM Length" in line:
+                if "Type RM Length L Ch R = 1" in line:
 
                     xs=line.split(",")[1].strip()
                     
@@ -495,7 +481,7 @@ class stochICE():
 
             for count,line in enumerate(f):
 
-                if "Type RM Length" in line:
+                if "Type RM Length L Ch R = 1" in line:
 
                     xs=line.split(",")[1].strip()
                     
@@ -527,7 +513,7 @@ class stochICE():
     
             for count,line in enumerate(f):
     
-                if "Type RM Length" in line:
+                if "Type RM Length L Ch R = 1" in line:
     
                     xs=line.split(",")[1].strip()
                     
@@ -588,12 +574,31 @@ class stochICE():
                     
                     self.xsData[xs]['MainChannelGeometry']['xy'].append(self.xsData[xs]['Geometry']['xy'][i])
                     self.xsData[xs]['MainChannelGeometry']['xy'].append(self.xsData[xs]['Geometry']['xy'][i+1])
-                
-                    
-                
-        
-        
 
+    
+    def getBridgeData(self):
+        
+        self.Bridge = False
+        
+        self.BridgeData = {}
+        
+        Bridge_number = 1
+        
+        with open(self.geo_file, 'r') as f:    			
+    
+            for count,line in enumerate(f):
+    
+                if "Type RM Length L Ch R = 3" in line:
+                    
+                    self.Bridge = True
+    
+                    xs=line.split(",")[1].strip()
+                    self.BridgeData[str(Bridge_number)]={}  
+                    self.BridgeData[str(Bridge_number)]['chainage'] = float(xs)
+                    
+                    Bridge_number += 1
+
+                    
 
 
     def randomlyModifyGeometryFile(self):
@@ -787,354 +792,333 @@ class stochICE():
     #______________________________FONCTIONS DE CONVERSION HEC-RAS VERS RIVICE______________________________#
         
     
-    def RiviceParameters(self):
+    # def RiviceParameters(self):
         
-        self.RiviceParameters = {}
-        self.RiviceParameters['Rivice XS Interpolation Interval'] = 5
+    #     self.RiviceParameters = {}
+    #     self.RiviceParameters['Rivice XS Interpolation Interval'] = 5
         
         
      
-    def RiviceXSections(self): 
+    # def RiviceXSections(self): 
         
-        self.RivicexsData = {}
+    #     self.RivicexsData = {}
         
-        xs_number = 1
+    #     xs_number = 1
         
-        xs_precedente = ''
+    #     xs_precedente = ''
         
-        for xs in self.xsData:
+    #     for xs in self.xsData:
             
-            if xs_precedente == '':
+    #         if xs_precedente == '':
             
-                self.RivicexsData[str(xs_number)] = {}
-                self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
+    #             self.RivicexsData[str(xs_number)] = {}
+    #             self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
                        
+    #         elif self.xsData[xs]['Manning']['val_MAIN'] != self.xsData[xs_precedente]['Manning']['val_MAIN'] :
+                
+    #             self.RivicexsData[str(xs_number)] = {}
+    #             self.RivicexsData[str(xs_number)]['Hecras xs'] = xs_precedente
+                
+    #             xs_number += 1
+                
+    #             self.RivicexsData[str(xs_number)] = {}
+    #             self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
             
-            elif self.xsData[xs]['Manning']['val_MAIN'] != self.xsData[xs_precedente]['Manning']['val_MAIN'] :
+    #         else :
                 
-                self.RivicexsData[str(xs_number)] = {}
-                self.RivicexsData[str(xs_number)]['Hecras xs'] = xs_precedente
-                
-                xs_number += 1
-                
-                self.RivicexsData[str(xs_number)] = {}
-                self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
-            
-                    
-            else :
-                
-                self.RivicexsData[str(xs_number)] = {}
-                self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
+    #             self.RivicexsData[str(xs_number)] = {}
+    #             self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
         
-        
-        
-            xs_number += 1        
-            xs_precedente = xs
+    #         xs_number += 1        
+    #         xs_precedente = xs
             
             
-    def RiviceChainage(self):
+    # def RiviceChainage(self):
         
-        def mon_arrondi(x, base):
-            return base * round(x/base)
+    #     def mon_arrondi(x, base):
+    #         return base * round(x/base)
         
+    #     flag = False
+    #     reste_arrondi = 0            
+    #     xs_number_precedent = ''
+    #     xs_number_precedent_precedent = ''
         
-        flag = False
-        
-        reste_arrondi = 0            
-        
-        xs_number_precedent = ''
-        
-        xs_number_precedent_precedent = ''
-        
-        
-        
-        for xs_number in self.RivicexsData:
+    #     for xs_number in self.RivicexsData:
             
-            
-            if xs_number == '1':
-            
-                self.RivicexsData[xs_number]['Rivice Chainage'] = 0
+    #         if xs_number == '1':
+    #             self.RivicexsData[xs_number]['Rivice Chainage'] = 0
                 
-                
-            elif xs_number == str(len(self.RivicexsData)):
-                
-                
-                self.RivicexsData[xs_number]['Rivice Chainage'] = mon_arrondi(self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval'])
-                
-                
-            elif flag:
-                
-                self.RivicexsData[xs_number]['Rivice Chainage'] = self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - (reste_arrondi + int(self.RivicexsData[xs_number]['Hecras xs'])))
+    #         elif xs_number == str(len(self.RivicexsData)):
+    #             self.RivicexsData[xs_number]['Rivice Chainage'] = mon_arrondi(self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval'])
                  
-                flag = False
+    #         elif flag:
+    #             self.RivicexsData[xs_number]['Rivice Chainage'] = self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - (reste_arrondi + int(self.RivicexsData[xs_number]['Hecras xs'])))
+    #             flag = False
                 
-            elif self.RivicexsData[xs_number]['Hecras xs'] == self.RivicexsData[xs_number_precedent]['Hecras xs'] :
+    #         elif self.RivicexsData[xs_number]['Hecras xs'] == self.RivicexsData[xs_number_precedent]['Hecras xs'] :
                 
-                self.RivicexsData[xs_number]['Rivice Chainage'] = mon_arrondi(self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval'])
+    #             self.RivicexsData[xs_number]['Rivice Chainage'] = mon_arrondi(self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval'])
                 
-                self.RivicexsData[xs_number_precedent]['Rivice Chainage'] = self.RivicexsData[xs_number]['Rivice Chainage']   
+    #             self.RivicexsData[xs_number_precedent]['Rivice Chainage'] = self.RivicexsData[xs_number]['Rivice Chainage']   
                 
-                reste_arrondi = mon_arrondi(self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval']) - (self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])))
-
-                flag = True                                                                                    
+    #             reste_arrondi = mon_arrondi(self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval']) - (self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])))
+    #             flag = True                                                                                    
             
-            
-            else:
+    #         else:
                 
-                self.RivicexsData[xs_number]['Rivice Chainage'] = self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number]['Hecras xs']))        
+    #             self.RivicexsData[xs_number]['Rivice Chainage'] = self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number]['Hecras xs']))        
             
-            xs_number_precedent_precedent = xs_number_precedent
+    #         xs_number_precedent_precedent = xs_number_precedent
             
-            xs_number_precedent = xs_number
+    #         xs_number_precedent = xs_number
     
      
-    def RiviceManning(self):
+    # def RiviceManning(self):
         
-        flag = False
+    #     flag = False
         
-        xs_number_precedent = ''
+    #     xs_number_precedent = ''
         
-        for xs_number in self.RivicexsData:
+    #     for xs_number in self.RivicexsData:
             
             
-            if xs_number == '1':
+    #         if xs_number == '1':
                 
-                self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
+    #             self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
             
             
-            elif self.RivicexsData[xs_number]['Hecras xs'] == self.RivicexsData[xs_number_precedent]['Hecras xs']:
+    #         elif self.RivicexsData[xs_number]['Hecras xs'] == self.RivicexsData[xs_number_precedent]['Hecras xs']:
                 
-                flag = True
-                
-                
-            elif flag:
-                
-                self.RivicexsData[xs_number_precedent]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
-                self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
-                
-                flag = False
+    #             flag = True
                 
                 
-            else:
+    #         elif flag:
+                
+    #             self.RivicexsData[xs_number_precedent]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
+    #             self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
+                
+    #             flag = False
+                
+                
+    #         else:
             
-                self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
+    #             self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
 
 
-            xs_number_precedent = xs_number
+    #         xs_number_precedent = xs_number
             
             
             
-    def RiviceXSectionMainChannelGeometry(self):
+    # def RiviceXSectionMainChannelGeometry(self):
         
-        for xs_number in self.RivicexsData:
+    #     for xs_number in self.RivicexsData:
             
-            self.RivicexsData[xs_number]['MainChannelGeometry'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['MainChannelGeometry']['xy']
+    #         self.RivicexsData[xs_number]['MainChannelGeometry'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['MainChannelGeometry']['xy']
             
             
         
-    def RiviceReach(self):
+    # def RiviceReach(self):
         
-        Reach = 1
+    #     Reach = 1
         
-        xs_number_precedent = ''
+    #     xs_number_precedent = ''
         
-        for xs_number in self.RivicexsData:
+    #     for xs_number in self.RivicexsData:
             
-            if xs_number == '1':
+    #         if xs_number == '1':
             
-                self.RivicexsData[xs_number]['Reach'] = Reach
+    #             self.RivicexsData[xs_number]['Reach'] = Reach
                 
                 
-            elif self.RivicexsData[xs_number]['Manning'] != self.RivicexsData[xs_number_precedent]['Manning']:
+    #         elif self.RivicexsData[xs_number]['Manning'] != self.RivicexsData[xs_number_precedent]['Manning']:
                 
-                Reach +=1
+    #             Reach +=1
                 
-                self.RivicexsData[xs_number]['Reach'] = Reach
+    #             self.RivicexsData[xs_number]['Reach'] = Reach
                 
-            else:
+    #         else:
                 
-                self.RivicexsData[xs_number]['Reach'] = Reach
+    #             self.RivicexsData[xs_number]['Reach'] = Reach
         
             
-            xs_number_precedent = xs_number
+    #         xs_number_precedent = xs_number
             
             
-    def RiviceXSectionID(self):
+    # def RiviceXSectionID(self):
         
-        for xs_number in self.RivicexsData:
+    #     for xs_number in self.RivicexsData:
             
-            self.RivicexsData[xs_number]['XS ID'] = int(xs_number)*1000
+    #         self.RivicexsData[xs_number]['XS ID'] = int(xs_number)*1000
         
         
         
         
-    def RiviceDistanceXSectionPrecedente(self):
+    # def RiviceDistanceXSectionPrecedente(self):
         
-        xs_number_precedent = ''
+    #     xs_number_precedent = ''
         
-        for xs_number in self.RivicexsData:
+    #     for xs_number in self.RivicexsData:
             
-            if xs_number == '1':
+    #         if xs_number == '1':
             
-                self.RivicexsData[xs_number]['Distance XS Precedente'] = 0
+    #             self.RivicexsData[xs_number]['Distance XS Precedente'] = 0
             
-            else:
+    #         else:
                 
-                self.RivicexsData[xs_number]['Distance XS Precedente'] = self.RivicexsData[xs_number]['Rivice Chainage'] - self.RivicexsData[xs_number_precedent]['Rivice Chainage']
+    #             self.RivicexsData[xs_number]['Distance XS Precedente'] = self.RivicexsData[xs_number]['Rivice Chainage'] - self.RivicexsData[xs_number_precedent]['Rivice Chainage']
                 
                 
-            xs_number_precedent =xs_number   
+    #         xs_number_precedent =xs_number   
                 
                 
    
 
-    def WriteRiviceCd1test(self):    
+    # def WriteRiviceCd1test(self):    
         
         
-        Cd1test = open(self.prjDir + '/' + 'CD1TEST' + '.txt','w')
+    #     Cd1test = open(self.prjDir + '/' + 'CD1TEST' + '.txt','w')
         
         
-        def Cd1testReachHeader(xs_number):
+    #     def Cd1testReachHeader(xs_number):
                        
-            adjustable_spacing_1 = ''
+    #         adjustable_spacing_1 = ''
             
-            for i in range(1,5-len(str(self.RivicexsData[xs_number]['Reach']))) : 
+    #         for i in range(1,5-len(str(self.RivicexsData[xs_number]['Reach']))) : 
                 
-                adjustable_spacing_1 = adjustable_spacing_1 + ' '
+    #             adjustable_spacing_1 = adjustable_spacing_1 + ' '
             
             
-            adjustable_spacing_2 = ''
+    #         adjustable_spacing_2 = ''
             
-            for i in range(1,5-len(str(self.RiviceParameters['Rivice XS Interpolation Interval']))) :
+    #         for i in range(1,5-len(str(self.RiviceParameters['Rivice XS Interpolation Interval']))) :
                 
-                adjustable_spacing_2 = adjustable_spacing_2 + ' '
+    #             adjustable_spacing_2 = adjustable_spacing_2 + ' '
             
             
-            Cd1test.write('PLOT      ELEV                                    INTP')
-            Cd1test.write('\n')
-            Cd1test.write('REAC  ' + adjustable_spacing_1 + str(self.RivicexsData[xs_number]['Reach']) + '  REACH FOR WHICH ELEV ARE GIVEN FROM A RELATIVE DATUM')
-            Cd1test.write('\n')
-            Cd1test.write('SCAL             1.0       1.0    ' + adjustable_spacing_2 + str(self.RiviceParameters['Rivice XS Interpolation Interval']) + '.')
-            Cd1test.write('\n')
+    #         Cd1test.write('PLOT      ELEV                                    INTP')
+    #         Cd1test.write('\n')
+    #         Cd1test.write('REAC  ' + adjustable_spacing_1 + str(self.RivicexsData[xs_number]['Reach']) + '  REACH FOR WHICH ELEV ARE GIVEN FROM A RELATIVE DATUM')
+    #         Cd1test.write('\n')
+    #         Cd1test.write('SCAL             1.0       1.0    ' + adjustable_spacing_2 + str(self.RiviceParameters['Rivice XS Interpolation Interval']) + '.')
+    #         Cd1test.write('\n')
             
             
-        def Cd1testXSectionHeader(xs_number):
+    #     def Cd1testXSectionHeader(xs_number):
             
-            Header_XS_ID = str(self.RivicexsData[xs_number]['XS ID']) + '.'
+    #         Header_XS_ID = str(self.RivicexsData[xs_number]['XS ID']) + '.'
             
-            while len(Header_XS_ID) < 10:
+    #         while len(Header_XS_ID) < 10:
                 
-                Header_XS_ID = ' ' + Header_XS_ID
+    #             Header_XS_ID = ' ' + Header_XS_ID
                 
                 
-            Header_Distance_XS_precedente = str(self.RivicexsData[xs_number]['Distance XS Precedente']) + '.00'
+    #         Header_Distance_XS_precedente = str(self.RivicexsData[xs_number]['Distance XS Precedente']) + '.00'
                 
-            while len(Header_Distance_XS_precedente) < 11 : 
+    #         while len(Header_Distance_XS_precedente) < 11 : 
                 
-                Header_Distance_XS_precedente = ' ' + Header_Distance_XS_precedente
+    #             Header_Distance_XS_precedente = ' ' + Header_Distance_XS_precedente
                 
             
-            Header_XS = 'SECT' + Header_XS_ID + Header_Distance_XS_precedente
+    #         Header_XS = 'SECT' + Header_XS_ID + Header_Distance_XS_precedente
+              
+    #         Cd1test.write(Header_XS)
+    #         Cd1test.write('\n')
             
             
-            Cd1test.write(Header_XS)
-            Cd1test.write('\n')
+    #     def Cd1testXSectionGeometry(xs_number):
             
             
-        def Cd1testXSectionGeometry(xs_number):
-            
-            
-            def length_adjustment(string,desired_length):
+    #         def length_adjustment(string,desired_length):
                 
-                while len(string) < desired_length:
+    #             while len(string) < desired_length:
                     
-                    string = ' ' + string
+    #                 string = ' ' + string
                     
-                return string
+    #             return string
     
             
-            for i in range(0,len(self.RivicexsData[xs_number]['MainChannelGeometry']),6):
+    #         for i in range(0,len(self.RivicexsData[xs_number]['MainChannelGeometry']),6):
                 
-                    ligne = '     '
+    #                 ligne = '     '
                 
-                    if i <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2 :
+    #                 if i <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2 :
                         
-                        x1 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i])
-                        y1 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+1])
+    #                     x1 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i])
+    #                     y1 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+1])
                         
-                        x1 = length_adjustment(x1,10)
-                        y1 = length_adjustment(y1,10)                        
+    #                     x1 = length_adjustment(x1,10)
+    #                     y1 = length_adjustment(y1,10)                        
                         
-                        ligne = ligne + x1 + y1
+    #                     ligne = ligne + x1 + y1
                     
-                    else:
+    #                 else:
                         
-                        break
+    #                     break
                     
-                    if i + 2 <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2 :
+    #                 if i + 2 <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2 :
                         
-                        x2 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+2])
-                        y2 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+3])
+    #                     x2 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+2])
+    #                     y2 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+3])
                         
-                        x2 = length_adjustment(x2,10)
-                        y2 = length_adjustment(y2,10)                        
+    #                     x2 = length_adjustment(x2,10)
+    #                     y2 = length_adjustment(y2,10)                        
                         
-                        ligne = ligne + x2 + y2
+    #                     ligne = ligne + x2 + y2
                     
-                    else:
+    #                 else:
                         
-                        Cd1test.write(ligne)
-                        Cd1test.write('\n')
+    #                     Cd1test.write(ligne)
+    #                     Cd1test.write('\n')
                         
-                        break
+    #                     break
                     
-                    if i + 4 <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2:
+    #                 if i + 4 <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2:
                         
-                        x3 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+4])
-                        y3 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+5])
+    #                     x3 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+4])
+    #                     y3 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+5])
                         
-                        x3 = length_adjustment(x3,10)
-                        y3 = length_adjustment(y3,10)                        
+    #                     x3 = length_adjustment(x3,10)
+    #                     y3 = length_adjustment(y3,10)                        
                         
-                        ligne = ligne + x3 + y3
+    #                     ligne = ligne + x3 + y3
                         
-                    else:
+    #                 else:
                         
-                        Cd1test.write(ligne)
-                        Cd1test.write('\n')
+    #                     Cd1test.write(ligne)
+    #                     Cd1test.write('\n')
                         
-                        break
+    #                     break
                         
-                    Cd1test.write(ligne)
-                    Cd1test.write('\n')
+    #                 Cd1test.write(ligne)
+    #                 Cd1test.write('\n')
             
             
 
-        xs_number_precedent = ''
+    #     xs_number_precedent = ''
         
-        for xs_number in self.RivicexsData:
+    #     for xs_number in self.RivicexsData:
                         
-            if xs_number == '1':
+    #         if xs_number == '1':
                 
-                Cd1testReachHeader(xs_number)
-                Cd1testXSectionHeader(xs_number)
-                Cd1testXSectionGeometry(xs_number)
+    #             Cd1testReachHeader(xs_number)
+    #             Cd1testXSectionHeader(xs_number)
+    #             Cd1testXSectionGeometry(xs_number)
                 
             
-            elif self.RivicexsData[xs_number]['Reach'] != self.RivicexsData[xs_number_precedent]['Reach']: 
+    #         elif self.RivicexsData[xs_number]['Reach'] != self.RivicexsData[xs_number_precedent]['Reach']: 
                 
-                Cd1testReachHeader(xs_number)
-                Cd1testXSectionHeader(xs_number)
-                Cd1testXSectionGeometry(xs_number)           
+    #             Cd1testReachHeader(xs_number)
+    #             Cd1testXSectionHeader(xs_number)
+    #             Cd1testXSectionGeometry(xs_number)           
             
             
-            else:
+    #         else:
                 
-                Cd1testXSectionHeader(xs_number)
-                Cd1testXSectionGeometry(xs_number)
+    #             Cd1testXSectionHeader(xs_number)
+    #             Cd1testXSectionGeometry(xs_number)
                 
                         
-            xs_number_precedent = xs_number
+    #         xs_number_precedent = xs_number
 
 
 

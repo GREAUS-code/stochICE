@@ -11,7 +11,7 @@ import stochICE as ice
 User input parameters (eventually these will be selectable in a PyQt5 graphical user interface)
 """
 
-path = os.getcwd()
+path = os.getcwd() + "\Secteur_NeufPasMC_testing"
 batch_ID="Test_2"
 ras = "Secteur_neufpas.prj"
 geo = "Secteur_neufpas.g01"
@@ -41,30 +41,15 @@ Roger=ice.stochICE(prjDir=path,
                                   phi_range=phi,
                                   flow_range=flows,
                                   locations=locations,
+                                  code='RIVICE',
                                   clrRes=True,
                                   compRes=True)
 
 
 
-
-
-Roger.getXSectionIceParameters()
-Roger.getXSectionManning()
-Roger.getXSectionBankStations()
-Roger.getXSectionGeometry()
-Roger.getXSectionMainChannelGeometry()
-Roger.RiviceXSections()
-Roger.RiviceParameters()
-Roger.RiviceChainage()
-Roger.RiviceManning()
-Roger.RiviceXSectionMainChannelGeometry()
-Roger.RiviceReach()
-Roger.RiviceXSectionID()
-Roger.RiviceDistanceXSectionPrecedente()
-Roger.WriteRiviceCd1test()
-
 xsData=Roger.xsData
-RivicexsData = Roger.RivicexsData
+BridgeData = Roger.BridgeData
+RivicexsData = Roger.stochRIVICE.riv_xsData
 
 
 # bob.simInputPars
