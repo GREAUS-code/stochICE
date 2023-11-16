@@ -13,9 +13,9 @@ RIVICE provides more flexibility and capabilities in terms of modelling fluvial 
 
 Required inputs:
 
-- the most recent version of HECRAS installed on a Windows operating systems.
-- a digital elevation model of the study reach with bathymetry embedded (e.g. provincial LiDAR dataset).
-- discharge and ice cover thickness distributions and locations of potential ice jam location (among other possible parameter distributions). 
+- the most recent version of HECRAS installed on a Windows operating system
+- a digital elevation model of the study reach with bathymetry embedded (e.g. provincial LiDAR dataset)
+- discharge and ice cover thickness distributions and locations of potential ice jam location (among other possible parameter distributions)
 
 Outputs include: 
 
