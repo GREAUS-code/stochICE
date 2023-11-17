@@ -1,11 +1,12 @@
 """
-This is the code development testing file for stochICE v0.1
--place this file in the HEC-RAS project folder
+This is a testing file for stochICE v0.1
+-It is easiest to place this file in the HEC-RAS project folder
 """
+
 
 import os
 import stochICE as ice
-# import rasterio # Install this package using pip install rasterio.
+
 
 """
 User input parameters (eventually these will be selectable in a PyQt5 graphical user interface)
@@ -18,7 +19,7 @@ geo = "Secteur_neufpas.g01"
 flowFile = "Secteur_neufpas.f03"
 wse= 'WSE (13 avril 2011).Terrain.MNT_Point_a_neuf_pas.tif'
 
-NSims = 1
+NSims = 10
 
 thick=[0.3,0.7]
 phi=[40,50]
@@ -41,15 +42,123 @@ Roger=ice.stochICE(prjDir=path,
                                   phi_range=phi,
                                   flow_range=flows,
                                   locations=locations,
-                                  code='RIVICE',
+                                  code='HECRAS',
                                   clrRes=True,
-                                  compRes=True)
+                                  compRes=True,
+                                  fun_mode=True)
 
 
 
-xsData=Roger.xsData
-BridgeData = Roger.BridgeData
-RivicexsData = Roger.stochRIVICE.riv_xsData
+
+
+
+
+
+
+    
+# riv_xs_data = {}
+
+# xs_number = 1
+# xs_prec = ''
+
+# if Roger.bridge:                        
+    
+#     bridge_number = 1
+    
+#     for xs in Roger.xs_data:
+        
+#         if xs_prec == '':
+        
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs
+            
+            
+#         elif bridge_number <= len(Roger.bridge_data) and Roger.bridge_data[str(bridge_number)]['chainage'] > float(xs):
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs_prec
+            
+#             xs_number += 1
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs
+            
+#             xs_number += 1
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs
+            
+#             bridge_number += 1
+                   
+            
+#         elif Roger.xs_data[xs]['Manning']['val_MAIN'] != Roger.xs_data[xs_prec]['Manning']['val_MAIN'] :
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs_prec
+            
+#             xs_number += 1
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs
+        
+#         else :
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs
+    
+#         xs_number += 1        
+#         xs_prec = xs
+        
+# else:
+    
+#     for xs in Roger.xs_data:
+        
+#         if xs_prec == '':
+        
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs
+            
+                   
+#         elif Roger.xs_data[xs]['Manning']['val_MAIN'] != Roger.xs_data[xs_prec]['Manning']['val_MAIN'] :
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs_prec
+            
+#             xs_number += 1
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs
+        
+#         else :
+            
+#             riv_xs_data[str(xs_number)] = {}
+#             riv_xs_data[str(xs_number)]['Hecras xs'] = xs
+    
+#         xs_number += 1        
+#         xs_prec = xs
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Roger.stochHECRAS.make_ensemble_flood_map()
+
+
+
+
+
+
+# xsData=Roger.xsData
+# BridgeData = Roger.BridgeData
+# RivicexsData = Roger.stochRIVICE.riv_xsData
 
 
 # bob.simInputPars
@@ -144,7 +253,7 @@ RivicexsData = Roger.stochRIVICE.riv_xsData
 #     def __init__(self):
         
 #         print('This is a simple class')
-#         self.bobsName="Bob"
+#         bobsName="Bob"
 
 #     def thisFunction(self):
         

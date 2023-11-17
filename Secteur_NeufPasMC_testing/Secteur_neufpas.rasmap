@@ -105,7 +105,7 @@
       <Layer Name="Velocity" Type="RASResultsMap">
         <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="13 avril 2011" />
       </Layer>
-      <Layer Name="WSE" Type="RASResultsMap" Filename=".\MonteCarlo\WSE (13 avril 2011).vrt">
+      <Layer Name="WSE" Type="RASResultsMap" Checked="True" Filename=".\MonteCarlo\WSE (13 avril 2011).vrt">
         <LabelFeatures Checked="True" PercentPosition="0" rows="1" cols="1" r0c0="FID" Position="5" Color="-16777216" FontSize="8.25" />
         <MapParameters MapType="elevation" LayerName="Water Surface Elevation" OutputMode="Stored Current Terrain" StoredFilename=".\MonteCarlo\WSE (13 avril 2011).vrt" Terrain="Terrain" ProfileIndex="0" ProfileName="13 avril 2011" ArrivalDepth="0" />
       </Layer>

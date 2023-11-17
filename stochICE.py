@@ -7,21 +7,14 @@ Created on Tue Oct 31 09:26:34 2023
 
 
 import os
-import glob
 import shutil
-import random
-import time
-import win32com.client
 import numpy as np
-import statistics
-#import rasterio
-import pandas as pd
-import re
-
+import vlc
+import time
 
 import stochRIVICE
+import stochHECRAS
 
-# 
 class stochICE():
 
     def __init__(self,prjDir,
@@ -37,7 +30,8 @@ class stochICE():
                       locations,
                       code,
                       clrRes,
-                      compRes):
+                      compRes,
+                      fun_mode):
 
         #paths
         self.prjDir = prjDir
@@ -57,10 +51,10 @@ class stochICE():
         self.code=code
         self.clr=clrRes
         self.compress=compRes
+        self.fun=fun_mode
         
-
         #ice variables in geo file
-        self.iceVariables=['Ice Thickness',
+        self.ice_variables=['Ice Thickness',
                    'Ice Mann',
                    'Ice Specific Gravity',
                    'Ice Is Channel',
@@ -76,20 +70,25 @@ class stochICE():
 
 		#Add functions here to run them by default
 
-        self.printHeader()
-        self.setupMonteCarloDir()
+        if self.fun:
+            self.p = vlc.MediaPlayer(self.prjDir + "\Jamming.mp3")
+            self.p.play()
 
-        # if self.clr:
-        #     self.clearResults()
+        self.print_header()
+        self.setup_monte_carlo_dir()
+
+       
+
+        # p.stop()
 
         # Common functions for either HECRAS or RIVICE
-        self.preprocessSimulations()
-        self.getXSectionIceParameters()
-        self.getXSectionManning()
-        self.getXSectionBankStations()
-        self.getXSectionGeometry()
-        self.getXSectionMainChannelGeometry()
-        self.getBridgeData()
+        
+        self.get_XS_ice_params()
+        self.get_XS_manning()
+        self.get_XS_bank_stations()
+        self.get_XS_geometry()
+        self.get_XS_main_chan_geometry()
+        self.get_bridge_data()
 
 
         """
@@ -98,7 +97,13 @@ class stochICE():
 
         if code =='HECRAS':
             print('Using HECRAS backend')
-            # self.launch_HECRAS_simulations()
+            self.stochHECRAS=stochHECRAS.StochHECRAS(self)
+            self.stochHECRAS.preprocess_sims()
+            self.stochHECRAS.launch_sims()
+
+        # if self.compress:
+        #     self.compressResults()
+
 
         """
         RIVICE specific functions will go here
@@ -118,15 +123,12 @@ class stochICE():
             self.stochRIVICE.RiviceReach()
             self.stochRIVICE.RiviceXSectionID()
             self.stochRIVICE.RiviceDistanceXSectionPrecedente()
-            self.stochRIVICE.WriteRiviceCd1test()
+            self.stochRIVICE.write_Cd1test()
 
+        if self.p:
+            self.p.stop()
 
-
-        # if self.compress:
-        #     self.compressResults()
-
-
-    def printHeader(self):
+    def print_header(self):
 
 
         print("\n")
@@ -169,7 +171,9 @@ class stochICE():
         print("Lodgement location randomly chosen between %2.0f provided locations.\n" %(len(self.locations)))
 
 
-        print("""
+        if self.fun:
+            
+            print("""
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@%...    .  ./&@@@@@@@@@@@@@@@@@@@
@@ -199,12 +203,14 @@ class stochICE():
                     You ready to jam?
 			                                                                    """)
 
-    def setupMonteCarloDir(self):
+        time.sleep(3)
+       
+    def setup_monte_carlo_dir(self):
 
         self.MC_path=self.prjDir+"\MonteCarlo"
         self.tif_path=self.MC_path+"\SimulationTifs"
-        self.geoFiles_path=self.MC_path+"\GeoFiles"
-        self.flowFiles_path=self.MC_path+"\FlowFiles"
+        self.geo_files_path=self.MC_path+"\GeoFiles"
+        self.flow_files_path=self.MC_path+"\FlowFiles"
 
         shutil.copyfile(self.geo_file,self.geo_file_temp)
 
@@ -216,193 +222,19 @@ class stochICE():
             os.makedirs(self.tif_path)
             print("Created .\MonteCarlo\SimulationTifs")
 
-        if not os.path.exists(self.geoFiles_path):
-            os.makedirs(self.geoFiles_path)
+        if not os.path.exists(self.geo_files_path):
+            os.makedirs(self.geo_files_path)
             print("Created .\MonteCarlo\GeoFiles")
 
-        if not os.path.exists(self.flowFiles_path):
-            os.makedirs(self.flowFiles_path)
+        if not os.path.exists(self.flow_files_path):
+            os.makedirs(self.flow_files_path)
             print("Created .\MonteCarlo\FlowFiles")
 
 
-    def preprocessSimulations(self):
 
-        #Import HEC-RAS Controller
-        self.RC = win32com.client.Dispatch("RAS641.HECRASCONTROLLER")
-        # self.RC = win32com.client.Dispatch("RAS631.HECRASCONTROLLER")
+    def get_XS_ice_params(self):
 
-        self.RC.Project_Open(self.ras_file)
-        self.NNod, self.TabRS, self.TabNTyp = None, None, None
-        self.RiverID = 1
-        self.ReachID = 1
-        self.V1,self.v2,self.NNod,self.TabRS,self.TabNTyp = self.RC.Geometry_GetNodes(self.RiverID, self.ReachID,self.NNod,self.TabRS,self.TabNTyp)
-        self.RC.QuitRAS()
-
-        # HECRAS controller variable output codes (Available in Annexe E of Breaking the HEC-RAS code)
-        self.WSE_id = 2
-        self.ice_thick_id = 184
-        self.MinChEle= 5
-
-
-
-    def clearResults(self):
-
-        print('Deleting *.tifs, *.g0 and *.f0 records in MonteCarlo folder!\nFlag "clrRes=False" to suppress.\n')
-        files = glob.glob(self.tif_path+'\\*')
-        for f in files:
-            os.remove(f)
-
-        files = glob.glob(self.geoFiles_path+'\\*')
-        for f in files:
-            os.remove(f)
-
-        files = glob.glob(self.flowFiles_path+'\\*')
-        for f in files:
-            os.remove(f)
-
-
-    def compressResults(self):
-
-        shutil.make_archive(self.prjDir+'\\MC_results_batch_%s'%self.ID, 'zip', self.MC_path)
-
-
-    def launch_HECRAS_simulations(self):
-
-        print('-----------------------------------------------------------')
-        print('-----------------------Simulating--------------------------')
-        print('-----------------------------------------------------------\n')
-        times=[]
-
-        self.simProfileData={}
-        self.simInputPars=pd.DataFrame()
-
-        self.simKeys=[]
-        self.flowRates=[]
-        self.init_thick=[]
-        self.phi_values=[]
-        self.locUp=[]
-        self.locDw=[]
-
-        self.getInitGeoFileContents()
-
-        for j in range(0,self.NSims):
-
-            self.simKey='sim_'+str(j+1)
-
-            self.simProfileData[self.simKey]={}
-
-            stopwatch = Stopwatch()
-            stopwatch.start()
-
-			#modify simulation parameters
-            self.randomlyModifyGeometryFile()
-            self.writeNewGeometry()
-            self.randomlyModifyFlowFile()
-
-			#populate lists of input variables
-            self.simKeys.append(self.simKey)
-            self.flowRates.append(self.flow)
-            self.init_thick.append(self.ice_thick)
-            self.phi_values.append(self.PHI)
-            self.locUp.append(self.location[0])
-            self.locDw.append(self.location[1])
-
-			#save copies of geo and flow files
-            self.storeGeoFile()
-            self.storeFlowFile()
-
-			#HEC-RAS controller related
-            self.RC.Project_Open(self.ras_file)
-            self.RC.Compute_HideComputationWindow()
-            self.NMsg,self.TabMsg,self.block = None, None, True
-
-            print('Sim %d of %d.' %(j+1, self.NSims))
-            print("Running Q = %3.2f, Phi = %3.2f, Ice thickness = %3.2f." %(self.flow,self.PHI,self.ice_thick))
-            print("Ice Jam location between chainage %d and %d." %(self.location[0],self.location[1],))
-
-            stopwatch = Stopwatch()
-            stopwatch.start()
-            self.v1,self.NMsg,self.TabMsg,self.v2 = self.RC.Compute_CurrentPlan(self.NMsg,self.TabMsg,self.block)
-			
-            
-			#-----------------------
-			#get simulation data
-			#-----------------------
-			
-            wseList=[]
-            iceThickList=[]
-            minChEleList=[]
-
-            self.V1,self.v2,self.NNod,self.TabRS,self.TabNTyp = self.RC.Geometry_GetNodes(self.RiverID, self.ReachID,self.NNod,self.TabRS,self.TabNTyp)
-
-            # get water surface profile
-            for i in range(0,self.NNod):
-                if self.TabNTyp[i] =="":
-                    wse,self.v1,self.v2,self.v3,self.v4,self.v5,self.v6 = self.RC.Output_NodeOutput(self.RiverID, self.ReachID,i+1,0,1,self.WSE_id)
-                    wseList.append(wse)
-
-            # get ice thickness profile
-            for i in range(0,self.NNod):
-                if self.TabNTyp[i] =="":
-
-                    thick,self.v1,self.v2,self.v3,self.v4,self.v5,self.v6 = self.RC.Output_NodeOutput(self.RiverID, self.ReachID,i+1,0,1,self.ice_thick_id)
-                    iceThickList.append(thick)
-
-            # get minimum channel elevation profile
-            for i in range(0,self.NNod):
-                if self.TabNTyp[i] =="":
-                    minChEle,self.v1,self.v2,self.v3,self.v4,self.v5,self.v6 = self.RC.Output_NodeOutput(self.RiverID, self.ReachID,i+1,0,1,self.MinChEle)
-                    minChEleList.append(minChEle)
-
-
-
-			#-----------------------
-			#store simulation data
-			#-----------------------
-
-            self.simProfileData[self.simKey]['WSE']=np.asarray(wseList)
-            self.simProfileData[self.simKey]['IceThick']=np.asarray(iceThickList)
-            self.simProfileData[self.simKey]['MinChEle']=np.asarray(minChEleList)
-            self.simProfileData[self.simKey]['TopIceMaxDepth']=self.simProfileData[self.simKey]['WSE']-self.simProfileData[self.simKey]['MinChEle']
-
-			#copy and store 2D flood map for 
-            # tif_filename=self.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\WSE_"+str(self.flow)+"_"+str(self.ice_thick)+"_"+str(self.PHI)+".tif"
-            # shutil.copyfile(self.wse_map_path,tif_filename)
-            # os.remove(self.wse_map_path)
-
-            # vrts_to_remove = glob.glob(self.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\*.vrt")
-
-            # for _file in vrts_to_remove:
-
-            #     os.remove(_file)
-
-
-			#-----------------------
-			#print sim time
-			#-----------------------
-
-            sim_time = stopwatch.stop()
-            times.append(sim_time)
-            avgTime=statistics.mean(times)
-            print('Sim time %3.2f s, average time %3.2f s.' %(sim_time,avgTime))
-            remainingTime = (self.NSims-(j+1))*avgTime/60
-            print(f"Approximately {remainingTime:.2f} mins remaining in batch.\n")
-
-        self.RC.QuitRAS()
-
-		#populate simInputPars with ensemble of sim input parms
-        self.simInputPars['simKey']=self.simKeys
-        self.simInputPars['Q']=self.flowRates
-        self.simInputPars['phi']=self.phi_values
-        self.simInputPars['init_thick']=self.init_thick
-        self.simInputPars['locUp']=self.locUp
-        self.simInputPars['locDw']=self.locDw
-
-        print('\nSimulations complete!')
-
-    def getXSectionIceParameters(self):
-
-        self.xsData={}
+        self.xs_data={}
 
         with open(self.geo_file, 'r') as f:
 			
@@ -413,33 +245,33 @@ class stochICE():
                 if "Type RM Length L Ch R = 1" in line:
 					
                     xs=line.split(",")[1].strip()
-                    self.xsData[xs]={}
-                    self.xsData[xs]['chainage']=float(xs)
+                    self.xs_data[xs]={}
+                    self.xs_data[xs]['chainage']=float(xs)
                     
-                    for variable in self.iceVariables:
-                        self.xsData[xs][variable]={}
+                    for variable in self.ice_variables:
+                        self.xs_data[xs][variable]={}
                     
                     flag=True
-                    variableCounter=0
+                    variable_counter=0
 					
                 else:
                     
                     if flag:
                         
-                        for count, variable in enumerate(self.iceVariables):
+                        for variable in self.ice_variables:
                             
                             if variable in line:
                                 
-                                variableCounter = variableCounter + 1
+                                variable_counter = variable_counter + 1
                                 
-                                self.xsData[xs][variable]['val']=line.split("=")[1].strip()
-                                self.xsData[xs][variable]['lnNum']=count
+                                self.xs_data[xs][variable]['val']=line.split("=")[1].strip()
+                                self.xs_data[xs][variable]['lnNum']=count
                                 
-                            if variableCounter == len(self.iceVariables):
+                            if variable_counter == len(self.ice_variables):
                                 flag=False
                                                          
 
-    def getXSectionManning(self):
+    def get_XS_manning(self):
 
         with open(self.geo_file, 'r') as f:
 			
@@ -455,11 +287,11 @@ class stochICE():
                     
                 elif flag2:
                     
-                    self.xsData[xs]['Manning'] = {}
-                    self.xsData[xs]['Manning']['val_LOB'] = line.split()[1]
-                    self.xsData[xs]['Manning']['val_MAIN'] = line.split()[4]
-                    self.xsData[xs]['Manning']['val_ROB'] = line.split()[7]
-                    self.xsData[xs]['Manning']['lnNum'] = count + 1
+                    self.xs_data[xs]['Manning'] = {}
+                    self.xs_data[xs]['Manning']['val_LOB'] = line.split()[1]
+                    self.xs_data[xs]['Manning']['val_MAIN'] = line.split()[4]
+                    self.xs_data[xs]['Manning']['val_ROB'] = line.split()[7]
+                    self.xs_data[xs]['Manning']['lnNum'] = count + 1
                     
                     flag, flag2 = False, False            
                     
@@ -471,9 +303,8 @@ class stochICE():
                             
                             flag2 = True
                             
-                            
-                            
-    def getXSectionBankStations(self):
+                                            
+    def get_XS_bank_stations(self):
 
         with open(self.geo_file, 'r') as f:
 			
@@ -489,10 +320,10 @@ class stochICE():
                     
                 elif flag2:
                     
-                    self.xsData[xs]['BankStations'] = {}
-                    self.xsData[xs]['BankStations']['val_L'] = float(line.split()[3])
-                    self.xsData[xs]['BankStations']['val_R'] = float(line.split()[6])
-                    self.xsData[xs]['BankStations']['lnNum'] = count + 1
+                    self.xs_data[xs]['BankStations'] = {}
+                    self.xs_data[xs]['BankStations']['val_L'] = float(line.split()[3])
+                    self.xs_data[xs]['BankStations']['val_R'] = float(line.split()[6])
+                    self.xs_data[xs]['BankStations']['lnNum'] = count + 1
                     
                     flag, flag2 = False, False            
                     
@@ -505,7 +336,7 @@ class stochICE():
                             flag2 = True
                             
                             
-    def getXSectionGeometry(self):
+    def get_XS_geometry(self):
     
         with open(self.geo_file, 'r') as f:
     			
@@ -517,16 +348,16 @@ class stochICE():
     
                     xs=line.split(",")[1].strip()
                     
-                    self.xsData[xs]['Geometry'] = {}
+                    self.xs_data[xs]['Geometry'] = {}
                     
                     flag=True
                     
                     
                 elif '#Mann' in line:
                     
-                    self.xsData[xs]['Geometry']['lnNum_end'] = count
+                    self.xs_data[xs]['Geometry']['lnNum_end'] = count
                     
-                    self.xsData[xs]['Geometry']['xy'] = np.float_(self.xsData[xs]['Geometry']['xy'])
+                    self.xs_data[xs]['Geometry']['xy'] = np.float_(self.xs_data[xs]['Geometry']['xy'])
                     
                     flag, flag2 = False, False
                     
@@ -544,7 +375,7 @@ class stochICE():
                         xy.append(line[8*i:8*i+8])
                         
                     
-                    self.xsData[xs]['Geometry']['xy'] = self.xsData[xs]['Geometry']['xy'] + xy
+                    self.xs_data[xs]['Geometry']['xy'] = self.xs_data[xs]['Geometry']['xy'] + xy
                              
                     
                 else:
@@ -553,36 +384,36 @@ class stochICE():
                             
                         if '#Sta/Elev' in line:
                             
-                            self.xsData[xs]['Geometry']['xy'] = []
-                            self.xsData[xs]['Geometry']['lnNum_start'] = count + 2
+                            self.xs_data[xs]['Geometry']['xy'] = []
+                            self.xs_data[xs]['Geometry']['lnNum_start'] = count + 2
                             
                             flag2 = True
                             
                             
-    def getXSectionMainChannelGeometry(self):
+    def get_XS_main_chan_geometry(self):
         
-        self.getXSectionGeometry()
+        self.get_XS_geometry()
         
-        for xs in self.xsData:       
+        for xs in self.xs_data:       
             
-            self.xsData[xs]['MainChannelGeometry'] = {}
-            self.xsData[xs]['MainChannelGeometry']['xy'] = []
+            self.xs_data[xs]['MainChannelGeometry'] = {}
+            self.xs_data[xs]['MainChannelGeometry']['xy'] = []
             
-            for i in range(0,len(self.xsData[xs]['Geometry']['xy']),2):
+            for i in range(0,len(self.xs_data[xs]['Geometry']['xy']),2):
                 
-                if self.xsData[xs]['Geometry']['xy'][i] >= self.xsData[xs]['BankStations']['val_L'] and self.xsData[xs]['Geometry']['xy'][i] <= self.xsData[xs]['BankStations']['val_R'] : 
+                if self.xs_data[xs]['Geometry']['xy'][i] >= self.xs_data[xs]['BankStations']['val_L'] and self.xs_data[xs]['Geometry']['xy'][i] <= self.xs_data[xs]['BankStations']['val_R'] : 
                     
-                    self.xsData[xs]['MainChannelGeometry']['xy'].append(self.xsData[xs]['Geometry']['xy'][i])
-                    self.xsData[xs]['MainChannelGeometry']['xy'].append(self.xsData[xs]['Geometry']['xy'][i+1])
+                    self.xs_data[xs]['MainChannelGeometry']['xy'].append(self.xs_data[xs]['Geometry']['xy'][i])
+                    self.xs_data[xs]['MainChannelGeometry']['xy'].append(self.xs_data[xs]['Geometry']['xy'][i+1])
 
     
-    def getBridgeData(self):
+    def get_bridge_data(self):
         
-        self.Bridge = False
+        self.bridge = False
         
-        self.BridgeData = {}
+        self.bridge_data = {}
         
-        Bridge_number = 1
+        bridge_number = 1
         
         with open(self.geo_file, 'r') as f:    			
     
@@ -590,204 +421,391 @@ class stochICE():
     
                 if "Type RM Length L Ch R = 3" in line:
                     
-                    self.Bridge = True
+                    self.bridge = True
     
                     xs=line.split(",")[1].strip()
-                    self.BridgeData[str(Bridge_number)]={}  
-                    self.BridgeData[str(Bridge_number)]['chainage'] = float(xs)
+                    self.bridge_data[str(bridge_number)]={}  
+                    self.bridge_data[str(bridge_number)]['chainage'] = float(xs)
                     
-                    Bridge_number += 1
+                    bridge_number += 1
+
+
+
+
+
+
+
+
+    # def preprocessSimulations(self):
+
+    #     #Import HEC-RAS Controller
+    #     self.RC = win32com.client.Dispatch("RAS641.HECRASCONTROLLER")
+    #     # self.RC = win32com.client.Dispatch("RAS631.HECRASCONTROLLER")
+
+    #     self.RC.Project_Open(self.ras_file)
+    #     self.NNod, self.TabRS, self.TabNTyp = None, None, None
+    #     self.RiverID = 1
+    #     self.ReachID = 1
+    #     self.V1,self.v2,self.NNod,self.TabRS,self.TabNTyp = self.RC.Geometry_GetNodes(self.RiverID, self.ReachID,self.NNod,self.TabRS,self.TabNTyp)
+    #     self.RC.QuitRAS()
+
+    #     # HECRAS controller variable output codes (Available in Annexe E of Breaking the HEC-RAS code)
+    #     self.WSE_id = 2
+    #     self.ice_thick_id = 184
+    #     self.MinChEle= 5
+
+
+
+    # def clearResults(self):
+
+    #     print('Deleting *.tifs, *.g0 and *.f0 records in MonteCarlo folder!\nFlag "clrRes=False" to suppress.\n')
+    #     files = glob.glob(self.tif_path+'\\*')
+    #     for f in files:
+    #         os.remove(f)
+
+    #     files = glob.glob(self.geo_files_path+'\\*')
+    #     for f in files:
+    #         os.remove(f)
+
+    #     files = glob.glob(self.flow_files_path+'\\*')
+    #     for f in files:
+    #         os.remove(f)
+
+
+    # def compressResults(self):
+
+    #     shutil.make_archive(self.prjDir+'\\MC_results_batch_%s'%self.ID, 'zip', self.MC_path)
+
+
+#     def launch_HECRAS_simulations(self):
+
+#         print('-----------------------------------------------------------')
+#         print('-----------------------Simulating--------------------------')
+#         print('-----------------------------------------------------------\n')
+#         times=[]
+
+#         self.simProfileData={}
+#         self.simInputPars=pd.DataFrame()
+
+#         self.simKeys=[]
+#         self.flowRates=[]
+#         self.init_thick=[]
+#         self.phi_values=[]
+#         self.locUp=[]
+#         self.locDw=[]
+
+#         self.getInitGeoFileContents()
+
+#         for j in range(0,self.NSims):
+
+#             self.simKey='sim_'+str(j+1)
+
+#             self.simProfileData[self.simKey]={}
+
+#             stopwatch = Stopwatch()
+#             stopwatch.start()
+
+# 			#modify simulation parameters
+#             self.randomlyModifyGeometryFile()
+#             self.writeNewGeometry()
+#             self.randomlyModifyFlowFile()
+
+# 			#populate lists of input variables
+#             self.simKeys.append(self.simKey)
+#             self.flowRates.append(self.flow)
+#             self.init_thick.append(self.ice_thick)
+#             self.phi_values.append(self.PHI)
+#             self.locUp.append(self.location[0])
+#             self.locDw.append(self.location[1])
+
+#  			#save copies of geo and flow files
+#             self.storeGeoFile()
+#             self.storeFlowFile()
+
+#  			#HEC-RAS controller related
+#             self.RC.Project_Open(self.ras_file)
+#             self.RC.Compute_HideComputationWindow()
+#             self.NMsg,self.TabMsg,self.block = None, None, True
+
+#             print('Sim %d of %d.' %(j+1, self.NSims))
+#             print("Running Q = %3.2f, Phi = %3.2f, Ice thickness = %3.2f." %(self.flow,self.PHI,self.ice_thick))
+#             print("Ice Jam location between chainage %d and %d." %(self.location[0],self.location[1],))
+
+#             stopwatch = Stopwatch()
+#             stopwatch.start()
+#             self.v1,self.NMsg,self.TabMsg,self.v2 = self.RC.Compute_CurrentPlan(self.NMsg,self.TabMsg,self.block)
+ 			
+            
+#  			#-----------------------
+#  			#get simulation data
+#  			#-----------------------
+ 			
+#             wseList=[]
+#             iceThickList=[]
+#             minChEleList=[]
+
+#             self.V1,self.v2,self.NNod,self.TabRS,self.TabNTyp = self.RC.Geometry_GetNodes(self.RiverID, self.ReachID,self.NNod,self.TabRS,self.TabNTyp)
+
+#             # get water surface profile
+#             for i in range(0,self.NNod):
+#                 if self.TabNTyp[i] =="":
+#                     wse,self.v1,self.v2,self.v3,self.v4,self.v5,self.v6 = self.RC.Output_NodeOutput(self.RiverID, self.ReachID,i+1,0,1,self.WSE_id)
+#                     wseList.append(wse)
+
+#             # get ice thickness profile
+#             for i in range(0,self.NNod):
+#                 if self.TabNTyp[i] =="":
+
+#                     thick,self.v1,self.v2,self.v3,self.v4,self.v5,self.v6 = self.RC.Output_NodeOutput(self.RiverID, self.ReachID,i+1,0,1,self.ice_thick_id)
+#                     iceThickList.append(thick)
+
+#             # get minimum channel elevation profile
+#             for i in range(0,self.NNod):
+#                 if self.TabNTyp[i] =="":
+#                     minChEle,self.v1,self.v2,self.v3,self.v4,self.v5,self.v6 = self.RC.Output_NodeOutput(self.RiverID, self.ReachID,i+1,0,1,self.MinChEle)
+#                     minChEleList.append(minChEle)
+
+
+
+#  			#-----------------------
+#  			#store simulation data
+#  			#-----------------------
+
+#             self.simProfileData[self.simKey]['WSE']=np.asarray(wseList)
+#             self.simProfileData[self.simKey]['IceThick']=np.asarray(iceThickList)
+#             self.simProfileData[self.simKey]['MinChEle']=np.asarray(minChEleList)
+#             self.simProfileData[self.simKey]['TopIceMaxDepth']=self.simProfileData[self.simKey]['WSE']-self.simProfileData[self.simKey]['MinChEle']
+
+#  			#copy and store 2D flood map for 
+#             tif_filename=self.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\WSE_"+str(self.flow)+"_"+str(self.ice_thick)+"_"+str(self.PHI)+".tif"
+#             shutil.copyfile(self.wse_map_path,tif_filename)
+#             os.remove(self.wse_map_path)
+
+#             vrts_to_remove = glob.glob(self.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\*.vrt")
+
+#             for _file in vrts_to_remove:
+
+#                 os.remove(_file)
+
+
+#  			#-----------------------
+#  			#print sim time
+#  			#-----------------------
+
+#             sim_time = stopwatch.stop()
+#             times.append(sim_time)
+#             avgTime=statistics.mean(times)
+#             print('Sim time %3.2f s, average time %3.2f s.' %(sim_time,avgTime))
+#             remainingTime = (self.NSims-(j+1))*avgTime/60
+#             print(f"Approximately {remainingTime:.2f} mins remaining in batch.\n")
+
+#         self.RC.QuitRAS()
+
+# 		#populate simInputPars with ensemble of sim input parms
+#         self.simInputPars['simKey']=self.simKeys
+#         self.simInputPars['Q']=self.flowRates
+#         self.simInputPars['phi']=self.phi_values
+#         self.simInputPars['init_thick']=self.init_thick
+#         self.simInputPars['locUp']=self.locUp
+#         self.simInputPars['locDw']=self.locDw
+
+#         print('\nSimulations complete!')
+
+
 
                     
 
 
-    def randomlyModifyGeometryFile(self):
+#     def randomlyModifyGeometryFile(self):
 
-        secure_random = random.SystemRandom()
+#         secure_random = random.SystemRandom()
 
-        #randomly select between min and max
-        self.ice_thick = round(secure_random.uniform(self.thick[0], self.thick[1]),2)
-        self.PHI = round(secure_random.uniform(self.phi[0], self.phi[1]),0)
-        self.thicknesses= [[str(self.ice_thick)+","+str(self.ice_thick)+","+str(self.ice_thick)]]
+#         #randomly select between min and max
+#         self.ice_thick = round(secure_random.uniform(self.thick[0], self.thick[1]),2)
+#         self.PHI = round(secure_random.uniform(self.phi[0], self.phi[1]),0)
+#         self.thicknesses= [[str(self.ice_thick)+","+str(self.ice_thick)+","+str(self.ice_thick)]]
 
-        self.xsData_mod=self.xsData
-        self.modifyIceCoverThickness()
-        self.modifyPhi()
+#         self.xs_data_mod=self.xs_data
+#         self.modifyIceCoverThickness()
+#         self.modifyPhi()
 
-        #randomly select ice jam location from list of possible locations
-        self.location = random.choice(self.locations)
-        self.modifyIceJamLocation()
-
-
-    def modifyIceCoverThickness(self):
-
-        for item in self.xsData_mod:
-            self.xsData_mod[item]["Ice Thickness"]['val']=self.thicknesses[0]
+#         #randomly select ice jam location from list of possible locations
+#         self.location = random.choice(self.locations)
+#         self.modifyIceJamLocation()
 
 
-#               for count, reachBounds in enumerate(bounds):
-#
-#                   if xsData[item]['chainage'] <= reachBounds[0] and xsData[item]['chainage'] >= reachBounds[1]:
-#                       xsData[item]["Ice Thickness"]['val']=thicknesses[count][0]
+#     def modifyIceCoverThickness(self):
+
+#         for item in self.xs_data_mod:
+#             self.xs_data_mod[item]["Ice Thickness"]['val']=self.thicknesses[0]
 
 
-    def modifyPhi(self):
-
-        for item in self.xsData_mod:
-            self.xsData_mod[item]['Ice Friction Angle']['val']=self.PHI
-
-#               for count, reachBounds in enumerate(bounds):
-#
-#                   if xsData[item]['chainage'] <= reachBounds[0] and xsData[item]['chainage'] >= reachBounds[1]:
-#                       xsData[item]['Ice Friction Angle']['val']=phi[count]
+# #               for count, reachBounds in enumerate(bounds):
+# #
+# #                   if xs_data[item]['chainage'] <= reachBounds[0] and xs_data[item]['chainage'] >= reachBounds[1]:
+# #                       xs_data[item]["Ice Thickness"]['val']=thicknesses[count][0]
 
 
-    def modifyIceJamLocation(self):
+#     def modifyPhi(self):
 
-        for item in self.xsData_mod:
-            if self.xsData_mod[item]['chainage'] <= self.location[0] and self.xsData_mod[item]['chainage'] >= self.location[1]:
-                self.xsData_mod[item]["Ice Is Channel"]['val']=str(-1)
-                self.xsData_mod[item]["Ice Is OB"]['val']=str(-1)
+#         for item in self.xs_data_mod:
+#             self.xs_data_mod[item]['Ice Friction Angle']['val']=self.PHI
 
-            else:
-                self.xsData_mod[item]["Ice Is Channel"]['val']=str(0)
-                self.xsData_mod[item]["Ice Is OB"]['val']=str(0)
-
-
-    def writeNewGeometry(self):
-
-        for key,item in self.xsData_mod.items():
-
-            try:
-                self.toWrite="Ice Is Channel=%s" % item['Ice Is Channel']['val']+'\n'
-                self.lineNmb=item['Ice Is Channel']['lnNum']
-
-                self.replace_line()
-
-            except TypeError:
-                pass
-
-            try:
-                self.toWrite="Ice Is OB=%s" % item['Ice Is OB']['val']+'\n'
-                self.lineNmb=item['Ice Is OB']['lnNum']
-
-                self.replace_line()
-
-            except TypeError:
-                pass
-
-            try:
-                self.toWrite="Ice Thickness=%s" % item['Ice Thickness']['val'][0]+'\n'
-                self.lineNmb=item['Ice Thickness']['lnNum']
-
-                self.replace_line()
+# #               for count, reachBounds in enumerate(bounds):
+# #
+# #                   if xs_data[item]['chainage'] <= reachBounds[0] and xs_data[item]['chainage'] >= reachBounds[1]:
+# #                       xs_data[item]['Ice Friction Angle']['val']=phi[count]
 
 
-            except TypeError:
-                pass
+#     def modifyIceJamLocation(self):
 
-            try:
-                self.toWrite="Ice Friction Angle=%s" % item['Ice Friction Angle']['val']+'\n'
-                self.lineNmb=item['Ice Friction Angle']['lnNum']
+#         for item in self.xs_data_mod:
+#             if self.xs_data_mod[item]['chainage'] <= self.location[0] and self.xs_data_mod[item]['chainage'] >= self.location[1]:
+#                 self.xs_data_mod[item]["Ice Is Channel"]['val']=str(-1)
+#                 self.xs_data_mod[item]["Ice Is OB"]['val']=str(-1)
 
-                self.replace_line()
+#             else:
+#                 self.xs_data_mod[item]["Ice Is Channel"]['val']=str(0)
+#                 self.xs_data_mod[item]["Ice Is OB"]['val']=str(0)
 
 
-            except TypeError:
-                pass
+
+
+    # def writeNewGeometry(self):
+
+    #     for key,item in self.xs_data_mod.items():
+
+    #         try:
+    #             self.toWrite="Ice Is Channel=%s" % item['Ice Is Channel']['val']+'\n'
+    #             self.lineNmb=item['Ice Is Channel']['lnNum']
+
+    #             self.replace_line()
+
+    #         except TypeError:
+    #             pass
+
+    #         try:
+    #             self.toWrite="Ice Is OB=%s" % item['Ice Is OB']['val']+'\n'
+    #             self.lineNmb=item['Ice Is OB']['lnNum']
+
+    #             self.replace_line()
+
+    #         except TypeError:
+    #             pass
+
+    #         try:
+    #             self.toWrite="Ice Thickness=%s" % item['Ice Thickness']['val'][0]+'\n'
+    #             self.lineNmb=item['Ice Thickness']['lnNum']
+
+    #             self.replace_line()
+
+
+    #         except TypeError:
+    #             pass
+
+    #         try:
+    #             self.toWrite="Ice Friction Angle=%s" % item['Ice Friction Angle']['val']+'\n'
+    #             self.lineNmb=item['Ice Friction Angle']['lnNum']
+
+    #             self.replace_line()
+
+
+    #         except TypeError:
+    #             pass
 
        
-        self.closeGeoFile()
+    #     self.closeGeoFile()
        
 
-    def getInitGeoFileContents(self):
-        self.readGeoFile = open(self.geo_file, 'r')
-        self.initGeoFileContents=self.readGeoFile.readlines()
-        self.readGeoFile.close()
+    # def getInitGeoFileContents(self):
+    #     self.readGeoFile = open(self.geo_file, 'r')
+    #     self.initGeoFileContents=self.readGeoFile.readlines()
+    #     self.readGeoFile.close()
 
 
-    def replace_line(self):
+    # def replace_line(self):
 
-        self.newGeoFileContents=self.initGeoFileContents
-        self.newGeoFileContents[self.lineNmb] = self.toWrite
+    #     self.newGeoFileContents=self.initGeoFileContents
+    #     self.newGeoFileContents[self.lineNmb] = self.toWrite
 
-        with open(self.geo_file, 'w') as self.out:
+    #     with open(self.geo_file, 'w') as self.out:
 
-            self.out.writelines(self.newGeoFileContents)
+    #         self.out.writelines(self.newGeoFileContents)
 
-    def closeGeoFile(self):
+    # def closeGeoFile(self):
 
-        self.out.close()
+    #     self.out.close()
 
-    def randomlyModifyFlowFile(self):
-        secure_random = random.SystemRandom()
-        self.flow = round(secure_random.uniform(self.flows[0], self.flows[1]),0)
-        self.replaceFlow()
+    # def randomlyModifyFlowFile(self):
+    #     secure_random = random.SystemRandom()
+    #     self.flow = round(secure_random.uniform(self.flows[0], self.flows[1]),0)
+    #     self.replaceFlow()
 
-    def replaceFlow(self):
-        """
-        Places new flow rate on the sixth line of the HEC-RAS steady state flow file
-        """
+    # def replaceFlow(self):
+    #     """
+    #     Places new flow rate on the sixth line of the HEC-RAS steady state flow file
+    #     """
 
-        with open(self.flow_file,'r') as txt:
-            text=txt.readlines()
-            text[5]='     %s\n'%self.flow
+    #     with open(self.flow_file,'r') as txt:
+    #         text=txt.readlines()
+    #         text[5]='     %s\n'%self.flow
 
-            with open(self.flow_file,'w') as txt:
-                txt.writelines(text)
-
-    def storeGeoFile(self):
-
-        geoCopyPath=self.prjDir+"\\MonteCarlo\\GeoFiles\\"+str(self.flow)+"_"+str(self.ice_thick)+"_"+str(self.PHI)+"_"+str(self.location[0])+"_"+str(self.location[1])+".g01"
-        shutil.copyfile(self.geo_file,geoCopyPath)
-
-    def storeFlowFile(self):
-
-        flowCopyPath=self.prjDir+"\\MonteCarlo\\FlowFiles\\"+str(self.flow)+"_"+str(self.ice_thick)+"_"+str(self.PHI)+"_"+str(self.location[0])+"_"+str(self.location[1])+".f01"
-        shutil.copyfile(self.flow_file,flowCopyPath)
-
-    def createEnsembleFloodMap(self):
-
-        listdir = os.listdir(self.tif_path)
-
-        for count,m in enumerate(listdir):
-
-            data_name = self.tif_path + "\\"+m
-            tiff = rasterio.open(data_name)
-            arr = tiff.read()
-
-            arr[arr > 0] = 1
-            arr[arr < 0] = 0
-
-            #Check if first image
-            if count == 0:
-                stoch=arr
-            else:
-                stoch = stoch + arr
-
-        # stoch=(stoch/NSimul)*100
-        self.stoch=(stoch/self.NSims)*100
+    #         with open(self.flow_file,'w') as txt:
+    #             txt.writelines(text)
 
 
-        self.floodmap_path=self.prjDir+"\FloodMaps"
+    # def storeGeoFile(self):
+
+    #     geoCopyPath=self.prjDir+"\\MonteCarlo\\GeoFiles\\"+str(self.flow)+"_"+str(self.ice_thick)+"_"+str(self.PHI)+"_"+str(self.location[0])+"_"+str(self.location[1])+".g01"
+    #     shutil.copyfile(self.geo_file,geoCopyPath)
+
+    # def storeFlowFile(self):
+
+    #     flowCopyPath=self.prjDir+"\\MonteCarlo\\FlowFiles\\"+str(self.flow)+"_"+str(self.ice_thick)+"_"+str(self.PHI)+"_"+str(self.location[0])+"_"+str(self.location[1])+".f01"
+    #     shutil.copyfile(self.flow_file,flowCopyPath)
+
+    # def createEnsembleFloodMap(self):
+
+    #     listdir = os.listdir(self.tif_path)
+
+    #     for count,m in enumerate(listdir):
+
+    #         data_name = self.tif_path + "\\"+m
+    #         tiff = rasterio.open(data_name)
+    #         arr = tiff.read()
+
+    #         arr[arr > 0] = 1
+    #         arr[arr < 0] = 0
+
+    #         #Check if first image
+    #         if count == 0:
+    #             stoch=arr
+    #         else:
+    #             stoch = stoch + arr
+
+    #     # stoch=(stoch/NSimul)*100
+    #     self.stoch=(stoch/self.NSims)*100
 
 
-        if not os.path.exists(self.floodmap_path):
-            os.makedirs(self.floodmap_path)
+    #     self.floodmap_path=self.prjDir+"\FloodMaps"
 
-        self.stoch = self.stoch.astype(int)
 
-        try:
+    #     if not os.path.exists(self.floodmap_path):
+    #         os.makedirs(self.floodmap_path)
 
-            os.remove(self.floodmap_path+"\ensemble_floodmap.tif")#delete previous map
+    #     self.stoch = self.stoch.astype(int)
 
-        except FileNotFoundError:
-            pass
+    #     try:
 
-        floodmap_output = self.floodmap_path+"\ensemble_floodmap.tif"
-        result = rasterio.open(floodmap_output,'w',driver='GTiff',height=tiff.shape[0],width=tiff.shape[1],count=1,dtype=stoch.dtype,crs=tiff.crs,transform=tiff.transform)
-        result.write(stoch[0,:,:],1)
-        result.close()
+    #         os.remove(self.floodmap_path+"\ensemble_floodmap.tif")#delete previous map
+
+    #     except FileNotFoundError:
+    #         pass
+
+    #     floodmap_output = self.floodmap_path+"\ensemble_floodmap.tif"
+    #     result = rasterio.open(floodmap_output,'w',driver='GTiff',height=tiff.shape[0],width=tiff.shape[1],count=1,dtype=stoch.dtype,crs=tiff.crs,transform=tiff.transform)
+    #     result.write(stoch[0,:,:],1)
+    #     result.close()
         
     #______________________________FONCTIONS DE CONVERSION HEC-RAS VERS RIVICE______________________________#
         
@@ -801,33 +819,33 @@ class stochICE():
      
     # def RiviceXSections(self): 
         
-    #     self.RivicexsData = {}
+    #     self.Rivicexs_data = {}
         
     #     xs_number = 1
         
     #     xs_precedente = ''
         
-    #     for xs in self.xsData:
+    #     for xs in self.xs_data:
             
     #         if xs_precedente == '':
             
-    #             self.RivicexsData[str(xs_number)] = {}
-    #             self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
+    #             self.Rivicexs_data[str(xs_number)] = {}
+    #             self.Rivicexs_data[str(xs_number)]['Hecras xs'] = xs
                        
-    #         elif self.xsData[xs]['Manning']['val_MAIN'] != self.xsData[xs_precedente]['Manning']['val_MAIN'] :
+    #         elif self.xs_data[xs]['Manning']['val_MAIN'] != self.xs_data[xs_precedente]['Manning']['val_MAIN'] :
                 
-    #             self.RivicexsData[str(xs_number)] = {}
-    #             self.RivicexsData[str(xs_number)]['Hecras xs'] = xs_precedente
+    #             self.Rivicexs_data[str(xs_number)] = {}
+    #             self.Rivicexs_data[str(xs_number)]['Hecras xs'] = xs_precedente
                 
     #             xs_number += 1
                 
-    #             self.RivicexsData[str(xs_number)] = {}
-    #             self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
+    #             self.Rivicexs_data[str(xs_number)] = {}
+    #             self.Rivicexs_data[str(xs_number)]['Hecras xs'] = xs
             
     #         else :
                 
-    #             self.RivicexsData[str(xs_number)] = {}
-    #             self.RivicexsData[str(xs_number)]['Hecras xs'] = xs
+    #             self.Rivicexs_data[str(xs_number)] = {}
+    #             self.Rivicexs_data[str(xs_number)]['Hecras xs'] = xs
         
     #         xs_number += 1        
     #         xs_precedente = xs
@@ -843,30 +861,30 @@ class stochICE():
     #     xs_number_precedent = ''
     #     xs_number_precedent_precedent = ''
         
-    #     for xs_number in self.RivicexsData:
+    #     for xs_number in self.Rivicexs_data:
             
     #         if xs_number == '1':
-    #             self.RivicexsData[xs_number]['Rivice Chainage'] = 0
+    #             self.Rivicexs_data[xs_number]['Rivice Chainage'] = 0
                 
-    #         elif xs_number == str(len(self.RivicexsData)):
-    #             self.RivicexsData[xs_number]['Rivice Chainage'] = mon_arrondi(self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval'])
+    #         elif xs_number == str(len(self.Rivicexs_data)):
+    #             self.Rivicexs_data[xs_number]['Rivice Chainage'] = mon_arrondi(self.Rivicexs_data[xs_number_precedent]['Rivice Chainage'] + (int(self.Rivicexs_data[xs_number_precedent]['Hecras xs']) - int(self.Rivicexs_data[xs_number]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval'])
                  
     #         elif flag:
-    #             self.RivicexsData[xs_number]['Rivice Chainage'] = self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - (reste_arrondi + int(self.RivicexsData[xs_number]['Hecras xs'])))
+    #             self.Rivicexs_data[xs_number]['Rivice Chainage'] = self.Rivicexs_data[xs_number_precedent]['Rivice Chainage'] + (int(self.Rivicexs_data[xs_number_precedent]['Hecras xs']) - (reste_arrondi + int(self.Rivicexs_data[xs_number]['Hecras xs'])))
     #             flag = False
                 
-    #         elif self.RivicexsData[xs_number]['Hecras xs'] == self.RivicexsData[xs_number_precedent]['Hecras xs'] :
+    #         elif self.Rivicexs_data[xs_number]['Hecras xs'] == self.Rivicexs_data[xs_number_precedent]['Hecras xs'] :
                 
-    #             self.RivicexsData[xs_number]['Rivice Chainage'] = mon_arrondi(self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval'])
+    #             self.Rivicexs_data[xs_number]['Rivice Chainage'] = mon_arrondi(self.Rivicexs_data[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.Rivicexs_data[xs_number_precedent_precedent]['Hecras xs']) - int(self.Rivicexs_data[xs_number_precedent]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval'])
                 
-    #             self.RivicexsData[xs_number_precedent]['Rivice Chainage'] = self.RivicexsData[xs_number]['Rivice Chainage']   
+    #             self.Rivicexs_data[xs_number_precedent]['Rivice Chainage'] = self.Rivicexs_data[xs_number]['Rivice Chainage']   
                 
-    #             reste_arrondi = mon_arrondi(self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval']) - (self.RivicexsData[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number_precedent]['Hecras xs'])))
+    #             reste_arrondi = mon_arrondi(self.Rivicexs_data[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.Rivicexs_data[xs_number_precedent_precedent]['Hecras xs']) - int(self.Rivicexs_data[xs_number_precedent]['Hecras xs'])), self.RiviceParameters['Rivice XS Interpolation Interval']) - (self.Rivicexs_data[xs_number_precedent_precedent]['Rivice Chainage'] + (int(self.Rivicexs_data[xs_number_precedent_precedent]['Hecras xs']) - int(self.Rivicexs_data[xs_number_precedent]['Hecras xs'])))
     #             flag = True                                                                                    
             
     #         else:
                 
-    #             self.RivicexsData[xs_number]['Rivice Chainage'] = self.RivicexsData[xs_number_precedent]['Rivice Chainage'] + (int(self.RivicexsData[xs_number_precedent]['Hecras xs']) - int(self.RivicexsData[xs_number]['Hecras xs']))        
+    #             self.Rivicexs_data[xs_number]['Rivice Chainage'] = self.Rivicexs_data[xs_number_precedent]['Rivice Chainage'] + (int(self.Rivicexs_data[xs_number_precedent]['Hecras xs']) - int(self.Rivicexs_data[xs_number]['Hecras xs']))        
             
     #         xs_number_precedent_precedent = xs_number_precedent
             
@@ -879,30 +897,30 @@ class stochICE():
         
     #     xs_number_precedent = ''
         
-    #     for xs_number in self.RivicexsData:
+    #     for xs_number in self.Rivicexs_data:
             
             
     #         if xs_number == '1':
                 
-    #             self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
+    #             self.Rivicexs_data[xs_number]['Manning'] = self.xs_data[self.Rivicexs_data[xs_number]['Hecras xs']]['Manning']['val_MAIN']
             
             
-    #         elif self.RivicexsData[xs_number]['Hecras xs'] == self.RivicexsData[xs_number_precedent]['Hecras xs']:
+    #         elif self.Rivicexs_data[xs_number]['Hecras xs'] == self.Rivicexs_data[xs_number_precedent]['Hecras xs']:
                 
     #             flag = True
                 
                 
     #         elif flag:
                 
-    #             self.RivicexsData[xs_number_precedent]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
-    #             self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
+    #             self.Rivicexs_data[xs_number_precedent]['Manning'] = self.xs_data[self.Rivicexs_data[xs_number]['Hecras xs']]['Manning']['val_MAIN']
+    #             self.Rivicexs_data[xs_number]['Manning'] = self.xs_data[self.Rivicexs_data[xs_number]['Hecras xs']]['Manning']['val_MAIN']
                 
     #             flag = False
                 
                 
     #         else:
             
-    #             self.RivicexsData[xs_number]['Manning'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['Manning']['val_MAIN']
+    #             self.Rivicexs_data[xs_number]['Manning'] = self.xs_data[self.Rivicexs_data[xs_number]['Hecras xs']]['Manning']['val_MAIN']
 
 
     #         xs_number_precedent = xs_number
@@ -911,9 +929,9 @@ class stochICE():
             
     # def RiviceXSectionMainChannelGeometry(self):
         
-    #     for xs_number in self.RivicexsData:
+    #     for xs_number in self.Rivicexs_data:
             
-    #         self.RivicexsData[xs_number]['MainChannelGeometry'] = self.xsData[self.RivicexsData[xs_number]['Hecras xs']]['MainChannelGeometry']['xy']
+    #         self.Rivicexs_data[xs_number]['MainChannelGeometry'] = self.xs_data[self.Rivicexs_data[xs_number]['Hecras xs']]['MainChannelGeometry']['xy']
             
             
         
@@ -923,22 +941,22 @@ class stochICE():
         
     #     xs_number_precedent = ''
         
-    #     for xs_number in self.RivicexsData:
+    #     for xs_number in self.Rivicexs_data:
             
     #         if xs_number == '1':
             
-    #             self.RivicexsData[xs_number]['Reach'] = Reach
+    #             self.Rivicexs_data[xs_number]['Reach'] = Reach
                 
                 
-    #         elif self.RivicexsData[xs_number]['Manning'] != self.RivicexsData[xs_number_precedent]['Manning']:
+    #         elif self.Rivicexs_data[xs_number]['Manning'] != self.Rivicexs_data[xs_number_precedent]['Manning']:
                 
     #             Reach +=1
                 
-    #             self.RivicexsData[xs_number]['Reach'] = Reach
+    #             self.Rivicexs_data[xs_number]['Reach'] = Reach
                 
     #         else:
                 
-    #             self.RivicexsData[xs_number]['Reach'] = Reach
+    #             self.Rivicexs_data[xs_number]['Reach'] = Reach
         
             
     #         xs_number_precedent = xs_number
@@ -946,9 +964,9 @@ class stochICE():
             
     # def RiviceXSectionID(self):
         
-    #     for xs_number in self.RivicexsData:
+    #     for xs_number in self.Rivicexs_data:
             
-    #         self.RivicexsData[xs_number]['XS ID'] = int(xs_number)*1000
+    #         self.Rivicexs_data[xs_number]['XS ID'] = int(xs_number)*1000
         
         
         
@@ -957,15 +975,15 @@ class stochICE():
         
     #     xs_number_precedent = ''
         
-    #     for xs_number in self.RivicexsData:
+    #     for xs_number in self.Rivicexs_data:
             
     #         if xs_number == '1':
             
-    #             self.RivicexsData[xs_number]['Distance XS Precedente'] = 0
+    #             self.Rivicexs_data[xs_number]['Distance XS Precedente'] = 0
             
     #         else:
                 
-    #             self.RivicexsData[xs_number]['Distance XS Precedente'] = self.RivicexsData[xs_number]['Rivice Chainage'] - self.RivicexsData[xs_number_precedent]['Rivice Chainage']
+    #             self.Rivicexs_data[xs_number]['Distance XS Precedente'] = self.Rivicexs_data[xs_number]['Rivice Chainage'] - self.Rivicexs_data[xs_number_precedent]['Rivice Chainage']
                 
                 
     #         xs_number_precedent =xs_number   
@@ -983,7 +1001,7 @@ class stochICE():
                        
     #         adjustable_spacing_1 = ''
             
-    #         for i in range(1,5-len(str(self.RivicexsData[xs_number]['Reach']))) : 
+    #         for i in range(1,5-len(str(self.Rivicexs_data[xs_number]['Reach']))) : 
                 
     #             adjustable_spacing_1 = adjustable_spacing_1 + ' '
             
@@ -997,7 +1015,7 @@ class stochICE():
             
     #         Cd1test.write('PLOT      ELEV                                    INTP')
     #         Cd1test.write('\n')
-    #         Cd1test.write('REAC  ' + adjustable_spacing_1 + str(self.RivicexsData[xs_number]['Reach']) + '  REACH FOR WHICH ELEV ARE GIVEN FROM A RELATIVE DATUM')
+    #         Cd1test.write('REAC  ' + adjustable_spacing_1 + str(self.Rivicexs_data[xs_number]['Reach']) + '  REACH FOR WHICH ELEV ARE GIVEN FROM A RELATIVE DATUM')
     #         Cd1test.write('\n')
     #         Cd1test.write('SCAL             1.0       1.0    ' + adjustable_spacing_2 + str(self.RiviceParameters['Rivice XS Interpolation Interval']) + '.')
     #         Cd1test.write('\n')
@@ -1005,14 +1023,14 @@ class stochICE():
             
     #     def Cd1testXSectionHeader(xs_number):
             
-    #         Header_XS_ID = str(self.RivicexsData[xs_number]['XS ID']) + '.'
+    #         Header_XS_ID = str(self.Rivicexs_data[xs_number]['XS ID']) + '.'
             
     #         while len(Header_XS_ID) < 10:
                 
     #             Header_XS_ID = ' ' + Header_XS_ID
                 
                 
-    #         Header_Distance_XS_precedente = str(self.RivicexsData[xs_number]['Distance XS Precedente']) + '.00'
+    #         Header_Distance_XS_precedente = str(self.Rivicexs_data[xs_number]['Distance XS Precedente']) + '.00'
                 
     #         while len(Header_Distance_XS_precedente) < 11 : 
                 
@@ -1037,14 +1055,14 @@ class stochICE():
     #             return string
     
             
-    #         for i in range(0,len(self.RivicexsData[xs_number]['MainChannelGeometry']),6):
+    #         for i in range(0,len(self.Rivicexs_data[xs_number]['MainChannelGeometry']),6):
                 
     #                 ligne = '     '
                 
-    #                 if i <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2 :
+    #                 if i <= len(self.Rivicexs_data[xs_number]['MainChannelGeometry']) - 2 :
                         
-    #                     x1 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i])
-    #                     y1 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+1])
+    #                     x1 = str(self.Rivicexs_data[xs_number]['MainChannelGeometry'][i])
+    #                     y1 = str(self.Rivicexs_data[xs_number]['MainChannelGeometry'][i+1])
                         
     #                     x1 = length_adjustment(x1,10)
     #                     y1 = length_adjustment(y1,10)                        
@@ -1055,10 +1073,10 @@ class stochICE():
                         
     #                     break
                     
-    #                 if i + 2 <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2 :
+    #                 if i + 2 <= len(self.Rivicexs_data[xs_number]['MainChannelGeometry']) - 2 :
                         
-    #                     x2 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+2])
-    #                     y2 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+3])
+    #                     x2 = str(self.Rivicexs_data[xs_number]['MainChannelGeometry'][i+2])
+    #                     y2 = str(self.Rivicexs_data[xs_number]['MainChannelGeometry'][i+3])
                         
     #                     x2 = length_adjustment(x2,10)
     #                     y2 = length_adjustment(y2,10)                        
@@ -1072,10 +1090,10 @@ class stochICE():
                         
     #                     break
                     
-    #                 if i + 4 <= len(self.RivicexsData[xs_number]['MainChannelGeometry']) - 2:
+    #                 if i + 4 <= len(self.Rivicexs_data[xs_number]['MainChannelGeometry']) - 2:
                         
-    #                     x3 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+4])
-    #                     y3 = str(self.RivicexsData[xs_number]['MainChannelGeometry'][i+5])
+    #                     x3 = str(self.Rivicexs_data[xs_number]['MainChannelGeometry'][i+4])
+    #                     y3 = str(self.Rivicexs_data[xs_number]['MainChannelGeometry'][i+5])
                         
     #                     x3 = length_adjustment(x3,10)
     #                     y3 = length_adjustment(y3,10)                        
@@ -1096,7 +1114,7 @@ class stochICE():
 
     #     xs_number_precedent = ''
         
-    #     for xs_number in self.RivicexsData:
+    #     for xs_number in self.Rivicexs_data:
                         
     #         if xs_number == '1':
                 
@@ -1105,7 +1123,7 @@ class stochICE():
     #             Cd1testXSectionGeometry(xs_number)
                 
             
-    #         elif self.RivicexsData[xs_number]['Reach'] != self.RivicexsData[xs_number_precedent]['Reach']: 
+    #         elif self.Rivicexs_data[xs_number]['Reach'] != self.Rivicexs_data[xs_number_precedent]['Reach']: 
                 
     #             Cd1testReachHeader(xs_number)
     #             Cd1testXSectionHeader(xs_number)
@@ -1144,16 +1162,14 @@ class stochICE():
 
 
 
-def removeOldTIFs(project_path):
+# def removeOldTIFs(project_path):
 
-    tifs_to_remove = glob.glob(project_path +"\\MonteCarlo\TIF\*.tif")
+#     tifs_to_remove = glob.glob(project_path +"\\MonteCarlo\TIF\*.tif")
 
-    for _file in tifs_to_remove:
-        os.remove(_file)
+#     for _file in tifs_to_remove:
+#         os.remove(_file)
 
-    print("Removed all tiffs from previous run if present.\n")
-
-
+#     print("Removed all tiffs from previous run if present.\n")
 
 
 
@@ -1166,19 +1182,21 @@ def removeOldTIFs(project_path):
 
 
 
-class Stopwatch:
-    def __init__(self):
-        self.start_time = None
 
-    def start(self):
-        self.start_time = time.time()
 
-    def stop(self):
-        if self.start_time is None:
-            raise ValueError("Stopwatch has not been started.")
-        elapsed_time = time.time() - self.start_time
-        self.start_time = None
-        return elapsed_time
+# class Stopwatch:
+#     def __init__(self):
+#         self.start_time = None
+
+#     def start(self):
+#         self.start_time = time.time()
+
+#     def stop(self):
+#         if self.start_time is None:
+#             raise ValueError("Stopwatch has not been started.")
+#         elapsed_time = time.time() - self.start_time
+#         self.start_time = None
+#         return elapsed_time
 
 
 
