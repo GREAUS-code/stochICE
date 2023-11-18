@@ -5,6 +5,8 @@ Created on Tue Nov 14 13:52:46 2023
 @author: dugj2403
 """
 
+"TEST DE GITHUB"
+
 class StochRIVICE():
     
     # pass-in stochICE instance 
