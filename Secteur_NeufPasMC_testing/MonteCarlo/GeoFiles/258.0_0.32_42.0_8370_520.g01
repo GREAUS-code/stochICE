@@ -116,12 +116,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  480.344  88.994 484.221  89.004
 #Mann= 3 ,0,0
        0      .1       0  167.65    .027       0 211.993      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=0
 Ice Is OB=0
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -221,12 +221,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  464.208  88.528 465.211  88.547 465.798   88.58
 #Mann= 3 ,0,0
        0      .1       0 198.325    .027       0 238.456      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -327,12 +327,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
   468.24  87.133 468.863  87.193
 #Mann= 3 ,0,0
        0      .1       0 207.999    .027       0 251.033      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -429,12 +429,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  484.188  87.215 485.216  87.199 486.463  87.137
 #Mann= 3 ,0,0
        0      .1       0 252.862    .027       0  321.34      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -531,12 +531,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  478.783  86.777 480.889  86.704 483.268  86.582
 #Mann= 3 ,0,0
        0      .1       0 260.701    .027       0 316.597      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -635,12 +635,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  495.404  82.781 496.215  82.783 498.376  83.184 499.465  83.078
 #Mann= 3 ,0,0
        0      .1       0 213.361    .027       0 255.855      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -727,12 +727,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  476.276  80.297 479.625  80.413 481.598  80.455
 #Mann= 3 ,0,0
        0      .1       0 200.829    .027       0 262.866      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -824,12 +824,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  496.298  77.571
 #Mann= 3 ,0,0
        0      .1       0 204.096    .027       0  258.79      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -926,12 +926,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  514.437  74.614
 #Mann= 3 ,0,0
        0      .1       0 297.243    .027       0  340.96      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1005,12 +1005,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  390.381  74.561 391.498  74.561
 #Mann= 3 ,0,0
        0      .1       0 170.223    .027       0 227.323      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1081,12 +1081,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  340.252  73.656 345.123  73.776
 #Mann= 3 ,0,0
        0      .1       0   87.57    .027       0 144.884      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1150,12 +1150,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  299.995  73.474 300.931  73.494
 #Mann= 3 ,0,0
        0      .1       0  41.822    .027       0  103.03      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1225,12 +1225,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  284.433  73.223 285.431  73.219
 #Mann= 3 ,0,0
        0      .1       0   36.06     .03       0  80.928      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1301,12 +1301,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  325.273  73.282 326.288  73.271 328.318  73.311 328.565  73.298
 #Mann= 3 ,0,0
        0      .1       0  82.687     .03       0  134.75      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1377,12 +1377,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  348.691  73.314 349.691  73.225 350.847  73.226 352.691  73.191  353.93  73.191
 #Mann= 3 ,0,0
        0      .1       0 115.957     .03       0   159.2      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1463,12 +1463,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  412.602  73.263
 #Mann= 3 ,0,0
        0      .1       0 164.238     .03       0 210.454      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1576,12 +1576,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  550.116  80.808 551.118  80.672 553.123  80.694
 #Mann= 3 ,0,0
        0      .1       0 343.572     .03       0 394.281      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1695,12 +1695,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  582.248  86.609 583.185   86.59 584.235   86.46
 #Mann= 3 ,0,0
        0      .1       0 393.856     .03       0 440.595      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1807,12 +1807,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  580.312  88.872
 #Mann= 3 ,0,0
        0      .1       0   420.5     .03       0 461.821      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1903,12 +1903,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  490.212  90.608 494.244  90.815 496.455  90.952
 #Mann= 3 ,0,0
        0      .1       0 340.327     .03       0 391.928      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -1996,12 +1996,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
   457.05  91.722 458.051  91.555 459.051  91.264 459.302  91.279
 #Mann= 3 ,0,0
        0      .1       0 300.265     .03       0  345.43      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2111,12 +2111,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
    549.8  91.391 551.459  91.423
 #Mann= 3 ,0,0
        0      .1       0 274.041     .03       0 315.657      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2204,12 +2204,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  520.571   92.88
 #Mann= 3 ,0,0
        0      .1       0 117.655     .03       0 164.867      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2314,12 +2314,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  553.664  93.239 556.286  93.203 559.421  93.266
 #Mann= 3 ,0,0
        0      .1       0   198.7     .03       0 244.833      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2420,12 +2420,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  571.118  92.045 571.701      92 572.051  91.996
 #Mann= 3 ,0,0
        0      .1       0 265.487     .03       0  319.87      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2513,12 +2513,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  541.527   91.32 543.099  91.308 543.885  91.321 544.961  91.382 545.563  91.398
 #Mann= 3 ,0,0
        0      .1       0  186.03     .03       0  230.13      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2611,12 +2611,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
   498.92  90.473  502.08  90.488 503.901  90.535 504.716  90.517
 #Mann= 3 ,0,0
        0      .1       0 127.794     .03       0 175.451      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2711,12 +2711,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
   524.66  89.301 526.756  89.312 529.901  89.406 531.384  89.423
 #Mann= 3 ,0,0
        0      .1       0   222.7    .035       0 270.716      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2807,12 +2807,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  477.736  89.466
 #Mann= 3 ,0,0
        0      .1       0 194.416    .035       0 248.169      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -2913,12 +2913,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  550.552  87.566 555.686  87.587
 #Mann= 3 ,0,0
        0      .1       0 198.928    .035       0 248.573      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3014,12 +3014,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
    494.8   87.01
 #Mann= 3 ,0,0
        0      .1       0   222.3    .035       0   271.9      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3118,12 +3118,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  548.171   87.04 550.173  87.143 550.696  87.156
 #Mann= 3 ,0,0
        0      .1       0 281.732    .035       0 325.566      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3232,12 +3232,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  561.182  83.721  561.89   83.77 562.311  83.775 563.308  83.706 564.073  83.678
 #Mann= 3 ,0,0
        0      .1       0 310.491    .035       0 357.116      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3323,12 +3323,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  419.474  79.913
 #Mann= 3 ,0,0
        0      .1       0 266.357    .035       0 316.743      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3405,12 +3405,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  425.351  76.473 426.355  76.392 427.185  76.368
 #Mann= 3 ,0,0
        0      .1       0 178.816    .035       0  225.86      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3520,12 +3520,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  526.594  72.136 527.327  72.141 528.303  72.289
 #Mann= 3 ,0,0
        0      .1       0  84.555    .035       0 144.672      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3607,12 +3607,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  439.577  69.944 440.577  69.952 441.578   69.91 442.513  70.009
 #Mann= 3 ,0,0
        0      .1       0  64.965    .035       0  113.23      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3686,12 +3686,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  332.398  69.823
 #Mann= 3 ,0,0
        0      .1       0 112.917    .035       0 166.238      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3779,12 +3779,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  461.039  77.031  463.04  76.995 464.512  77.002
 #Mann= 3 ,0,0
        0      .1       0   258.2     .03       0   312.7      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -3884,12 +3884,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  497.812  78.879 499.145  78.844 499.522  78.858
 #Mann= 3 ,0,0
        0      .1       0 309.068     .03       0 355.976      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -4008,12 +4008,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
   574.28   81.32  576.96  81.312 578.923   81.35
 #Mann= 3 ,0,0
        0      .1       0 272.748     .03       0  342.28      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=-1
 Ice Is OB=-1
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5
@@ -4121,12 +4121,12 @@ Node Last Edited Time=Sep/12/2023 11:09:52
  573.702  81.066 575.008  81.084 576.864  81.141 579.298  81.172
 #Mann= 3 ,0,0
        0      .1       0 220.832     .03       0 290.403      .1       0
-Ice Thickness=0.49,0.49,0.49
+Ice Thickness=0.32,0.32,0.32
 Ice Mann=0.04,0.04,0.04
 Ice Specific Gravity=0.916
 Ice Is Channel=0
 Ice Is OB=0
-Ice Friction Angle=46.0
+Ice Friction Angle=42.0
 Ice Porosity=0.4
 Ice K1=0.33
 Ice Max Mean Vel=5

@@ -42,7 +42,7 @@ Roger=ice.stochICE(prjDir=path,
                                   phi_range=phi,
                                   flow_range=flows,
                                   locations=locations,
-                                  code='HECRAS',
+                                  code='RIVICE',
                                   clrRes=True,
                                   compRes=True,
                                   fun_mode=True)
