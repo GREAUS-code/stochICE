@@ -5,7 +5,9 @@ Created on Tue Nov 14 13:52:46 2023
 @author: dugj2403
 """
 
-"TEST DE GITHUB"
+import os
+
+
 
 class StochRIVICE():
     
@@ -370,3 +372,70 @@ class StochRIVICE():
                 
                         
             xs_number_precedent = xs_number
+            
+            
+        Cd1test.write("STOP")
+        
+        Cd1test.close()
+        
+        
+    
+    
+    
+    def write_Testcd2(self):
+        
+        print('')
+        
+        
+    def write_Cd1test_for_DOUT7(self):
+        
+        if not os.path.exists(self.stochICE.prjDir + '/DOUT7'):
+            
+            os.makedirs(self.stochICE.prjDir + '/DOUT7')
+            
+            
+        Cd1test = open(self.stochICE.prjDir + '/CD1TEST.txt','r')
+        
+        Cd1test_no_INTP = open(self.stochICE.prjDir + '/DOUT7/CD1TEST.txt','w')
+        
+        
+        for line in Cd1test:
+            
+            if "PLOT" in line:
+                
+                Cd1test_no_INTP.write("PLOT      ELEV                                    ")
+                Cd1test_no_INTP.write('\n')
+                
+            else:
+                
+                Cd1test_no_INTP.write(line)
+                
+        
+            
+        
+            
+        
+    def write_TAPE5(self):
+        print('')
+        
+            
+            
+""" 
+Notes
+
+To create Dout7 -> Need Testcd2 &
+
+
+"""        
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            

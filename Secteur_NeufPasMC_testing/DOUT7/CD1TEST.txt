@@ -1,4 +1,4 @@
-PLOT      ELEV                                    INTP
+PLOT      ELEV                                    
 REAC     1  REACH FOR WHICH ELEV ARE GIVEN FROM A RELATIVE DATUM
 SCAL             1.0       1.0       5.
 SECT     1000.       0.00
@@ -232,7 +232,7 @@ SECT    12000.     150.00
          96.824    65.928      98.7    66.431    98.824    66.464
          99.824    66.936   100.824    67.343   101.824    67.835
          103.03     68.61
-PLOT      ELEV                                    INTP
+PLOT      ELEV                                    
 REAC     2  REACH FOR WHICH ELEV ARE GIVEN FROM A RELATIVE DATUM
 SCAL             1.0       1.0       5.
 SECT    13000.       0.00
@@ -490,7 +490,7 @@ SECT    28000.     188.00
         170.059    65.384   171.085     65.64     171.7    65.777
         173.135    66.095   174.161    66.338   174.615    66.671
         174.765     66.87   175.186    67.272   175.451     67.64
-PLOT      ELEV                                    INTP
+PLOT      ELEV                                    
 REAC     3  REACH FOR WHICH ELEV ARE GIVEN FROM A RELATIVE DATUM
 SCAL             1.0       1.0       5.
 SECT    29000.       0.00
@@ -709,7 +709,7 @@ SECT    40000.     256.00
         162.714    65.589   163.169    66.184   163.539    66.278
         164.098    66.283     164.3    66.315   164.719    66.382
         165.168    66.495   166.238     66.86
-PLOT      ELEV                                    INTP
+PLOT      ELEV                                    
 REAC     4  REACH FOR WHICH ELEV ARE GIVEN FROM A RELATIVE DATUM
 SCAL             1.0       1.0       5.
 SECT    41000.       0.00

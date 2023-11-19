@@ -80,7 +80,7 @@ class stochICE():
 
        
 
-        #self.p.stop()
+        self.p.stop()
 
         # Common functions for either HECRAS or RIVICE
         
@@ -125,9 +125,10 @@ class stochICE():
             self.stochRIVICE.assign_RIVICE_xs_ID()
             self.stochRIVICE.compute_dist_prev_xs()
             self.stochRIVICE.write_Cd1test()
+            self.stochRIVICE.write_Cd1test_for_DOUT7()
 
-        # if self.p:
-        #     self.p.stop()
+        if self.p:
+            self.p.stop()
 
     def print_header(self):
 

@@ -50,11 +50,6 @@ Roger=ice.stochICE(prjDir=path,
 
 
 
-
-
-
-
-
     
 # riv_xs_data = {}
 
