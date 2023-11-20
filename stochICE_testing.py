@@ -47,8 +47,11 @@ Roger=ice.stochICE(prjDir=path,
                                   compRes=True,
                                   fun_mode=True)
 
+xs_Data = Roger.xs_data
 
+sim_water_lvl = Roger.stochRIVICE.sim_water_lvl
 
+RIVICE_xs_data = Roger.stochRIVICE.riv_xs_data
 
     
 # riv_xs_data = {}

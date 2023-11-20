@@ -379,13 +379,6 @@ class StochRIVICE():
         Cd1test.close()
         
         
-    
-    
-    
-    def write_Testcd2(self):
-        
-        print('')
-        
         
     def write_Cd1test_for_DOUT7(self):
         
@@ -412,7 +405,162 @@ class StochRIVICE():
                 
         
             
+    def get_water_lvl_TestCd2(self):
         
+        self.sim_water_lvl = {}
+        
+        for xs in self.stochICE.xs_data:
+            
+            self.sim_water_lvl[xs] = {}
+            self.sim_water_lvl[xs]['Chainage'] = xs
+            self.sim_water_lvl[xs]['Discharge'] = 125.0
+            self.sim_water_lvl[xs]['Water_lvl_elv'] = 100.0
+            self.sim_water_lvl[xs]['Water_lvl_elv_high'] =  self.sim_water_lvl[xs]['Water_lvl_elv'] = 100.0 + 0.5
+            self.sim_water_lvl[xs]['Water_lvl_elv_low'] = self.sim_water_lvl[xs]['Water_lvl_elv'] = 100.0 - 0.5
+        
+        
+    
+    def write_Testcd2(self):
+        
+        Testcd2 = open(self.stochICE.prjDir + '/' + 'TESTCD2' + '.txt','w')
+        
+        def string_length_adjustment(string,desired_length):
+            
+            while len(string) < desired_length:
+                
+                string = ' ' + string
+                                
+                
+        
+        def write_Testcd2_header(Reach_number):
+            
+            water_lvl_max = -9999.0
+            water_lvl_min = 9999.0
+            Manning = 0.0
+            Reach_length = -9999.0
+            Interp_interval = str(self.interInt) + '.'
+            
+            for xs_number in self.riv_xs_data:
+                
+                if self.riv_xs_data[xs_number]['Reach'] == str(Reach_number):
+                    
+                    if self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['water_lvl_elv_high'] > water_lvl_max:
+
+                        water_lvl_max = self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['water_lvl_elv_high'] 
+                        
+                    if self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['water_lvl_elv_high'] < water_lvl_min:
+                        
+                        water_lvl_min = self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['water_lvl_elv_high']
+                        
+                    if int(self.riv_xs_data[xs_number]['Rivice Chainage']) > Reach_length : 
+                        
+                        Reach_length = self.riv_xs_data[xs_number]['Rivice Chainage']
+                        
+                        Manning = self.riv_xs_data[xs_number]['Manning']
+                  
+                             
+            water_lvl_max = str(round(water_lvl_max + 0.5,1))
+            water_lvl_min = str(round(water_lvl_min - 0.5,1))
+            Manning = str(Manning)
+            Reach_length = str(Reach_length) + '.'
+            
+            
+            
+            while len(Manning) < 22:
+                
+                if Manning[0] != '0':
+                
+                    Manning = '0' + Manning
+                    
+                else:
+            
+                    Manning = Manning + ' '
+            
+            string_length_adjustment(Reach_length,13)    
+            string_length_adjustment(Interp_interval,12) 
+            string_length_adjustment(water_lvl_max,10) 
+            string_length_adjustment(water_lvl_min,10) 
+                
+            
+            
+            Testcd2.write('REACH ' + str(Reach_number))
+            Testcd2.write('\n')
+            Testcd2.write('         ' + str(Reach_number) + '    0    0    0    1')
+            Testcd2.write('\n')
+            Testcd2.write(Manning + '0.0       0.0' + Reach_length + Interp_interval)
+            Testcd2.write('\n')
+            Testcd2.write('3    ' + water_lvl_min + water_lvl_min)
+            Testcd2.write('\n')
+            
+            
+        
+        def write_Testcd2_reach_data(Reach_number,Number_of_reaches):
+            
+            numbering = 1
+            
+            for xs_number in self.riv_xs_data:
+                
+                if self.riv_xs_data[xs_number]['Reach'] == str(Reach_number):
+                                        
+                    Reach_xs_number = str(numbering) 
+                    water_lvl_elv = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv'])   
+                    discharge = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Discharge'])
+                    water_lvl_elv_high = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_high'])
+                    water_lvl_elv_low = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_low'])
+ 
+                    string_length_adjustment(Reach_xs_number,9)
+                    string_length_adjustment(water_lvl_elv,11)
+                    string_length_adjustment(discharge,10)
+                    string_length_adjustment(water_lvl_elv_high,8)
+                    string_length_adjustment(water_lvl_elv_low,8)
+                    
+                    Testcd2.write(Reach_xs_number + water_lvl_elv + discharge + '                                ' + water_lvl_elv_low + water_lvl_elv_high)
+                    Testcd2.wrte('\n')
+             
+            numbering += 1
+            
+            
+            if Reach_number < Number_of_reaches:
+                
+                Testcd2.write('\n')
+                
+            else:
+                
+                Testcd2.write('0')
+                
+        
+        Number_of_reaches = 0
+        
+        for xs_number in self.riv_xs_data:
+            
+            if self.riv_xs_data[xs_number]['Reach'] > Number_of_reaches:
+                
+                Number_of_reaches = self.riv_xs_data[xs_number]['Reach']
+    
+    
+        for Reach in range(1,Number_of_reaches + 1):
+            
+            write_Testcd2_header(Reach)
+            write_Testcd2_reach_data(Reach,Number_of_reaches)
+            
+
+                           
+                        
+                    
+                
+                
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        
+            
             
         
     def write_TAPE5(self):
