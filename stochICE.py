@@ -80,7 +80,7 @@ class stochICE():
 
        
 
-        # self.p.stop()
+        self.p.stop()
 
         # Common functions for either HECRAS or RIVICE
         
@@ -128,9 +128,10 @@ class stochICE():
             self.stochRIVICE.write_Cd1test_for_DOUT7()
             self.stochRIVICE.get_water_lvl_TestCd2()
             self.stochRIVICE.write_Testcd2()
+            self.stochRIVICE.launch_Cd1xebat_file()
 
-        # if self.p:
-        #     self.p.stop()
+        if self.p:
+            self.p.stop()
 
     def print_header(self):
 

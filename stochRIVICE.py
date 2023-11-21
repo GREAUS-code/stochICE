@@ -414,25 +414,27 @@ class StochRIVICE():
             self.sim_water_lvl[xs] = {}
             self.sim_water_lvl[xs]['Chainage'] = xs
             self.sim_water_lvl[xs]['Discharge'] = 125.0
-            self.sim_water_lvl[xs]['Water_lvl_elv'] = 100.0
-            self.sim_water_lvl[xs]['Water_lvl_elv_high'] =  self.sim_water_lvl[xs]['Water_lvl_elv'] = 100.0 + 0.5
-            self.sim_water_lvl[xs]['Water_lvl_elv_low'] = self.sim_water_lvl[xs]['Water_lvl_elv'] = 100.0 - 0.5
+            self.sim_water_lvl[xs]['Water_lvl_elv'] = 100.01
+            self.sim_water_lvl[xs]['Water_lvl_elv_high'] =  self.sim_water_lvl[xs]['Water_lvl_elv'] + 5.0
+            self.sim_water_lvl[xs]['Water_lvl_elv_low'] = self.sim_water_lvl[xs]['Water_lvl_elv'] - 2.0
         
         
     
     def write_Testcd2(self):
         
-        Testcd2 = open(self.stochICE.prjDir + '/' + 'TESTCD2' + '.txt','w')
+        Testcd2 = open(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'TESTCD2' + '.txt','w')
         
         def string_length_adjustment(string,desired_length):
             
             while len(string) < desired_length:
                 
                 string = ' ' + string
+                
+            return string
                                 
                 
         
-        def write_Testcd2_header(Reach_number):
+        def write_Testcd2_reach_header(Reach_number):
             
             water_lvl_max = -9999.0
             water_lvl_min = 9999.0
@@ -442,15 +444,15 @@ class StochRIVICE():
             
             for xs_number in self.riv_xs_data:
                 
-                if self.riv_xs_data[xs_number]['Reach'] == str(Reach_number):
+                if self.riv_xs_data[xs_number]['Reach'] == Reach_number:
                     
-                    if self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['water_lvl_elv_high'] > water_lvl_max:
+                    if self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_high'] > water_lvl_max:
 
-                        water_lvl_max = self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['water_lvl_elv_high'] 
+                        water_lvl_max = self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_high'] 
                         
-                    if self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['water_lvl_elv_high'] < water_lvl_min:
+                    if self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_low'] < water_lvl_min:
                         
-                        water_lvl_min = self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['water_lvl_elv_high']
+                        water_lvl_min = self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_low']
                         
                     if int(self.riv_xs_data[xs_number]['Rivice Chainage']) > Reach_length : 
                         
@@ -472,14 +474,23 @@ class StochRIVICE():
                 
                     Manning = '0' + Manning
                     
+                if len(Manning) == 3:
+                    
+                    Manning = Manning + '00'
+                    
+                if len(Manning) == 4:
+                    
+                    Manning = Manning + '0'                   
+                    
                 else:
             
                     Manning = Manning + ' '
             
-            string_length_adjustment(Reach_length,13)    
-            string_length_adjustment(Interp_interval,12) 
-            string_length_adjustment(water_lvl_max,10) 
-            string_length_adjustment(water_lvl_min,10) 
+            
+            Reach_length = string_length_adjustment(Reach_length,13)    
+            Interp_interval = string_length_adjustment(Interp_interval,12) 
+            water_lvl_max = string_length_adjustment(water_lvl_max,10) 
+            water_lvl_min = string_length_adjustment(water_lvl_min,10) 
                 
             
             
@@ -489,7 +500,7 @@ class StochRIVICE():
             Testcd2.write('\n')
             Testcd2.write(Manning + '0.0       0.0' + Reach_length + Interp_interval)
             Testcd2.write('\n')
-            Testcd2.write('3    ' + water_lvl_min + water_lvl_min)
+            Testcd2.write('3    ' + water_lvl_min + water_lvl_max)
             Testcd2.write('\n')
             
             
@@ -500,7 +511,7 @@ class StochRIVICE():
             
             for xs_number in self.riv_xs_data:
                 
-                if self.riv_xs_data[xs_number]['Reach'] == str(Reach_number):
+                if self.riv_xs_data[xs_number]['Reach'] == Reach_number:
                                         
                     Reach_xs_number = str(numbering) 
                     water_lvl_elv = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv'])   
@@ -508,16 +519,16 @@ class StochRIVICE():
                     water_lvl_elv_high = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_high'])
                     water_lvl_elv_low = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_low'])
  
-                    string_length_adjustment(Reach_xs_number,9)
-                    string_length_adjustment(water_lvl_elv,11)
-                    string_length_adjustment(discharge,10)
-                    string_length_adjustment(water_lvl_elv_high,8)
-                    string_length_adjustment(water_lvl_elv_low,8)
+                    Reach_xs_number = string_length_adjustment(Reach_xs_number,9)
+                    water_lvl_elv = string_length_adjustment(water_lvl_elv,11)
+                    discharge = string_length_adjustment(discharge,10)
+                    water_lvl_elv_high = string_length_adjustment(water_lvl_elv_high,8)
+                    water_lvl_elv_low = string_length_adjustment(water_lvl_elv_low,8)
                     
                     Testcd2.write(Reach_xs_number + water_lvl_elv + discharge + '                                ' + water_lvl_elv_low + water_lvl_elv_high)
-                    Testcd2.wrte('\n')
+                    Testcd2.write('\n')
              
-            numbering += 1
+                numbering += 1
             
             
             if Reach_number < Number_of_reaches:
@@ -540,26 +551,24 @@ class StochRIVICE():
     
         for Reach in range(1,Number_of_reaches + 1):
             
-            write_Testcd2_header(Reach)
+            write_Testcd2_reach_header(Reach)
             write_Testcd2_reach_data(Reach,Number_of_reaches)
             
-
                            
-                        
+        Testcd2.close()                
                     
                 
                 
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+    def launch_Cd1xebat_file(self):
         
+        print('')
+        
+        # os.startfile(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'command.bat')
+        
+        # os.startfile(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'Cd1x_e.bat')
+        
+    def launch_Cd2pgmaexe_file(self):
+        print('')
             
             
         
