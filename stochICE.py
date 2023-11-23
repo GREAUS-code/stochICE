@@ -80,12 +80,6 @@ class stochICE():
 
        
 
-<<<<<<< HEAD
-        
-=======
-        # self.p.stop()
->>>>>>> 88685fc0d1a0f8c4e89fd5b534056779e2412809
-
         # Common functions for either HECRAS or RIVICE
         
         self.get_XS_ice_params()
@@ -142,13 +136,8 @@ class stochICE():
             self.stochRIVICE.write_Testcd2()
             self.stochRIVICE.launch_Cd1xebat_file()
 
-<<<<<<< HEAD
         if self.fun:
             self.p.stop()
-=======
-        # if self.p:
-        #     self.p.stop()
->>>>>>> 88685fc0d1a0f8c4e89fd5b534056779e2412809
 
     def print_header(self):
 
