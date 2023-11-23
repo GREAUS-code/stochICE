@@ -378,7 +378,7 @@ class StochHECRAS():
         self.floodmap_path=self.stochICE.prjDir+"\FloodMaps"
 
         if not os.path.exists(self.floodmap_path):
-            os.makedirs(self.stochICE.floodmap_path)
+            os.makedirs(self.floodmap_path)
 
         self.stoch = self.stoch.astype(int)
 

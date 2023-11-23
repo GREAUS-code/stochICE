@@ -19,7 +19,7 @@ geo = "Secteur_neufpas.g01"
 flowFile = "Secteur_neufpas.f03"
 wse= 'WSE (13 avril 2011).Terrain.MNT_Point_a_neuf_pas.tif'
 
-NSims = 10
+NSims = 3
 
 thick=[0.3,0.7]
 phi=[40,50]
@@ -42,16 +42,43 @@ Roger=ice.stochICE(prjDir=path,
                                   phi_range=phi,
                                   flow_range=flows,
                                   locations=locations,
-                                  code='RIVICE',
+                                  code='HECRAS',
                                   clrRes=True,
                                   compRes=True,
                                   fun_mode=True)
 
-xs_Data = Roger.xs_data
 
-sim_water_lvl = Roger.stochRIVICE.sim_water_lvl
 
-RIVICE_xs_data = Roger.stochRIVICE.riv_xs_data
+
+# import fileinput
+
+# # Does a list of files, and
+# # redirects STDOUT to the file in question
+
+
+# Ice Is Channel=-1
+# Ice Is OB=-1
+
+# for line in fileinput.input(path+'\\'+geo, inplace = 1): 
+#       line.replace("Ice Is Channel=-1", "Ice Is Channel=0")
+#       line.replace("Ice Is OB=-1", "Ice Is OB=0")
+
+
+
+
+
+
+
+
+
+# Roger.stochHECRAS.make_ensemble_flood_map()
+
+
+# xs_Data = Roger.xs_data
+
+# sim_water_lvl = Roger.stochRIVICE.sim_water_lvl
+
+# RIVICE_xs_data = Roger.stochRIVICE.riv_xs_data
 
     
 # riv_xs_data = {}
@@ -147,7 +174,6 @@ RIVICE_xs_data = Roger.stochRIVICE.riv_xs_data
 
 
 
-# Roger.stochHECRAS.make_ensemble_flood_map()
 
 
 

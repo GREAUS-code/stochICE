@@ -7,6 +7,7 @@ Created on Tue Nov 14 13:52:46 2023
 
 import os
 
+import stochHECRAS
 
 
 class StochRIVICE():
@@ -16,6 +17,7 @@ class StochRIVICE():
         
         self.stochICE=stochICE
         self.interInt=interInt
+        
            
     def create_RIVICE_xs(self): 
         
@@ -563,7 +565,7 @@ class StochRIVICE():
         
         print('')
         
-        # os.startfile(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'command.bat')
+        os.startfile(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'Cd1x_e.bat')
         
         # os.startfile(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'Cd1x_e.bat')
         
