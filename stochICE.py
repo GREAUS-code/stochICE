@@ -77,8 +77,7 @@ class stochICE():
 
         self.print_header()
         self.setup_monte_carlo_dir()
-
-       
+        self.copy_geofile()
 
         # Common functions for either HECRAS or RIVICE
         
@@ -134,6 +133,19 @@ class stochICE():
 
         if self.fun:
             self.p.stop()
+
+    def copy_geofile(self):
+        
+        file_name=os.path.splitext(os.path.basename(self.geo_file))[0]
+        file_ext=os.path.splitext(os.path.basename(self.geo_file))[1]
+        geo_file_copy=self.prjDir+"\\"+file_name+"_backup%s" % file_ext
+
+        if os.path.exists(geo_file_copy):
+            shutil.copyfile(geo_file_copy, self.geo_file)
+            print(".g0* file copied from original.")
+        else:
+            shutil.copyfile(self.geo_file, geo_file_copy)
+            print("Copy of original .g0* file made.")
 
     def store_orig_parameters(self):
         
