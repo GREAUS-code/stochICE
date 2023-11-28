@@ -111,17 +111,13 @@ class stochICE():
         if code =='RIVICE':
         
             print('Using RIVICE backend')
-
-            #launch hecras to get single water surface profile 
-            # self.stochHECRAS=stochHECRAS.StochHECRAS(self)
-            # self.stochHECRAS.preprocess_sims()
-            #call to return water surface profile
             
             #create stochRIVICE instance
             self.stochRIVICE=stochRIVICE.StochRIVICE(self,5)
             
-
-
+            self.store_orig_parameters()
+            self.get_HECRAS_wse_to_init_rivice()
+            self.reinstate_orig_parameters()
 
             self.stochRIVICE.create_RIVICE_xs()
             self.stochRIVICE.compute_RIVICE_xs_chainage()
@@ -138,6 +134,29 @@ class stochICE():
 
         if self.fun:
             self.p.stop()
+
+    def store_orig_parameters(self):
+        
+        # A copy is made of the original input parameters
+        # This is necessary to internally run a single HECRAS 
+        # simulation needed to set the initial water levels in RIVICE.
+        
+        self.NSims_orig=self.NSims
+        self.thick_orig=self.thick
+        self.phi_orig=self.phi
+        self.flows_orig=self.flows
+        self.locations_orig=self.locations
+        self.clr_orig=self.clr
+
+    def reinstate_orig_parameters(self):
+        
+        self.NSims=self.NSims_orig
+        self.thick=self.thick_orig
+        self.phi=self.phi_orig
+        self.flows=self.flows_orig
+        self.locations=self.locations_orig
+        self.clr=self.clr_orig
+
 
     def print_header(self):
 
@@ -470,6 +489,42 @@ class stochICE():
                     bridge_number += 1
 
 
+
+    def get_HECRAS_wse_to_init_rivice(self):
+        
+        """
+        Runs a single HECRAS simulation with no ice cover or ice jam
+        with the average of the lower and upper discharge limits supplied
+        by the user.
+        """
+        
+        print("\nRunning openwater HECRAS simulation with average discharge")
+        print("This is necessary to populate a hydraulic table in RIVICE\n")
+        
+        self.NSims = 1
+
+        #removes ice cover
+        self.thick=[0.0,0.0]
+        
+        self.phi=[40,50]
+        
+        #need user to specify this somehow
+        flow=sum(self.flows) / len(self.flows) 
+        self.flows=[flow,flow]
+
+        # removes ice jam
+        self.locations=[[0,0]]
+        
+        # prevent old results from being deleted
+        self.clr=False
+         
+        self.stochHECRAS=stochHECRAS.StochHECRAS(self)
+        self.stochHECRAS.preprocess_sims()
+        self.stochHECRAS.launch_sims()
+
+        self.open_HECRAS_wse={}
+        self.open_HECRAS_wse['chainage']=[float(i) for i in list(self.xs_data.keys())]
+        self.open_HECRAS_wse['wse']=self.stochHECRAS.result_profiles['sim_1']['WSE'].tolist()
 
 
 

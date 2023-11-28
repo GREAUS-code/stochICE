@@ -7,9 +7,6 @@ Created on Tue Nov 14 13:52:46 2023
 
 import os
 
-import stochHECRAS
-
-
 class StochRIVICE():
     
     # pass-in stochICE instance 
@@ -17,7 +14,7 @@ class StochRIVICE():
         
         self.stochICE=stochICE
         self.interInt=interInt
-        
+
            
     def create_RIVICE_xs(self): 
         

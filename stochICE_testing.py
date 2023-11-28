@@ -19,19 +19,61 @@ geo = "Secteur_neufpas.g01"
 flowFile = "Secteur_neufpas.f03"
 wse= 'WSE (13 avril 2011).Terrain.MNT_Point_a_neuf_pas.tif'
 
-NSims = 3
+NSims = 1
+
+thick=[0.0,0.0]
+phi=[40,50]
+flows=[100,100]
+
+# locations=[[3731,520],[8370,5026],[3327,520]]
+locations=[[10,0]]
+
+# Place ice jam way downstream from actual reach, this ensures
+# there are no ice jams in the geofile for RIVICE water level extraction
+# locations=[[10,0]]
+
+#specify just one flow for RIVICE w.s. ele extraction
+# flows=[120,120]
+
+
+
+
+
+# Roger=ice.stochICE(prjDir=path,
+#                                   batch_ID=batch_ID,
+#                                   ras_file=ras,
+#                                   geo_file=geo,
+#                                   flow_file=flowFile,
+#                                   wse_file=wse,
+#                                   NSims=NSims,
+#                                   thick_range=thick,
+#                                   phi_range=phi,
+#                                   flow_range=flows,
+#                                   locations=locations,
+#                                   code='HECRAS',
+#                                   clrRes=True,
+#                                   compRes=True,
+#                                   fun_mode=False)
+
+
+
+"""
+Testing code to get HECRAS water level out with no ice cover
+"""
+
+#step one - get a single instance of HECRAS to work 
+
+
+NSims = 1
 
 thick=[0.3,0.7]
 phi=[40,50]
-flows=[100,300]
+flows=[100,200]
 
-# locations=[[3731,520],[8370,5026],[3327,520]]
-locations=[[8370,520]]
+locations=[[3731,520],[8370,5026],[3327,520]]
+# locations=[[3731,520]]
 
-
-
-
-Roger=ice.stochICE(prjDir=path,
+single=ice.stochICE(prjDir=path,
                                   batch_ID=batch_ID,
                                   ras_file=ras,
                                   geo_file=geo,
@@ -42,10 +84,17 @@ Roger=ice.stochICE(prjDir=path,
                                   phi_range=phi,
                                   flow_range=flows,
                                   locations=locations,
-                                  code='HECRAS',
+                                  code='RIVICE',
                                   clrRes=True,
                                   compRes=True,
-                                  fun_mode=True)
+                                  fun_mode=False)
+
+
+# open_HECRAS_wse={}
+# open_HECRAS_wse['chainage']=[float(i) for i in list(single.xs_data.keys())]
+# open_HECRAS_wse['wse']=single.stochHECRAS.result_profiles['sim_1']['WSE'].tolist()
+
+
 
 
 

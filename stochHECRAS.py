@@ -193,7 +193,7 @@ class StochHECRAS():
         self.input_parms['jam_loc_upstream']=self.jam_loc_upstream
         self.input_parms['jam_loc_downstream']=self.jam_loc_downstream
 
-        print('\nSimulations complete!')
+        print('\nHECRAS simulation(s) complete!')
         
         
     def randomize_variables(self):
