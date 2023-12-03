@@ -129,7 +129,7 @@ class stochICE():
             self.stochRIVICE.write_Cd1test_for_DOUT7()
             self.stochRIVICE.get_water_lvl_TestCd2()
             self.stochRIVICE.write_Testcd2()
-            self.stochRIVICE.launch_Cd1xebat_file()
+            self.stochRIVICE.launch_Cd1xebat_Cd2pgmaexe_file()
 
         if self.fun:
             self.p.stop()
@@ -537,6 +537,7 @@ class stochICE():
         self.open_HECRAS_wse={}
         self.open_HECRAS_wse['chainage']=[float(i) for i in list(self.xs_data.keys())]
         self.open_HECRAS_wse['wse']=self.stochHECRAS.result_profiles['sim_1']['WSE'].tolist()
+        self.open_HECRAS_wse['discharge'] = flow
 
 
 

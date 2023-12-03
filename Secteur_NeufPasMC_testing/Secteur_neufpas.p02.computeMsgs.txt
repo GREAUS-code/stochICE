@@ -1,8 +1,9 @@
 Message  | Plan: 'MonteCarlo' (Secteur_neufpas.p02)
-Message  | Simulation started at: 23Nov2023 08:07:14 AM
+Message  | Simulation started at: 02Dec2023 09:31:23 PM
 Message  | 
 Message  | PROCESS:RasProcess
 Message  | Writing Plan GIS Data...
+Progress | 100
 Message  | Completed Writing Plan GIS Data
 Message  | Writing Geometry...
 Message  | Completed Writing Geometry
@@ -24,45 +25,47 @@ Progress | 0.7
 Progress | 0.8
 Progress | 0.9
 Progress | 1
-Progress | 0.012
-Progress | 0.036
-Progress | 0.06
-Progress | 0.083
-Progress | 0.107
-Progress | 0.131
-Progress | 0.155
-Progress | 0.179
-Progress | 0.202
-Progress | 0.226
-Progress | 0.25
-Progress | 0.271
-Progress | 0.293
-Progress | 0.314
-Progress | 0.336
+Progress | 0.024
+Progress | 0.048
+Progress | 0.071
+Progress | 0.095
+Progress | 0.119
+Progress | 0.143
+Progress | 0.167
+Progress | 0.19
+Progress | 0.214
+Progress | 0.238
+Progress | 0.262
+Progress | 0.286
+Progress | 0.31
+Progress | 0.333
 Progress | 0.357
-Progress | 0.379
-Progress | 0.4
-Progress | 0.424
-Progress | 0.448
-Progress | 0.471
-Progress | 0.495
-Progress | 0.517
+Progress | 0.381
+Progress | 0.405
+Progress | 0.429
+Progress | 0.452
+Progress | 0.476
+Progress | 0.5
+Progress | 0.524
 Progress | 0.548
-Progress | 0.568
-Progress | 0.589
-Progress | 0.61
-Progress | 0.641
-Progress | 0.663
-Progress | 0.683
-Progress | 0.704
-Progress | 0.725
-Progress | 0.755
-Progress | 0.776
-Progress | 0.807
-Progress | 0.827
+Progress | 0.571
+Progress | 0.595
+Progress | 0.619
+Progress | 0.643
+Progress | 0.667
+Progress | 0.69
+Progress | 0.714
+Progress | 0.738
+Progress | 0.762
+Progress | 0.786
+Progress | 0.81
+Progress | 0.833
 Progress | 0.857
-Progress | 0.887
-Progress | 0.917
+Progress | 0.881
+Progress | 0.905
+Progress | 0.929
+Progress | 0.952
+Progress | 0.976
 Progress | 1
 Message  | 
 Message  | Finished Steady Flow Simulation
@@ -72,18 +75,16 @@ Message  | PROCESS:RasProcess
 Message  | Computing Stored Results Maps
 Message  | Generating stored map: 'WSE (13 avril 2011)'
 Message  | Processing Terrain File 1 of 1
-Progress | 11
-Message  | File 1 of 1: 11% processed (Map Generation)
 Progress | 13
 Message  | File 1 of 1: 13% processed (Map Generation)
 Progress | 14
 Message  | File 1 of 1: 14% processed (Map Generation)
+Progress | 15
+Message  | File 1 of 1: 15% processed (Map Generation)
 Progress | 16
 Message  | File 1 of 1: 16% processed (Map Generation)
 Progress | 17
 Message  | File 1 of 1: 17% processed (Map Generation)
-Progress | 18
-Message  | File 1 of 1: 18% processed (Map Generation)
 Progress | 19
 Message  | File 1 of 1: 19% processed (Map Generation)
 Progress | 20
@@ -92,6 +93,8 @@ Progress | 21
 Message  | File 1 of 1: 21% processed (Map Generation)
 Progress | 22
 Message  | File 1 of 1: 22% processed (Map Generation)
+Progress | 23
+Message  | File 1 of 1: 23% processed (Map Generation)
 Progress | 24
 Message  | File 1 of 1: 24% processed (Map Generation)
 Progress | 25
@@ -100,8 +103,10 @@ Progress | 27
 Message  | File 1 of 1: 27% processed (Map Generation)
 Progress | 28
 Message  | File 1 of 1: 28% processed (Map Generation)
-Progress | 29
-Message  | File 1 of 1: 29% processed (Map Generation)
+Progress | 30
+Message  | File 1 of 1: 30% processed (Map Generation)
+Progress | 31
+Message  | File 1 of 1: 31% processed (Map Generation)
 Progress | 32
 Message  | File 1 of 1: 32% processed (Map Generation)
 Progress | 33
@@ -114,16 +119,12 @@ Progress | 36
 Message  | File 1 of 1: 36% processed (Map Generation)
 Progress | 37
 Message  | File 1 of 1: 37% processed (Map Generation)
-Progress | 38
-Message  | File 1 of 1: 38% processed (Map Generation)
-Progress | 39
-Message  | File 1 of 1: 39% processed (Map Generation)
-Progress | 40
-Message  | File 1 of 1: 40% processed (Map Generation)
-Progress | 42
-Message  | File 1 of 1: 42% processed (Map Generation)
-Progress | 56
-Message  | File 1 of 1: 56% processed (Map Generation)
+Progress | 52
+Message  | File 1 of 1: 52% processed (Map Generation)
+Progress | 54
+Message  | File 1 of 1: 54% processed (Map Generation)
+Progress | 57
+Message  | File 1 of 1: 57% processed (Map Generation)
 Progress | 58
 Message  | File 1 of 1: 58% processed (Map Generation)
 Progress | 59
@@ -196,7 +197,7 @@ Message  |
 Message  | Computations Summary
 Message  | 
 Message  | Computation Task	Time(hh:mm:ss)
-Message  | Completing Geometry, Flow and Plan	       2
-Message  | Steady Flow Computations	       1
-Message  | Computing Maps	       6
-Message  | Complete Process	      11
+Message  | Completing Geometry, Flow and Plan	       1
+Message  | Steady Flow Computations	<1
+Message  | Computing Maps	       4
+Message  | Complete Process	       6

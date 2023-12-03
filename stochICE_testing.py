@@ -50,13 +50,34 @@ Roger=ice.stochICE(prjDir=path,
                                   phi_range=phi,
                                   flow_range=flows,
                                   locations=locations,
-                                  code='HECRAS',
+                                  code='RIVICE',
                                   clrRes=True,
                                   compRes=True,
                                   fun_mode=False)
 
 
 os.path.splitext(os.path.basename(Roger.geo_file))[1]
+
+
+
+
+
+
+xs_Data = Roger.xs_data
+
+sim_water_lvl = Roger.stochRIVICE.sim_water_lvl
+
+RIVICE_xs_data = Roger.stochRIVICE.riv_xs_data
+
+open_HECRAS_wse = Roger.open_HECRAS_wse
+
+
+
+
+
+
+
+
 
 
 """

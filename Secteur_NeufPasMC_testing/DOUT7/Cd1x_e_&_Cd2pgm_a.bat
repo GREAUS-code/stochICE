@@ -5,4 +5,5 @@ del psplot.ps
 del psplot.pdf
 del psplot.log
 Cd1x_e.exe
+Cd2pgm_a.exe
 rem psplot.ps

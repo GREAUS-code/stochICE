@@ -408,14 +408,26 @@ class StochRIVICE():
         
         self.sim_water_lvl = {}
         
+        i = 0
+        
         for xs in self.stochICE.xs_data:
             
+            
             self.sim_water_lvl[xs] = {}
+            
             self.sim_water_lvl[xs]['Chainage'] = xs
-            self.sim_water_lvl[xs]['Discharge'] = 125.0
-            self.sim_water_lvl[xs]['Water_lvl_elv'] = 100.01
-            self.sim_water_lvl[xs]['Water_lvl_elv_high'] =  self.sim_water_lvl[xs]['Water_lvl_elv'] + 5.0
-            self.sim_water_lvl[xs]['Water_lvl_elv_low'] = self.sim_water_lvl[xs]['Water_lvl_elv'] - 2.0
+            
+            self.sim_water_lvl[xs]['Discharge'] = self.stochICE.open_HECRAS_wse['discharge']
+            
+            self.sim_water_lvl[xs]['Water_lvl_elv'] = self.stochICE.open_HECRAS_wse['wse'][self.stochICE.open_HECRAS_wse['chainage'].index(float(xs))]
+            self.sim_water_lvl[xs]['Water_lvl_elv_high'] =  self.sim_water_lvl[xs]['Water_lvl_elv'] + 0.5
+            self.sim_water_lvl[xs]['Water_lvl_elv_low'] = self.sim_water_lvl[xs]['Water_lvl_elv'] - 0.5
+            
+            self.sim_water_lvl[xs]['Water_lvl_elv'] = round(self.sim_water_lvl[xs]['Water_lvl_elv'],2)
+            self.sim_water_lvl[xs]['Water_lvl_elv_high'] = round(self.sim_water_lvl[xs]['Water_lvl_elv_high'],2)
+            self.sim_water_lvl[xs]['Water_lvl_elv_low'] = round(self.sim_water_lvl[xs]['Water_lvl_elv_low'],2)
+            
+            i += 1
         
         
     
@@ -506,6 +518,14 @@ class StochRIVICE():
         
         def write_Testcd2_reach_data(Reach_number,Number_of_reaches):
             
+            def water_lvl_format_adjusment(string):
+                
+                if len(string) == 4:
+                    
+                    string = string + '0'
+                    
+                return string
+            
             numbering = 1
             
             for xs_number in self.riv_xs_data:
@@ -517,6 +537,10 @@ class StochRIVICE():
                     discharge = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Discharge'])
                     water_lvl_elv_high = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_high'])
                     water_lvl_elv_low = str(self.sim_water_lvl[self.riv_xs_data[xs_number]['Hecras xs']]['Water_lvl_elv_low'])
+                    
+                    water_lvl_elv = water_lvl_format_adjusment(water_lvl_elv)
+                    water_lvl_elv_high = water_lvl_format_adjusment(water_lvl_elv_high)
+                    water_lvl_elv_low = water_lvl_format_adjusment(water_lvl_elv_low)
  
                     Reach_xs_number = string_length_adjustment(Reach_xs_number,9)
                     water_lvl_elv = string_length_adjustment(water_lvl_elv,11)
@@ -558,17 +582,11 @@ class StochRIVICE():
                     
                 
                 
-    def launch_Cd1xebat_file(self):
+    def launch_Cd1xebat_Cd2pgmaexe_file(self):
         
         print('')
         
-        os.startfile(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'Cd1x_e.bat')
-        
-        # os.startfile(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'Cd1x_e.bat')
-        
-    def launch_Cd2pgmaexe_file(self):
-        print('')
-            
+        os.startfile(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'Cd1x_e_&_Cd2pgm_a.bat')            
             
         
     def write_TAPE5(self):
