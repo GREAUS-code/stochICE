@@ -130,6 +130,7 @@ class stochICE():
             self.stochRIVICE.get_water_lvl_TestCd2()
             self.stochRIVICE.write_Testcd2()
             self.stochRIVICE.launch_Cd1xebat_Cd2pgmaexe_file()
+            self.stochRIVICE.write_TAPE5()
 
         if self.fun:
             self.p.stop()

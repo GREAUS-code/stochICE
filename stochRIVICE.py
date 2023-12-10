@@ -590,17 +590,259 @@ class StochRIVICE():
             
         
     def write_TAPE5(self):
-        print('')
         
+        def string_length_adjustment(string,length,position):
             
+            if position == "F":
             
-""" 
-Notes
+                while len(string) < length:
+                    
+                    string = " " + string
+            
+            elif position == "B":
+            
+                while len(string) < length:
+                    
+                    string = string + " "
+                      
+            else:               
+                print('Error : The position (3rd argument), should be F (for front adjustment) or B (for back adjustment)')
+                
+            return string
+        
+        """
+        Liste de variables locales qui devront être précisées par
+        l'utilisateur (pour l'instant ces variables sont "hardcoded")
+    
+        """
+        # Project solution
+        Project_title = "RIVICE MODEL"
+        
+        # Hydraulic solution options (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
+        IOpt_1 = 1
+        IOpt_2 = 2
+        IOpt_3 = 1
+        IOpt_4 = 1
+        IOpt_5 = 2
+        KOpt = 2
+        
+        # Water quality solution options (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
+        JOpt_1 = 1
+        JOpt_2 = 2
+        JOpt_3 = 2
+        
+        # Water quality parameter options (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
+        NPARM = 1
+        
+        # Parameter options (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
+        WQPAR = ["T"]
+        INOP = [0]
+        OUTOP = [1]
+        DOCALC = [0]
+        
+        # Time Parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
+        NPER = 1
+        NINC = 2880
+        PERIOD = 86400
+        RATIO = ""
+        MAXITR = "" 
+        EPS = ""
+        LPER = ""
+        NRINC = ""
+        
+        # Network Parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
+        
+        NREACH = self.riv_xs_data[str(len(self.riv_xs_data))]["Reach"] # -> Cette variable n'a pas besoin d'être précisée par l'utilisateur
+        NNODE = NREACH + 1 # -> Cette variable n'a pas besoin d'être précisée par l'utilisateur
+        NCTR = 0
+        
+        
+        """
+        Écriture du fichier de contrôle TAPE5
+        
+        """
+        
+        TAPE5 = open(self.stochICE.prjDir + '/TAPE5.txt','w')
+         
+        # Writing project name
+        if len(Project_title) > 80:
+            
+            print("Error : The project title should be 80 characters or less. Please shorten the project title")
+        
+        flag = 1
+        
+        while len(Project_title) < 80:
+                
+            if flag == 1:
+                
+                Project_title = "*" + Project_title
+                
+                flag = 0
+                
+            else:
+                
+                Project_title = Project_title + "*"
+                
+                flag = 1
+                
+        TAPE5.write(Project_title)
+        TAPE5.write("\n")
+        
+        # Writing Hydraulic solution options
+        Hyd_sol_Options = [IOpt_1,IOpt_2,IOpt_3,IOpt_4,IOpt_5,KOpt]
+        
+        line = ""
+        
+        for i in range(len(Hyd_sol_Options)):
+            
+            line = line + "         " + str(Hyd_sol_Options[i])
+            
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        # Writing Water quality solution options
+        WQ_sol_Options = [JOpt_1,JOpt_2,JOpt_3]
+        
+        line = ""
+        
+        for i in range(len(WQ_sol_Options)):
+            
+            line = line + "         " + str(WQ_sol_Options[i])
+            
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        # Writing Water quality parameter options
+        line = str(NPARM)
+        
+        while len(line) < 10:
+            
+            line = " " + line
+        
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        # Writing Parameter options        
+        line = ""
+        
+        for i in range(len(WQPAR)):
+            
+            while len(WQPAR[i]) < 10:
+                
+                WQPAR[i] = WQPAR[i] + " "
+                
+            line = line + WQPAR[i]   
+            line = line + "         " + str(INOP[i])
+            line = line + "         " + str(OUTOP[i])
+            line = line + "         " + str(DOCALC[i])
+            
+            TAPE5.write(line)
+            TAPE5.write("\n")
+            
+            line = ""
+            
+        # Writing Time Parameters
+        NPER = string_length_adjustment(str(NPER),10,"F")
+        NINC = string_length_adjustment(str(NINC),10,"F")
+        PERIOD = string_length_adjustment(str(PERIOD) + ".",10,"F")
+            
+        if RATIO != "":
+        
+            print("") # -> Cette partie du script est présentement facultative,
+                      #    celle-ci pourra être complétée ultérieurement.
+                      
+        if MAXITR != "":
+        
+            print("") # -> Cette partie du script est présentement facultative,
+                      #    celle-ci pourra être complétée ultérieurement.
+                      
+        if EPS != "":
 
-To create Dout7 -> Need Testcd2 &
+            print("") # -> Cette partie du script est présentement facultative,
+                      #    celle-ci pourra être complétée ultérieurement.
+                      
+        if LPER != "":
 
+            print("") # -> Cette partie du script est présentement facultative,
+                      #    celle-ci pourra être complétée ultérieurement.
+                      
+        if NRINC != "":
 
-"""        
+            print("") # -> Cette partie du script est présentement facultative,
+                      #    celle-ci pourra être complétée ultérieurement.
+                      
+        line = NPER + NINC + PERIOD + RATIO + MAXITR + EPS + LPER + NRINC
+        
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        # Writing Network Parameters        
+        NREACH = string_length_adjustment(str(NREACH),10,"F")
+        NNODE = string_length_adjustment(str(NNODE),10,"F")
+        NCTR = string_length_adjustment(str(NCTR),10,"F")
+        
+        line = NREACH + NNODE + NCTR
+        
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        # Writing  Reach-node Connectivity Data
+        # -> Since RIVICE can only model a single channel, reaches informations
+        #    are listed for every reach following the reaches numbering order
+        for i in range(1,int(NREACH)+1):
+            
+            line = ""
+            
+            for j in range(4):
+                
+                if j == 3:
+                    
+                    line = line + string_length_adjustment(str(i + 1),10,"F")
+                    
+                else:
+                    line = line + string_length_adjustment(str(i),10,"F")
+                    # line = line + string_length_adjustment(str(int(NREACH)),10,"F")
+                
+            TAPE5.write(line)
+            TAPE5.write("\n")
+            
+        # Writing DOU7 file content       
+        Dout7 = open(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'DOUT7' + '.txt','r')
+        
+        for line in Dout7:
+                            
+                TAPE5.write(line)
+            
+                
+        TAPE5.close()
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
             
             
             
