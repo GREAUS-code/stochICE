@@ -650,11 +650,29 @@ class StochRIVICE():
         LPER = ""
         NRINC = ""
         
-        # Network Parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
-        
+        # Network Parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)       
         NREACH = self.riv_xs_data[str(len(self.riv_xs_data))]["Reach"] # -> Cette variable n'a pas besoin d'être précisée par l'utilisateur
         NNODE = NREACH + 1 # -> Cette variable n'a pas besoin d'être précisée par l'utilisateur
         NCTR = 0
+        
+        # Water quality parameter coefficients
+        KEY = 1       
+        # 0 - Time from the beginning for entry IMC (in hours) 
+        # 1 - Ambient temperature (in degrees Fahrenheit) 
+        # 2 - Relative humidity (in percent) 
+        # 3 - Wind velocity at 2 m (in miles/hour)
+        # 4 - Net solar flux (in BTU/ft²/day)
+        # 5 - Net atmospheric flux (in BTU/ft²/day) 
+        # 6 - Atmospheric pressure (in mm Hg) 
+        T_inputs = [[0.,2900.,2910.,9000.],\
+                    [32.,32.,32.,32.],\
+                    [25.,25.,25.,25.],\
+                    [5.,5.,5.,5.],\
+                    [0.,0.,0.,0.],\
+                    [0.,0.,0.,0.],\
+                    [760.,760.,760.,760.,]]
+        
+        
         
         
         """
@@ -801,19 +819,67 @@ class StochRIVICE():
                     
                 else:
                     line = line + string_length_adjustment(str(i),10,"F")
-                    # line = line + string_length_adjustment(str(int(NREACH)),10,"F")
                 
             TAPE5.write(line)
             TAPE5.write("\n")
             
-        # Writing DOU7 file content       
-        Dout7 = open(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'DOUT7' + '.txt','r')
+        # Writing DOUT7 file content       
+        Dout7 = open(self.stochICE.prjDir + '/' + 'DOUT7' + '/' + 'DOUT7.txt','r')
         
         for line in Dout7:
                             
                 TAPE5.write(line)
             
+        Dout7.close()        
+        
+        
+        # Writing Water quality parameter coefficients  
+        TAPE5.write("Water quality description of the reaches")
+        TAPE5.write("\n")
+        
+        KEY = string_length_adjustment(str(KEY),10,"F")
+        
+        for i in range(len(WQPAR)):
+            
+            TAPE5.write(WQPAR[i] + KEY)
+            TAPE5.write("\n")
+            
+            if WQPAR[i][0] == "T":
+            
+                T_series = len(T_inputs[0])
+                T_series = string_length_adjustment(str(T_series),10,"F")
+                TAPE5.write(T_series)
+                TAPE5.write("\n")
+                          
+                for i in range(int(T_series)):
+                    
+                    line = ""
+                    
+                    for j in range(7):
+                        
+                        param = T_inputs[j][i] 
+                        param = string_length_adjustment(str(param),10,"F")
+                        
+                        line = line + param
+                    
+                    TAPE5.write(line)
+                    TAPE5.write("\n")
                 
+            
+
+            # This "if clause" should be continued for every water quality
+            # parameter in option, but as water temperature is the main topic
+            # here, all other water quality parameter are omitted
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
         TAPE5.close()
         
         
