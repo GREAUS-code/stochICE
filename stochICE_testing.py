@@ -71,7 +71,7 @@ RIVICE_xs_data = Roger.stochRIVICE.riv_xs_data
 
 open_HECRAS_wse = Roger.open_HECRAS_wse
 
-
+RIVICE_reach_data = Roger.stochRIVICE.reach_data
 
 
 

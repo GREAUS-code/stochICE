@@ -125,6 +125,7 @@ class stochICE():
             self.stochRIVICE.assign_RIVICE_Reaches()
             self.stochRIVICE.assign_RIVICE_xs_ID()
             self.stochRIVICE.compute_dist_prev_xs()
+            self.stochRIVICE.get_reach_data()
             self.stochRIVICE.write_Cd1test()
             self.stochRIVICE.write_Cd1test_for_DOUT7()
             self.stochRIVICE.get_water_lvl_TestCd2()
@@ -500,6 +501,7 @@ class stochICE():
                     self.bridge_data[str(bridge_number)]['chainage'] = float(xs)
                     
                     bridge_number += 1
+                    
 
 
 

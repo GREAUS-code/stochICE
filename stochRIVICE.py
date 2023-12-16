@@ -203,8 +203,6 @@ class StochRIVICE():
             self.riv_xs_data[xs_number]['XS ID'] = int(xs_number)*1000
         
         
-        
-        
     def compute_dist_prev_xs(self):
         
         xs_number_precedent = ''
@@ -223,7 +221,64 @@ class StochRIVICE():
             xs_number_precedent =xs_number   
                 
                 
-   
+    def get_reach_data(self):
+        
+        self.reach_data = {}
+        
+        #Recueil du numero de reach et du chainage de sa limite aval
+        
+        
+        for i in range(1,len(self.riv_xs_data) + 1):
+            
+            if i == len(self.riv_xs_data):
+                
+                Reach_number = self.riv_xs_data[str(i)]['Reach']
+                Reach_end_chainage = self.riv_xs_data[str(i)]['Rivice Chainage']
+                
+                self.reach_data[str(Reach_number)] = {}
+                self.reach_data[str(Reach_number)]['Reach_number'] = Reach_number
+                self.reach_data[str(Reach_number)]['Reach_end_chainage'] = Reach_end_chainage
+                
+                
+            else:
+            
+                Reach_number = self.riv_xs_data[str(i)]['Reach']
+                Reach_end_chainage = self.riv_xs_data[str(i)]['Rivice Chainage']
+                
+                Next_reach_number = self.riv_xs_data[str(i+1)]['Reach']
+                
+                
+                if Reach_number != Next_reach_number:
+                    
+                    self.reach_data[str(Reach_number)] = {}
+                    self.reach_data[str(Reach_number)]['Reach_number'] = Reach_number
+                    self.reach_data[str(Reach_number)]['Reach_end_chainage'] = Reach_end_chainage
+                    
+        #Recueil de la longueur de chaque reach et du nombre de XS qu'ils comprennent
+        #incluant les XS interpolees            
+        for i in range(1,len(self.reach_data)+1):
+            
+            if i == 1:
+                
+                Reach_length = self.reach_data[str(i)]['Reach_end_chainage']                
+                Num_of_XS = int(Reach_length)/self.interInt + 1
+                
+                self.reach_data[str(i)]['Reach_length'] = Reach_length                
+                self.reach_data[str(i)]['Number_of_XS'] = Num_of_XS
+                
+            else:
+                            
+                Reach_end_chainage = self.reach_data[str(i)]['Reach_end_chainage']
+                Prev_reach_end_chainage = self.reach_data[str(i-1)]['Reach_end_chainage']               
+                
+                Reach_length = Reach_end_chainage - Prev_reach_end_chainage                
+                Num_of_XS = Reach_length/self.interInt + 1
+                
+                self.reach_data[str(i)]['Reach_length'] = Reach_length                               
+                self.reach_data[str(i)]['Number_of_XS'] = Num_of_XS
+                
+                
+        
 
     def write_Cd1test(self):    
         
@@ -851,19 +906,69 @@ class StochRIVICE():
                 TAPE5.write(T_series)
                 TAPE5.write("\n")
                           
-                for i in range(int(T_series)):
+                for j in range(int(T_series)):
                     
                     line = ""
                     
-                    for j in range(7):
+                    for k in range(7):
                         
-                        param = T_inputs[j][i] 
+                        param = T_inputs[k][j] 
                         param = string_length_adjustment(str(param),10,"F")
                         
                         line = line + param
                     
                     TAPE5.write(line)
                     TAPE5.write("\n")
+                    
+            line = ""
+              
+            for j in range(1,len(self.reach_data)+1):
+               
+                Reach_number = self.reach_data[str(j)]['Reach_number']
+                Reach_xs_num = self.reach_data[str(j)]['Number_of_XS']
+                
+                Reach_number = string_length_adjustment(str(Reach_number),20,'F')
+                Reach_xs_num = string_length_adjustment("-" + str(Reach_xs_num),10,'F')
+                
+                TAPE5.write(Reach_number + Reach_xs_num)
+                TAPE5.write("\n")
+                
+                line = Reach_number + string_length_adjustment("0",10,'F')
+                
+                TAPE5.write(line)
+                TAPE5.write("\n")
+                
+                TAPE5.write(WQPAR[i] + KEY)
+                TAPE5.write("\n")
+                
+                initial_time = T_inputs[0][0] 
+                initial_wat_temp = T_inputs[1][0]
+                
+                initial_time = string_length_adjustment(str(initial_time),10,"F")
+                initial_wat_temp = string_length_adjustment(str(initial_wat_temp),10,"F")
+                
+                TAPE5.write(initial_time + initial_wat_temp)
+                TAPE5.write("\n")
+                
+                
+        #Writing lateral inflow parameters   
+        TAPE5.write("D              LATERAL INFLOW")
+        TAPE5.write("\n")
+        TAPE5.write("         0")
+        TAPE5.write("\n")
+        
+        #Writing injection points parameters
+        TAPE5.write("E              INJECTION POINTS")
+        TAPE5.write("\n")
+        TAPE5.write("         0")
+        TAPE5.write("\n")
+        
+        #Writing boundary conditions parameters   
+        TAPE5.write("F              BOUNDARY CONDITIONS")
+        TAPE5.write("\n")
+        TAPE5.write("         0")
+        TAPE5.write("\n")   
+                
                 
             
 
