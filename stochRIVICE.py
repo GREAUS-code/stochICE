@@ -727,8 +727,28 @@ class StochRIVICE():
                     [0.,0.,0.,0.],\
                     [760.,760.,760.,760.,]]
         
+        # Upstream discharge boundary condition parameters   
+        Q_inputs = [[0.0,2880.0],\
+                    [100.0,100.0]]            
+        Q_Type = 2 #Boundary condition type
+        Q_Time_dep = 2 #Boundary condition time dependance
+        Q_Serie_len = len(Q_inputs[0]) #Boundary condition serie length
+        Q_Intr_type = 1 #Interpolation type used to interpolate between the
+                        #boundary condition serie terms              
         
         
+        # Downstream water surface elevation boundary condition parameters
+        H_inputs = [[0.0,2880.0],\
+                    [66.08,66.08]]
+        H_Type = 1 #Boundary condition type
+        H_Time_dep = 2 #Boundary condition time dependance
+        H_Serie_len = len(Q_inputs[0]) #Boundary condition serie length
+        H_Intr_type = 1 #Interpolation type used to interpolate between the
+                        #boundary condition serie terms   
+        
+        # Hydraulic hydrographs parameters
+        HG_xs_chainage = [0.0,1685.0,4090.0,7095.0,8285.0]
+        HG_time_step = [0.0,1440.0,2880.0] #Correspond to the time step number, not the real time
         
         """
         Écriture du fichier de contrôle TAPE5
@@ -888,7 +908,7 @@ class StochRIVICE():
         Dout7.close()        
         
         
-        # Writing Water quality parameter coefficients  
+        # Writing Water quality parameters of the reaches 
         TAPE5.write("Water quality description of the reaches")
         TAPE5.write("\n")
         
@@ -951,30 +971,102 @@ class StochRIVICE():
                 TAPE5.write("\n")
                 
                 
-        #Writing lateral inflow parameters   
+        # Writing Lateral Inflow parameters of the reaches 
         TAPE5.write("D              LATERAL INFLOW")
         TAPE5.write("\n")
         TAPE5.write("         0")
         TAPE5.write("\n")
         
-        #Writing injection points parameters
+        # Writing Injection Points parameters of the reaches 
         TAPE5.write("E              INJECTION POINTS")
         TAPE5.write("\n")
         TAPE5.write("         0")
         TAPE5.write("\n")
         
-        #Writing boundary conditions parameters   
+        # Writing Hydraulic Boundary Conditions at each "Node" of the domain 
         TAPE5.write("F              BOUNDARY CONDITIONS")
         TAPE5.write("\n")
-        TAPE5.write("         0")
-        TAPE5.write("\n")   
-                
-                
+        
+        reach_num = string_length_adjustment("1",10,'F')
+        
+        line = reach_num
+        
+        # Upstream boundary condition definition        
+        US_boundary_cdn = [Q_inputs,Q_Type,Q_Time_dep,Q_Serie_len,Q_Intr_type] #US boundary condition parameters
+        
+        for i in range(1,len(US_boundary_cdn)):
             
+            US_boundary_cdn[i] = string_length_adjustment(str(US_boundary_cdn[i]),10,'F')
+            
+            line = line + US_boundary_cdn[i]
+        
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        for i in range(len(US_boundary_cdn[0][0])):
+            
+            time_step = str(US_boundary_cdn[0][0][i])
+            Discharge = str(US_boundary_cdn[0][1][i])
+            
+            time_step = string_length_adjustment(time_step,10,'F')
+            Discharge = string_length_adjustment(Discharge,19,'F')
 
-            # This "if clause" should be continued for every water quality
-            # parameter in option, but as water temperature is the main topic
-            # here, all other water quality parameter are omitted
+            TAPE5.write(time_step + Discharge)
+            TAPE5.write("\n")
+        
+        # Internal node definition
+        for i in range(2,len(self.reach_data)+1):
+            
+            reach_num = string_length_adjustment(str(i),10,'F')
+            
+            TAPE5.write(reach_num + "         0")
+            TAPE5.write("\n")
+            
+        i += 1
+            
+        reach_num = string_length_adjustment(str(i),10,'F')
+        
+        line = reach_num
+        
+        # Downstream boundary condition definition
+        DS_boundary_cdn = [H_inputs,H_Type,H_Time_dep,H_Serie_len,H_Intr_type]
+        
+        for i in range(1,len(DS_boundary_cdn)):
+            
+            DS_boundary_cdn[i] = string_length_adjustment(str(DS_boundary_cdn[i]),10,'F')
+            
+            line = line + DS_boundary_cdn[i]
+        
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        for i in range(len(DS_boundary_cdn[0][0])):
+            
+            time_step = str(DS_boundary_cdn[0][0][i])
+            WSE = str(DS_boundary_cdn[0][1][i])
+            
+            time_step = string_length_adjustment(time_step,10,'F')
+            WSE = string_length_adjustment(WSE,10,'F')
+
+            TAPE5.write(time_step + WSE)
+            TAPE5.write("\n")
+            
+        # Writing Hydraulic Hydrographs and profiles
+        HG_params = [HG_xs_chainage,HG_time_step]
+        
+        HG_num = len(HG_params[0])
+        
+        
+        
+        
+
+
+        
+        
+            
+           
+        
+        
         
         
         
