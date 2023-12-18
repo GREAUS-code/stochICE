@@ -748,7 +748,9 @@ class StochRIVICE():
         
         # Hydraulic hydrographs parameters
         HG_xs_chainage = [0.0,1685.0,4090.0,7095.0,8285.0]
-        HG_time_step = [0.0,1440.0,2880.0] #Correspond to the time step number, not the real time
+        HG_time_step = [0.0,1440.0,2880.0] # Corresponds to the time step number
+                                           # where the hydrograph will be
+                                           # printed, not the real time
         
         """
         Écriture du fichier de contrôle TAPE5
@@ -1052,9 +1054,29 @@ class StochRIVICE():
             TAPE5.write("\n")
             
         # Writing Hydraulic Hydrographs and profiles
-        HG_params = [HG_xs_chainage,HG_time_step]
+        TAPE5.write("HYDRAULIC HYDROGRAPHS & PROFILES")
+        TAPE5.write("\n")
         
+        HG_params = [HG_xs_chainage,HG_time_step]
         HG_num = len(HG_params[0])
+        
+        TAPE5.write(string_length_adjustment(str(HG_num),10,'F'))
+        TAPE5.write("\n")
+        
+        for i in range(1,HG_num+1):
+            
+            for j in range(len(self.riv_xs_data)):
+                
+                if int(HG_params[0][i]) == self.riv_xs_data[str(j)]['Rivice Chainage']:
+                    
+                    reach_num = self.riv_xs_data[str(j)]['Reach']
+          
+                # -> PORTION DE SCRIPT À TERMINER***
+
+            
+        
+        
+        
         
         
         
