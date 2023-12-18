@@ -1059,7 +1059,9 @@ class StochRIVICE():
         
         HG_params = [HG_xs_chainage,HG_time_step]
         HG_num = len(HG_params[0])
+        HG_time = len(HG_params[1])
         
+        # Ecriture des XS ou un hydrographe sera généré
         TAPE5.write(string_length_adjustment(str(HG_num),10,'F'))
         TAPE5.write("\n")
         
@@ -1069,9 +1071,27 @@ class StochRIVICE():
                 
                 if int(HG_params[0][i]) == self.riv_xs_data[str(j)]['Rivice Chainage']:
                     
-                    reach_num = self.riv_xs_data[str(j)]['Reach']
+                    reach_num = self.riv_xs_data[str(j)]['Reach']                
+                    xs_chainage = HG_params[0][i]
+                    
+                    reach_num = string_length_adjustment(reach_num,10,'F')
+                    xs_chainage = string_length_adjustment(xs_chainage,10,'F')
+                    line = "         1         1         1"                    
+                    
+                    TAPE5.write(reach_num + xs_chainage + line)
+                    TAPE5.write("\n")
+                    
+        # Ecriture des differents profils qui seront générés
+        TAPE5.write(string_length_adjustment(str(HG_time),10,'F'))
+        TAPE5.write("\n")
+        
+        for i in range(HG_time):
+            
+                    
+                    
+        
           
-                # -> PORTION DE SCRIPT À TERMINER***
+            
 
             
         
