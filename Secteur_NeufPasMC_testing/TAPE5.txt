@@ -336,3 +336,43 @@ WATER QUALITY TIME GRAPHS & PROFILES
          2      2880         1
          3      2880         1
          4      2880         1
+******** Test of RIVICE ***********
+    1   DEPOPT
+  1.2   VDEP
+  0.6   DIAICE
+  0.5   FRMAX
+   99   EROPT
+  1.5   VERODE
+   99   FTRLIM
+    3   LEOPT
+  0.1     Frontthick  ONLY USED IF LEOPT=3; OTHERWISE IGNORED
+   99   VFACTR
+  0.5   POROSC
+  0.5   POROSFS
+  0.2   SLUSHT
+   99   COHESN
+    1   NBRGSW
+ 1200      0.0     0.3       0.3             RLOCBRG, DAYSBR, BRIDTH, THERMD
+    0   NSHEDF		  Input number of load shed factors
+    0               ISTOP (Cross section number at which program stops)
+    1   20          IPRTYPE: 0(GEN'L ONLY),1 (GEN'L + DET'D CALCS);  LIMITOUT
+  050    1          TIMETRIGINC, NTOTHER
+  100               SECTIONINC
+     499
+   50    1          TIMETRIGINC, NTOTHER
+     483
+    2                      ICEGENMETHOD   (1-DETAILED;2-SIMPLIFIED)
+ 0.0                       HEAT LOSS COEFFIFICIENT FOR SIMPLE CALC METHOD
+         0    20.0         INCOMING ICE VOLUME FOR EACH TIME STEP
+      1440    20.0         INCOMING ICE VOLUME FOR EACH TIME STEP
+      2880    20.0         INCOMING ICE VOLUME FOR EACH TIME STEP
+ICE INFORMATION THRU RIVINH  INPUT TYPE J *********************************
+0.218      7.52          ZZK1TAN,  ZZK2            
+    2 ICENOPT(1-BELTAOS, 2-KGS, 3- USER-DEFINED)   
+ 1661  0.5 0.12 0.027 0.03          IX,FACTOR1, FACTOR2, FACTOR3, CNBED
+    1                 IBORD (1-USER, 2-NEWBURY, 3- MATOUSEK)       
+31.0                                DAYBORDSTART
+  1.0  1.0                 BORDUPBRK   BORDWNBRK           
+ 1661  0.1 0.15 0.15  IX  BORDCOEF1  BORDCOEF2  BRDTHK
+    1 86401                 MELTOPT (1- uSER COEFF,2- RIVICE ALGO.);MELTSTART
+   0.0                      HEAT TRANSFER COEFFICIENT WATER TO ICE(btu/M2/DAY)

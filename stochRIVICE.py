@@ -770,8 +770,12 @@ class StochRIVICE():
                                                # where the profiles will be
                                                # printed, not the real time
                                                
-        # RIVICE default parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
-        
+        # Upstream incoming ice volume boundary condition
+        IV_bc_inputs = [[0.0,1440.0,2880.0],\
+                        [20.0,20.0,20.0]]
+                                               
+                                               
+        # RIVICE default parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)        
         DEPOPT = 1
         VDEP = 1.20
         DIAICE = 0.6
@@ -788,23 +792,42 @@ class StochRIVICE():
         COHESN = 99
         NBRGSW = 1
         
+        RLOCBRG = 1200
+        DAYSBR = 0.00
+        BRIDTH = 0.30
+        THERMD = 0.30
+        NSHEDF = 0
+        ISTOP = 0
+        IPRTYPE = 1
+        LIMITOUT = 20
+        TIMETRIGINC = '050'
+        NTOTHER = 1
+        SECTIONINC = 100
+        DISTTRIGINC = 50
+        NDOTHER = 1
+        ICEGENMETHOD = 2
+        Heat_loss_coef = 0.0 #For simple calculation method
         
-        R_default_params = ['DEPOPT',DEPOPT,\
-                            'VDEP',VDEP,\
-                            'DIAICE',DIAICE,\
-                            'FRMAX',FRMAX,\
-                            'EROPT',EROPT,\
-                            'VERODE',VERODE,\
-                            'FTRLIM',FTRLIM,\
-                            'LEOPT',LEOPT,\
-                            '  Frontthick',Frontthick,\
-                            'VFACTR',VFACTR,\
-                            'POROSC',POROSC,\
-                            'POROSFS',POROSFS,\
-                            'SLUSHT',SLUSHT,\
-                            'COHESN',COHESN,\
-                            'NBRGSW',NBRGSW,\
-                            ]
+        # RIVICE INPUT TYPE J parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
+        ZZK1TAN = 0.218
+        ZZK2 = 7.52
+        ICENOPT = 2 
+        FACTOR1 = 0.5
+        FACTOR2 = 0.12
+        FACTOR3 = 0.027
+        CNBED = 0.030
+        IBORD = 1
+        DAYBORDSTART = 31.0
+        BORDUPBRK = 1.0
+        BORDWNBRK = 1.0
+        BORDCOEF1 = 0.1
+        BORDCOEF2 = 0.15
+        BRDTHK = 0.15
+        MELTOPT = 1
+        MELTSTART = 86401
+        Heat_coef_water_to_ice = 0.0
+
+        
         
                                            
         
@@ -1253,9 +1276,295 @@ class StochRIVICE():
         TAPE5.write("******** Test of RIVICE ***********")
         TAPE5.write("\n")
         
-        # Continuer la rédaction du fichier TAPE5 à partir d'ici
+        R_def_params = ['DEPOPT',DEPOPT,\
+                            'VDEP',VDEP,\
+                            'DIAICE',DIAICE,\
+                            'FRMAX',FRMAX,\
+                            'EROPT',EROPT,\
+                            'VERODE',VERODE,\
+                            'FTRLIM',FTRLIM,\
+                            'LEOPT',LEOPT,\
+                            '  Frontthick',Frontthick,\
+                            'VFACTR',VFACTR,\
+                            'POROSC',POROSC,\
+                            'POROSFS',POROSFS,\
+                            'SLUSHT',SLUSHT,\
+                            'COHESN',COHESN,\
+                            'NBRGSW',NBRGSW,\
+                            'RLOCBRG',RLOCBRG,\
+                            'DAYSBR',DAYSBR,\
+                            'BRIDTH',BRIDTH,\
+                            'THERMD',THERMD,\
+                            'NSHEDF',NSHEDF,\
+                            'ISTOP',ISTOP,\
+                            'IPRTYPE',IPRTYPE,\
+                            'LIMITOUT',LIMITOUT,\
+                            'TIMETRIGINC',TIMETRIGINC,\
+                            'NTOTHER',NTOTHER,\
+                            'SECTIONINC',SECTIONINC,\
+                            'DISTTRIGINC',DISTTRIGINC,\
+                            'NDOTHER',NDOTHER,\
+                            'ICEGENMETHOD',ICEGENMETHOD,\
+                            'Heat_loss_coef', Heat_loss_coef,\
+                            ]
+        
+        flag_1 = 0
+        flag_2 = 0
+        flag_3 = 0
+        # Rivice default parameters
+        for i in range(0,len(R_def_params),2):
+            
+            name = R_def_params[i]
+            value = R_def_params[i+1]
+            
+            value = string_length_adjustment(str(value),5,'F')
+            
+            
+            if name == '  Frontthick':                                
+                
+                extra_txt = '  ONLY USED IF LEOPT=3; OTHERWISE IGNORED'
+                
+                line = value + "   " + name + extra_txt
+                
+            elif name == 'RLOCBRG':
+                
+                value_1 = R_def_params[i+1]
+                value_2 = R_def_params[i+3]
+                value_3 = R_def_params[i+5]
+                value_4 = R_def_params[i+7]
+                
+                value_1 = string_length_adjustment(str(value_1),5,'F')
+                value_2 = string_length_adjustment(str(value_2),9,'F')
+                value_3 = string_length_adjustment(str(value_3),8,'F')
+                value_4 = string_length_adjustment(str(value_4),10,'F')
+                
+                extra_txt = '             RLOCBRG, DAYSBR, BRIDTH, THERMD'
+                
+                line = value_1 + value_2 + value_3 + value_4 + extra_txt
+                
+            elif name == 'DAYSBR' or name == 'BRIDTH' or name == 'THERMD':
+                
+                flag_3 = 1
+
+            elif name == 'NSHEDF':
+                
+                extra_txt = '		  Input number of load shed factors'
+                
+                line = value + "   " + name + extra_txt
+                
+            elif name == 'ISTOP' :
+                
+                extra_txt = ' (Cross section number at which program stops)'
+                
+                line = value + "               " + name + extra_txt
+                
+            elif name == 'IPRTYPE':
+            
+                value_1 = R_def_params[i+1]
+                value_2 = R_def_params[i+3]
+                
+                value_1 = string_length_adjustment(str(value_1),5,'F')
+                value_2 = string_length_adjustment(str(value_2),5,'F')
+                
+                extra_txt = "IPRTYPE: 0(GEN'L ONLY),1 (GEN'L + DET'D CALCS);  LIMITOUT"
+                
+                line = value_1 + value_2 + "          " + extra_txt
+                
+            elif name == 'LIMITOUT':
+                
+                flag_3 = 1            
+                
+            elif name == 'TIMETRIGINC':
+                
+                value_1 = R_def_params[i+1]
+                value_2 = R_def_params[i+3]
+                
+                value_1 = string_length_adjustment(str(value_1),5,'F')
+                value_2 = string_length_adjustment(str(value_2),5,'F')
+                
+                extra_txt = 'TIMETRIGINC, NTOTHER'
+                
+                line = value_1 + value_2 + "          " + extra_txt
+                
+            elif name == 'NTOTHER':
+                
+                flag_3 = 1 
+                
+            elif name == 'SECTIONINC':
+                
+                extra_txt = '               SECTIONINC'
+                
+                line = value + extra_txt
+
+                flag_1 = 1   
+                
+            elif name == 'DISTTRIGINC':
+                
+                value_1 = R_def_params[i+1]
+                value_2 = R_def_params[i+3]
+                
+                value_1 = string_length_adjustment(str(value_1),5,'F')
+                value_2 = string_length_adjustment(str(value_2),5,'F')
+                
+                extra_txt = 'TIMETRIGINC, NTOTHER'
+                
+                line = value_1 + value_2 + "          " + extra_txt
+                
+                flag_2 = 1
+                
+            elif name == 'NDOTHER':
+                
+                flag_3 = 1 
+                
+            elif name == 'ICEGENMETHOD':
+                
+                extra_txt = 'ICEGENMETHOD   (1-DETAILED;2-SIMPLIFIED)'
+                
+                line = value + '                      ' + extra_txt
+            
+            elif name == 'Heat_loss_coef':
+                
+                value_1 = R_def_params[i+1] 
+                
+                value_1 = string_length_adjustment(str(value_1),4,'F')
+                
+                extra_txt = 'HEAT LOSS COEFFIFICIENT FOR SIMPLE CALC METHOD'
+                
+                line = value_1 + "                       " + extra_txt
+                
+            else:
+            
+                line = value + "   " + name
+                
+           
+            if flag_1 == 1:
+                
+                TAPE5.write(line)
+                TAPE5.write("\n")
+                
+                TAPE5.write('     499')
+                TAPE5.write("\n")
+                
+                flag_1 = 0
+                
+            elif flag_2 == 1:
+                
+                TAPE5.write(line)
+                TAPE5.write("\n")
+                
+                TAPE5.write('     483')
+                TAPE5.write("\n")
+                
+                flag_2 = 0
+                
+            elif flag_3 == 1:
+
+                flag_3 = 0
+                  
+            else:
+                TAPE5.write(line)
+                TAPE5.write("\n")
+            
+            
+        # Upstream incoming ice volume  
+        for i in range(len(IV_bc_inputs[0])):
+            
+            time_step = int(IV_bc_inputs[0][i])
+            ice_volume = IV_bc_inputs[1][i]
+            
+            time_step = string_length_adjustment(str(time_step),10,'F')
+            ice_volume = string_length_adjustment(str(ice_volume),8,'F')
+            
+            extra_txt = '         INCOMING ICE VOLUME FOR EACH TIME STEP'
+            
+            line = time_step + ice_volume + extra_txt
+            
+            TAPE5.write(line)
+            TAPE5.write("\n")
+            
+        
+        # Writing ICE INFORMATION THRU RIVINH  INPUT TYPE J
+        TAPE5.write('ICE INFORMATION THRU RIVINH  INPUT TYPE J *********************************')
+        TAPE5.write("\n")
+        
+        nb_tot_XS = 0
+        
+        for i in range(1,len(self.reach_data)+1):
+            
+            reach_XS_nb = int(self.reach_data[str(i)]['Number_of_XS'])
+            
+            nb_tot_XS = nb_tot_XS + reach_XS_nb
         
         
+        value_1 = string_length_adjustment(str(ZZK1TAN),5,'F')
+        value_2 = string_length_adjustment(str(ZZK2),10,'F')
+        extra_txt = '          ZZK1TAN,  ZZK2            '
+        line = value_1 + value_2 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        value_1 = string_length_adjustment(str(ICENOPT),5,'F')
+        extra_txt = ' ICENOPT(1-BELTAOS, 2-KGS, 3- USER-DEFINED)   '
+        line = value_1 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        value_1 = string_length_adjustment(str(nb_tot_XS),5,'F')
+        value_2 = string_length_adjustment(str(FACTOR1),5,'F')
+        value_3 = string_length_adjustment(str(FACTOR2),5,'F')
+        value_4 = string_length_adjustment(str(FACTOR3),6,'F')
+        value_5 = string_length_adjustment(str(CNBED),5,'F')
+        extra_txt = '          IX,FACTOR1, FACTOR2, FACTOR3, CNBED'
+        line = value_1 + value_2 + value_3 + value_4 + value_5 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        value_1 = string_length_adjustment(str(IBORD),5,'F')
+        extra_txt = '                 IBORD (1-USER, 2-NEWBURY, 3- MATOUSEK)       '
+        line = value_1 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        value_1 = string_length_adjustment(str(DAYBORDSTART),4,'F')
+        extra_txt = '                                DAYBORDSTART'
+        line = value_1 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        value_1 = string_length_adjustment(str(BORDUPBRK),5,'F')
+        value_2 = string_length_adjustment(str(BORDWNBRK),5,'F')
+        extra_txt = '                 BORDUPBRK   BORDWNBRK           '
+        line = value_1 + value_2 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        value_1 = string_length_adjustment(str(nb_tot_XS),5,'F')
+        value_2 = string_length_adjustment(str(BORDCOEF1),5,'F')
+        value_3 = string_length_adjustment(str(BORDCOEF2),5,'F')
+        value_4 = string_length_adjustment(str(BRDTHK),5,'F')
+        extra_txt = '  IX  BORDCOEF1  BORDCOEF2  BRDTHK'
+        line = value_1 + value_2 + value_3 + value_4 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        value_1 = string_length_adjustment(str(MELTOPT),5,'F')
+        value_2 = string_length_adjustment(str(MELTSTART),22,'B')
+        extra_txt = 'MELTOPT (1- uSER COEFF,2- RIVICE ALGO.);MELTSTART'
+        line = value_1 + " " + value_2 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        value_1 = string_length_adjustment(str(Heat_coef_water_to_ice),6,'F')
+        extra_txt = '                      HEAT TRANSFER COEFFICIENT WATER TO ICE(btu/M2/DAY)'
+        line = value_1 + extra_txt
+        TAPE5.write(line)
+        TAPE5.write("\n")
+        
+        
+        
+        
+        
+
         
         
         
