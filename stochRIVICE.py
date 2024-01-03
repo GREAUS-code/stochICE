@@ -728,32 +728,85 @@ class StochRIVICE():
                     [760.,760.,760.,760.,]]
         
         # Upstream discharge boundary condition parameters   
-        Q_inputs = [[0.0,2880.0],\
+        Q_bc_inputs = [[0.0,2880.0],\
                     [100.0,100.0]]            
-        Q_Type = 2 #Boundary condition type
-        Q_Time_dep = 2 #Boundary condition time dependance
-        Q_Serie_len = len(Q_inputs[0]) #Boundary condition serie length
-        Q_Intr_type = 1 #Interpolation type used to interpolate between the
-                        #boundary condition serie terms              
-        
-        
+        Q_bc_Type = 2 #Boundary condition type
+        Q_bc_Time_dep = 2 #Boundary condition time dependance
+        Q_bc_Serie_len = len(Q_bc_inputs[0]) #Boundary condition serie length
+        Q_bc_Intr_type = 1 #Interpolation type used to interpolate between the
+                           #boundary condition serie terms              
+                
         # Downstream water surface elevation boundary condition parameters
-        H_inputs = [[0.0,2880.0],\
+        H_bc_inputs = [[0.0,2880.0],\
                     [66.08,66.08]]
-        H_Type = 1 #Boundary condition type
-        H_Time_dep = 2 #Boundary condition time dependance
-        H_Serie_len = len(Q_inputs[0]) #Boundary condition serie length
-        H_Intr_type = 1 #Interpolation type used to interpolate between the
+        H_bc_Type = 1 #Boundary condition type
+        H_bc_Time_dep = 2 #Boundary condition time dependance
+        H_bc_Serie_len = len(H_bc_inputs[0]) #Boundary condition serie length
+        H_bc_Intr_type = 1 #Interpolation type used to interpolate between the
                         #boundary condition serie terms   
-        
+                
         # Hydraulic hydrographs and profiles parameters
         HG_xs_chainage = [0.0,1685.0,4090.0,7095.0,8285.0]
-        PF_time_step = [0.0,1440.0,2880.0] # Corresponds to the time step number
+        HG_PF_time_step = [0.0,1440.0,2880.0] # Corresponds to the time step number
                                            # where the profiles will be
                                            # printed, not the real time
-                                           
-
+                                                                                  
+        # Upstream water temperature boundary condition parameters
+        # 0 - Time step number
+        # 1 - Water temperature (Fahrenheit)
+        # 2 - Dispersive flux
+        # 3 - Total flux       
+        T_bc_inputs = [[0.0,1440.0,2880.0],\
+                    [32.0,32.0,32.0],\
+                    [0.0,0.0,0.0],\
+                    [0.0,0.0,0.0]]
+        T_bc_Type = 1 #Boundary condition type
+        T_bc_Time_dep = 2 #Boundary condition time dependance
+        T_bc_Serie_len = len(T_inputs[0]) #Boundary condition serie length
         
+        # Water quality graphs and profile output parameters 
+        WQG_xs_chainage = [0.0,1685.0,4090.0,7095.0,8285.0] #***Chainage de XS ou distance de la XS a partir de debut du reach en pieds? Valider cette info
+        WQG_PF_time_step = [0.0,1440.0,2880.0] # Corresponds to the time step number
+                                               # where the profiles will be
+                                               # printed, not the real time
+                                               
+        # RIVICE default parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)
+        
+        DEPOPT = 1
+        VDEP = 1.20
+        DIAICE = 0.6
+        FRMAX = 0.50
+        EROPT = 99
+        VERODE = 1.50
+        FTRLIM = 99
+        LEOPT = 3
+        Frontthick = 0.1
+        VFACTR = 99
+        POROSC = 0.50
+        POROSFS = 0.50
+        SLUSHT = 0.20
+        COHESN = 99
+        NBRGSW = 1
+        
+        
+        R_default_params = ['DEPOPT',DEPOPT,\
+                            'VDEP',VDEP,\
+                            'DIAICE',DIAICE,\
+                            'FRMAX',FRMAX,\
+                            'EROPT',EROPT,\
+                            'VERODE',VERODE,\
+                            'FTRLIM',FTRLIM,\
+                            'LEOPT',LEOPT,\
+                            '  Frontthick',Frontthick,\
+                            'VFACTR',VFACTR,\
+                            'POROSC',POROSC,\
+                            'POROSFS',POROSFS,\
+                            'SLUSHT',SLUSHT,\
+                            'COHESN',COHESN,\
+                            'NBRGSW',NBRGSW,\
+                            ]
+        
+                                           
         
         """
         Écriture du fichier de contrôle TAPE5
@@ -997,7 +1050,7 @@ class StochRIVICE():
         line = reach_num
         
         # Upstream discharge boundary condition definition        
-        US_Q_boundary_cdn = [Q_inputs,Q_Type,Q_Time_dep,Q_Serie_len,Q_Intr_type] #US boundary condition parameters
+        US_Q_boundary_cdn = [Q_bc_inputs,Q_bc_Type,Q_bc_Time_dep,Q_bc_Serie_len,Q_bc_Intr_type] #US boundary condition parameters
         
         for i in range(1,len(US_Q_boundary_cdn)):
             
@@ -1034,7 +1087,7 @@ class StochRIVICE():
         line = reach_num
         
         # Downstream boundary condition definition
-        DS_WSE_boundary_cdn = [H_inputs,H_Type,H_Time_dep,H_Serie_len,H_Intr_type]
+        DS_WSE_boundary_cdn = [H_bc_inputs,H_bc_Type,H_bc_Time_dep,H_bc_Serie_len,H_bc_Intr_type]
         
         for i in range(1,len(DS_WSE_boundary_cdn)):
             
@@ -1085,7 +1138,7 @@ class StochRIVICE():
                     break
                     
         # Profiles parameters
-        PF_num = len(PF_time_step)
+        PF_num = len(HG_PF_time_step)
         Reach_num = len(self.reach_data)
         
         TAPE5.write(string_length_adjustment(str(PF_num*Reach_num),10,'F'))
@@ -1093,7 +1146,7 @@ class StochRIVICE():
         
         for i in range(PF_num):
             
-            time_step = string_length_adjustment(str(PF_time_step[i]),10,'F')
+            time_step = string_length_adjustment(str(int(HG_PF_time_step[i])),10,'F')
             
             for j in range(1,Reach_num+1):
                 
@@ -1109,44 +1162,104 @@ class StochRIVICE():
         TAPE5.write("WATER QUALITY BOUNDARY CONDITIONS")
         TAPE5.write("\n")
         
+        # Upstream temperature boundary condition definition  
+        US_T_boundary_cdn = [T_bc_inputs,T_bc_Type,T_bc_Time_dep,T_bc_Serie_len]
         
-        # Remettre les lignes de codes commentées dans le blocs de variables
-        # qui doivent être spécifiée par l'utilisateur et continuer le code
-        # # Upstream water temperature boundary condition parameters
-        # # 0 - Time step number
-        # # 1 - Water temperature (Fahrenheit)
-        # # 2 - Dispersive flux
-        # # 3 - Total flux       
-        # T_inputs = [[0.0,1440.0,2880.0],\
-        #             [32.0,32.0,32.0],\
-        #             [0.0,0.0,0.0],\
-        #             [0.0,0.0,0.0]]
-        # T_Type = 1 #Boundary condition type
-        # T_Time_dep = 2 #Boundary condition time dependance
-        # T_Serie_len = len(T_inputs[0]) #Boundary condition serie length
+        # First node
+        line = "         1"
         
+        for i in range(1,len(US_T_boundary_cdn)):
+
+            var = US_T_boundary_cdn[i]
+            var = string_length_adjustment(str(var),10,'F')
+            
+            line = line + var
+            
+        TAPE5.write(line)
+        TAPE5.write("\n")
         
-        
+        for i in range(len(T_bc_inputs[0])):
+            
+            line = "T         "
+            
+            for j in range(len(T_bc_inputs)):
                 
+                var = T_bc_inputs[j][i]
+                var = string_length_adjustment(str(var),10,'F')
                 
+                line = line + var
+                
+            TAPE5.write(line)
+            TAPE5.write("\n")
+            
+        # All other nodes
+        for i in range(2,len(self.reach_data)+2):
+            
+            node_num = string_length_adjustment(str(i),10,'F')
+            
+            TAPE5.write(node_num + "         0")
+            TAPE5.write("\n")
+
+    
         # Writing Water quality time graphs and profiles
         TAPE5.write("WATER QUALITY TIME GRAPHS & PROFILES")
         TAPE5.write("\n")
         
         # Time graphs parameters
+        WQG_num = len(WQG_xs_chainage)       
         
+        TAPE5.write(string_length_adjustment(str(WQG_num),10,'F'))
+        TAPE5.write("\n")
         
-        
-        
-        # Profiles parameters
-                
-                
-                
-                
+        for i in range(WQG_num):
             
+            for j in range(1,len(self.riv_xs_data)+1):
                 
+                if int(WQG_xs_chainage[i]) == self.riv_xs_data[str(j)]['Rivice Chainage']:
                     
+                    reach_num = self.riv_xs_data[str(j)]['Reach']                
+                    xs_chainage = WQG_xs_chainage[i]
                     
+                    reach_num = string_length_adjustment(str(reach_num),10,'F')
+                    xs_chainage = string_length_adjustment(str(xs_chainage),10,'F')
+                    line = "         1"                    
+                    
+                    TAPE5.write(reach_num + xs_chainage + line)
+                    TAPE5.write("\n")
+                    
+                    break
+                    
+        # Profiles parameters
+        PF_num = len(WQG_PF_time_step)
+        Reach_num = len(self.reach_data)
+        
+        TAPE5.write(string_length_adjustment(str(PF_num*Reach_num),10,'F'))
+        TAPE5.write("\n")
+        
+        for i in range(PF_num):
+            
+            time_step = string_length_adjustment(str(int(WQG_PF_time_step[i])),10,'F')
+            
+            for j in range(1,Reach_num+1):
+                
+                Reach = string_length_adjustment(str(j),10,'F')               
+                line = "         1"
+                
+                TAPE5.write(Reach + time_step + line)
+                TAPE5.write("\n")
+
+                           
+        # Writing Test of RIVICE
+        TAPE5.write("******** Test of RIVICE ***********")
+        TAPE5.write("\n")
+        
+        # Continuer la rédaction du fichier TAPE5 à partir d'ici
+        
+        
+        
+        
+        
+        
         
           
             
