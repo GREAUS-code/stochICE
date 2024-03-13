@@ -9,10 +9,12 @@ Created on Tue Oct 31 09:26:34 2023
 import os
 import shutil
 import numpy as np
-import vlc
+import time
+# import vlc
 
 
 import stochRIVICE
+import stochRIVICE_JD
 import stochHECRAS
 
 class stochICE():
@@ -24,14 +26,23 @@ class stochICE():
                       flow_file,
                       wse_file,
                       NSims,
+                      GrpSize,
                       thick_range,
                       phi_range,
                       flow_range,
                       locations,
                       code,
+                      interval,
+                      days,
+                      timestep,
+                      ice_start,
+                      ice_end,
+                      profile_int,
                       clrRes,
                       compRes,
-                      fun_mode):
+                      fun_mode,
+                      sleep,
+                      stochvars):
 
         #paths
         self.prjDir = prjDir
@@ -44,14 +55,26 @@ class stochICE():
 
         #variables
         self.NSims=NSims
+        self.GrpSize=GrpSize
+        self.NProcs=self.NSims/self.GrpSize
         self.thick=thick_range
         self.phi=phi_range
         self.flows=flow_range
         self.locations=locations
         self.code=code
+        
         self.clr=clrRes
         self.compress=compRes
-        self.fun=fun_mode
+        # self.fun=fun_mode
+        self.sleep=sleep
+        #RIVICE input
+        self.riv_interval=interval
+        self.riv_timestep=timestep
+        self.riv_days=days
+        self.riv_ice_start=ice_start
+        self.riv_ice_end=ice_end
+        self.riv_profile_interval=profile_int
+        self.riv_stochvars=stochvars
         
         #ice variables in geo file
         self.ice_variables=['Ice Thickness',
@@ -70,10 +93,10 @@ class stochICE():
 
 		#Add functions here to run them by default
 
-        if self.fun:
-            self.p = vlc.MediaPlayer(self.prjDir + "\Jamming.mp3")
-            # self.p = vlc.MediaPlayer(self.prjDir + "\Trololol.mp3")            
-            self.p.play()
+        # if self.fun:
+        #     self.p = vlc.MediaPlayer(self.prjDir + "\Jamming.mp3")
+        #     # self.p = vlc.MediaPlayer(self.prjDir + "\Trololol.mp3")            
+        #     self.p.play()
 
         self.print_header()
         self.setup_monte_carlo_dir()
@@ -94,7 +117,7 @@ class stochICE():
         """
 
         if code =='HECRAS':
-            print('Using HECRAS backend')
+            print('Modeling with the HECRAS backend')
             self.stochHECRAS=stochHECRAS.StochHECRAS(self)
             self.stochHECRAS.preprocess_sims()
             self.stochHECRAS.launch_sims()
@@ -109,32 +132,54 @@ class stochICE():
 
         if code =='RIVICE':
         
-            print('Using RIVICE backend')
+            print('Modeling with the RIVICE backend.')
             
             #create stochRIVICE instance
-            self.stochRIVICE=stochRIVICE.StochRIVICE(self,5)
+            self.stochRIVICE=stochRIVICE_JD.StochRIVICE(self)
+            self.stochRIVICE.clean_RIVICE_case()
             
             self.store_orig_parameters()
             self.get_HECRAS_wse_to_init_rivice()
             self.reinstate_orig_parameters()
 
-            self.stochRIVICE.create_RIVICE_xs()
-            self.stochRIVICE.compute_RIVICE_xs_chainage()
+            self.stochRIVICE.make_RIVICE_xs()
+            self.stochRIVICE.get_RIVICE_xs_chainage()
             self.stochRIVICE.get_RIVICE_xs_manning()
             self.stochRIVICE.get_RIVICE_xs_geometry()
             self.stochRIVICE.assign_RIVICE_Reaches()
             self.stochRIVICE.assign_RIVICE_xs_ID()
             self.stochRIVICE.compute_dist_prev_xs()
             self.stochRIVICE.get_reach_data()
+            
+
             self.stochRIVICE.write_Cd1test()
             self.stochRIVICE.write_Cd1test_for_DOUT7()
             self.stochRIVICE.get_water_lvl_TestCd2()
             self.stochRIVICE.write_Testcd2()
-            self.stochRIVICE.launch_Cd1xebat_Cd2pgmaexe_file()
-            self.stochRIVICE.write_TAPE5()
+            self.stochRIVICE.launch_Cd1xe_no_INTP()
+            time.sleep(self.sleep)
+            self.stochRIVICE.launch_Cd2pgm_a()
+            time.sleep(self.sleep)
+            
+            self.stochRIVICE.set_time_parameters()
+            self.stochRIVICE.set_profile_times()
+            self.stochRIVICE.init_default_ice_parms()
+            self.stochRIVICE.set_stochastic_variables()
 
-        if self.fun:
-            self.p.stop()
+
+            self.stochRIVICE.delete_sim_folders()
+            self.stochRIVICE.make_sim_folders()
+            self.stochRIVICE.call_write_TAPE5()
+            self.stochRIVICE.launch_Cd1xe_with_INTP()
+            
+            
+            
+            # time.sleep(self.sleep)
+            # print('Running RIVICE in a separate console ... please be patient.')
+            # self.stochRIVICE.launch_RIVICE()
+
+        # # if self.fun:
+        # #     self.p.stop()
 
     def copy_geofile(self):
         
@@ -214,70 +259,7 @@ class stochICE():
         print("Phi varies between %3.2f and %3.2f\n" %(self.phi[0],self.phi[1]))
         print("Lodgement location randomly chosen between %2.0f provided locations.\n" %(len(self.locations)))
 
-
-        if self.fun:
-            
-             print("""
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%...    .  ./&@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@@@@@@,..   @@@@@@/.  #@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@@@/   ..,@@&  @@@@@@ . /@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@      /@@@&(#@@   #@  .  @@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@, .   . @@&@@*  &%/ ..     &@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@/   .   (@@/@@(, @(@@ .     &@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@%        @@@@.(@.  . ...      @@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@*..       .. .%@,.           . @@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@.        ,.   . .   .      @    @@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@(@.      .(.  ..   (@    . *&    @@@@@@@@@@@@@@@
-@@@@@@@@@@@@@#&             .,%, .      @ .  ( @@@@@@@@@@@@@@@
-@@@@@@@@@@@@@ .     .  @    @ .       # . .  @@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@* .   .  %    @@/        # @@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@,      .@@& .@&. ..      & @@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@        @@@@%%         .  %, @@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@*       ,@@@@& .&%. (       &@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@       &@(@@@@@/. @&.  %@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@      @@.@@@@@*#. (&..*@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@.   &%@@&#@@@@/%(  /@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@(. %@@@ @@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@*@@@@@@@@@@@@@% @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-                    You ready to jam?
- 			                                                                    """)
-
-
-    """ print("""
-    # ((((((((((((/((((((((((((((((((((//((((((((((((((((((((((((((((((((%(((#%#%(%#(&
-    # (((((((((((((((((((((((((((((((((###%%%%%%(((((((((((((((((((((((((%(((#%%%#%&&(
-    # (((((((((((((((((((((((((((((((%&&&#%%&&&&%&(((((((((((((((((((((((%((((((##%&((
-    # ((((((((((((((((((((((((((((((%&%%%%(////((#%((((((((((((((((((((((%#((((((%&#((
-    # (((((((((((((((((((((((((((((&&%&&%((/(((((((%(((((((((((((((((((((%#(((((((&#(#
-    # (((((((((((((((((((((((((((((%(%&&%((##%#((##&(((((((((((((((((((((%#(((((((&%&%
-    # ((((((((((((((((((((((((((((#&(%%%(((/((//(##((((((((((((((((((((((%#(((((((&&&(
-    # (((((((((((((((((((((((((((((&&/((((((#(%%(%(((((((((((((((((((((((&@#%(((((%&((
-    # (((((((((((((((((((((((((((((#&(#((((%%##%%%%((((((((((((((((((((((&&(&(((((#&((
-    # (((((((((((((((((((((((((((((%%(###((((#&&#%(((((((((((((((((((((((&&(%#((((&&(&
-    # ((((((((((((((((((((((((((((&**(((%##(((##(((((((((((((((((((((((((&&&&%#((&&&@%
-    # ((((((((((((((((((((((((#%%%&/***((%%%&&%#(((((((((((((((((((((((((%&#&&((((#&&(
-    # (((((((((((((((((((#%%%%&&&&&#/****((###&&&&&#%%#((((((((((((((((((%&(&%((((&&%(
-    # ((((((((((((((%%%&%&&&&&&&&&&&*****((#/%&&&&&&&&&&&&(((((((((((((((#&(#&&#(&%&%(
-    # (((((((((((((%&&&&&&&&&&&&&&&&&/**&(#&#&&&&&&&&&&&&&&((((((((((((((#&((%#(((#&&@
-    # (((((((((((((&&&&&&&&&&&&&&&&&&&/#%##/&&&&&&&&&&&&&&&&&((((((((((((#&((&%#((&&&&
-    # ((((((((((((&&&&&&&&&&&&&&&&&&&&&##(%&&&&&&&&&&&&&&&&&&&#(((((((((((%((&&((((%&(
-    # (((((((((((&&&&&&&&&&&&&&&&&&&&&&&#(&&&&&&&&&&&&&&&&&&&&&&%#((((((//#%&#%((((&&(
-    # ((((((((((%%&&&&&&&@&&&&&&&&&&&&&&%(&&&&&&&&&&&&&&&&&&&&&&&&&&&&%&%#%&/(#&((&&&(
-    # (((((((((#&&&&&&&@@&&&&&&&&&&&&&&&&&&&&&&&&%(%&&&&&@&&&&&&&&&&&&@&&&#(###%(((%&(
-    # ((((((((#&&&&&&&&@@@&&&&&&&&&&&&&&&&&&&&&&&&&&&&@%&@&@&&&&&@&&&&@%&%#%%(#%%(#&((
-        
-        #                     You ready to trololol?    # 
-                                                                                    #)
     
-            # time.sleep(3)
-    
-
-
     def setup_monte_carlo_dir(self):
     
         self.MC_path=self.prjDir+"\MonteCarlo"
@@ -332,6 +314,7 @@ class stochICE():
                     if flag:
                         
                         for variable in self.ice_variables:
+                            
                             
                             if variable in line:
                                 
@@ -540,6 +523,7 @@ class stochICE():
         self.open_HECRAS_wse={}
         self.open_HECRAS_wse['chainage']=[float(i) for i in list(self.xs_data.keys())]
         self.open_HECRAS_wse['wse']=self.stochHECRAS.result_profiles['sim_1']['WSE'].tolist()
+        print(self.open_HECRAS_wse['wse'][-1])
         self.open_HECRAS_wse['discharge'] = flow
 
 

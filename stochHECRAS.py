@@ -162,8 +162,8 @@ class StochHECRAS():
             self.result_profiles[self.sim_key]['TopIceMaxDepth']=self.result_profiles[self.sim_key]['WSE']-self.result_profiles[self.sim_key]['MinChEle']
 
  			#copy and store 2D flood map for 
-            tif_filename=self.stochICE.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\WSE_"+str(self.flow)+"_"+str(self.ice_thickness)+"_"+str(self.phi)+".tif"
-            shutil.copyfile(self.stochICE.wse_map_path,tif_filename)
+            # tif_filename=self.stochICE.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\WSE_"+str(self.flow)+"_"+str(self.ice_thickness)+"_"+str(self.phi)+".tif"
+            # shutil.copyfile(self.stochICE.wse_map_path,tif_filename)
             # os.remove(self.stochICE.wse_map_path)
 
             vrts_to_remove = glob.glob(self.stochICE.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\*.vrt")
@@ -244,6 +244,7 @@ class StochHECRAS():
 
             try:
                 self.toWrite="Ice Is Channel=%s" % item['Ice Is Channel']['val']+'\n'
+               
                 self.lineNmb=item['Ice Is Channel']['lnNum']
                 self.replace_line()
 
