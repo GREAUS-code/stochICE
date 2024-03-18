@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: stochICE
+Version: 0.0.1
+Summary: Tool to assist in stochastic ice jam modelling
+Author: Mathieu Fouquet
+Author-email: Jason Duguay <jason.duguay@usherbrooke.ca>
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+# stochICE
+Python code using HECRAS controller and RIVICE to stocastically model river ice jams
