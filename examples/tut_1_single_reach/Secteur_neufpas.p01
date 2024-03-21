@@ -1,9 +1,9 @@
-Plan Title=Secteur_neufpas_sans_glace
+Plan Title=secteur_neufpas_50
 Program Version=6.41
-Short Identifier=sans_glace                                                      
+Short Identifier=50_sans_glace                                                   
 Simulation Date=,,,
 Geom File=g01
-Flow File=f01
+Flow File=f02
 Subcritical Flow
 K Sum by GR= 0 
 Std Step Tol= 0.003 

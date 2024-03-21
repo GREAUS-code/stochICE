@@ -9,6 +9,7 @@ import time
 
 import stochRIVICE
 import stochHECRAS
+import irregularSection
 
 class stochICE():
 
@@ -23,6 +24,8 @@ class stochICE():
                       thick_range,
                       phi_range,
                       flow_range,
+                      ds_slope,
+                      max_Q,
                       locations,
                       code,
                       interval,
@@ -37,6 +40,7 @@ class stochICE():
                       sleep,
                       stochvars):
 
+        print('This is a test')
         #paths
         self.prjDir = prjDir
         self.ID=batch_ID
@@ -53,6 +57,8 @@ class stochICE():
         self.thick=thick_range
         self.phi=phi_range
         self.flows=flow_range
+        self.ds_slope=ds_slope
+        self.max_Q=max_Q
         self.locations=locations
         self.code=code
         

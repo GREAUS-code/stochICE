@@ -1,9 +1,9 @@
-Plan Title=150_20cm_glace
+Plan Title=secteur_neufpas_150_20cm_glace
 Program Version=6.41
-Short Identifier=150_20cm_glace                                                  
+Short Identifier=150_glace                                                       
 Simulation Date=,,,
 Geom File=g02
-Flow File=f03
+Flow File=f01
 Subcritical Flow
 K Sum by GR= 0 
 Std Step Tol= 0.003 

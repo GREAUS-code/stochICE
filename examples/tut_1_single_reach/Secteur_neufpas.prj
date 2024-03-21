@@ -1,6 +1,5 @@
 Proj Title=Secteur_neufpas
-Current Geom=g02
-Current Flow=f03
+Current Plan=p04
 Current HD=h01
 Default Exp/Contr=0.3,0.1
 SI Units
@@ -13,7 +12,6 @@ Plan File=p01
 Plan File=p02
 Plan File=p03
 Plan File=p04
-Plan File=p05
 Y Axis Title=Elevation
 X Axis Title(PF)=Main Channel Distance
 X Axis Title(XS)=Station

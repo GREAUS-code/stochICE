@@ -6,9 +6,12 @@
   </Features>
   <Geometries Checked="True" Expanded="True">
     <Layer Name="geometry_1D" Type="RASGeometry" Checked="True" Expanded="True" Filename=".\Secteur_neufpas.g01.hdf">
-      <Layer Type="RASRiver" Checked="True" />
+      <Layer Type="RASRiver" Checked="True" Expanded="True" />
+      <Layer Type="RASJunction" Checked="True" />
       <Layer Type="RASBankLines" Checked="True" />
+      <Layer Type="FlowPaths" Checked="True" />
       <Layer Type="RASXS" Checked="True" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
+      <Layer Type="RASEdgeLines" Checked="True" />
       <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
       <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
       <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
@@ -43,7 +46,9 @@
         <Surface On="True" />
       </Layer>
     </Layer>
-    <Layer Name="geometry_1D_with_ice" Type="RASGeometry" Filename=".\Secteur_neufpas.g02.hdf">
+    <Layer Name="geometry_1D_20cm_glace" Type="RASGeometry" Expanded="True" Filename=".\Secteur_neufpas.g02.hdf">
+      <Layer Type="RASRiver" Checked="True" />
+      <Layer Type="RASBankLines" Checked="True" />
       <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
       <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
       <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
@@ -81,21 +86,33 @@
     </Layer>
   </Geometries>
   <Plans>
-    <Layer Name="MonteCarlo" Type="RASPlan" Filename=".\Secteur_neufpas.p02" GeometryHDF=".\Secteur_neufpas.g01.hdf">
+    <Layer Name="Secteur_neufpas_avec_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p02" GeometryHDF=".\Secteur_neufpas.g02.hdf">
       <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p02" />
     </Layer>
-    <Layer Name="Plan 01" Type="RASPlan" Filename=".\Secteur_neufpas.p01" GeometryHDF=".\Secteur_neufpas.g01.hdf">
+    <Layer Name="Secteur_neufpas_sans_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p01" GeometryHDF=".\Secteur_neufpas.g01.hdf">
       <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p01" />
     </Layer>
-    <Layer Name="With_ice" Type="RASPlan" Filename=".\Secteur_neufpas.p03" GeometryHDF=".\Secteur_neufpas.g02.hdf">
+    <Layer Name="Plan 03" Type="RASPlan" Filename=".\Secteur_neufpas.p03" GeometryHDF=".\Secteur_neufpas.g01.hdf">
       <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p03" />
+    </Layer>
+    <Layer Name="50_20cm_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p04" GeometryHDF=".\Secteur_neufpas.g02.hdf">
+      <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p04" />
+    </Layer>
+    <Layer Name="80_20cm_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p05" GeometryHDF=".\Secteur_neufpas.g02.hdf">
+      <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p05" />
+    </Layer>
+    <Layer Name="Plan 07" Type="RASPlan" Filename=".\Secteur_neufpas.p07" GeometryHDF=".\Secteur_neufpas.g02.hdf">
+      <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p07" />
+    </Layer>
+    <Layer Name="Plan 08" Type="RASPlan" Filename=".\Secteur_neufpas.p08" GeometryHDF=".\Secteur_neufpas.g02.hdf">
+      <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p08" />
     </Layer>
   </Plans>
   <EventConditions>
     <Layer Name="Q_calib_2022_04_30" Type="RASEventConditions" Filename="..\secteur_Pointe_a_noeuf_pas_MT - Copie\sans_ponts.u01.hdf" />
     <Layer Name="Q_calib_2022_04_30" Type="RASEventConditions" Filename=".\Secteur_neufpas.u01.hdf" />
   </EventConditions>
-  <Results Checked="True" Expanded="True">
+  <Results Expanded="True">
     <Layer Name="MonteCarlo" Type="RASResults" Checked="True" Expanded="True" Filename=".\Secteur_neufpas.p02.hdf">
       <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p02.hdf" />
       <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p02.hdf">
@@ -149,13 +166,7 @@
       </Layer>
     </Layer>
     <Layer Name="Plan 01" Type="RASResults" Expanded="True" Filename=".\Secteur_neufpas.p01.hdf">
-      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p01.hdf">
-        <Layer Name="Wind Layer" Type="ResultWindLayer" Filename=".\Secteur_neufpas.p01.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-          <Metadata BandIndex="0" SubDataset="" />
-        </Layer>
-      </Layer>
+      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p01.hdf" />
       <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p01.hdf">
         <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
         <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
@@ -196,16 +207,16 @@
         <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p01.hdf" />
       </Layer>
       <Layer Name="Depth" Type="RASResultsMap">
-        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="13 avril 2011" />
+        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="None" />
       </Layer>
       <Layer Name="Velocity" Type="RASResultsMap">
-        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="13 avril 2011" />
+        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="None" />
       </Layer>
       <Layer Name="WSE" Type="RASResultsMap">
-        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="13 avril 2011" />
+        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="None" />
       </Layer>
     </Layer>
-    <Layer Name="withice" Type="RASResults" Expanded="True" Filename=".\Secteur_neufpas.p03.hdf">
+    <Layer Name="sans_glace_50" Type="RASResults" Expanded="True" Filename=".\Secteur_neufpas.p03.hdf">
       <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p03.hdf">
         <Layer Name="Wind Layer" Type="ResultWindLayer" Filename=".\Secteur_neufpas.p03.hdf">
           <ResampleMethod>near</ResampleMethod>
@@ -253,17 +264,131 @@
         <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p03.hdf" />
       </Layer>
       <Layer Name="Depth" Type="RASResultsMap">
-        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="13 avril 2011" />
+        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="PF 1" />
       </Layer>
       <Layer Name="Velocity" Type="RASResultsMap">
-        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="13 avril 2011" />
+        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="PF 1" />
       </Layer>
       <Layer Name="WSE" Type="RASResultsMap">
-        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="13 avril 2011" />
+        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="PF 1" />
+      </Layer>
+    </Layer>
+    <Layer Name="50_20cm_glace" Type="RASResults" Filename=".\Secteur_neufpas.p04.hdf">
+      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p04.hdf">
+        <Layer Name="Wind Layer" Type="ResultWindLayer" Filename=".\Secteur_neufpas.p04.hdf">
+          <ResampleMethod>near</ResampleMethod>
+          <Surface On="True" />
+          <Metadata BandIndex="0" SubDataset="" />
+        </Layer>
+      </Layer>
+      <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p04.hdf">
+        <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
+        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
+        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+        <Layer Type="StructureLayer" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
+        <Layer Type="FinalNValueLayer">
+          <ResampleMethod>near</ResampleMethod>
+          <Surface On="True" />
+        </Layer>
+        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p04.hdf">
+          <ResampleMethod>near</ResampleMethod>
+          <Surface On="True" />
+        </Layer>
+        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p04.hdf">
+          <ResampleMethod>near</ResampleMethod>
+          <Surface On="True" />
+        </Layer>
+      </Layer>
+      <Layer Name="Plan" Type="RASPlan" Filename=".\Secteur_neufpas.p04.hdf" GeometryHDF=".\Secteur_neufpas.p04.hdf">
+        <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p04.hdf" />
+      </Layer>
+      <Layer Name="Depth" Type="RASResultsMap">
+        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="PF 1" />
+      </Layer>
+      <Layer Name="Velocity" Type="RASResultsMap">
+        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="PF 1" />
+      </Layer>
+      <Layer Name="WSE" Type="RASResultsMap">
+        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="PF 1" />
+      </Layer>
+    </Layer>
+    <Layer Name="80_20cm_glace" Type="RASResults" Filename=".\Secteur_neufpas.p05.hdf">
+      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p05.hdf">
+        <Layer Name="Wind Layer" Type="ResultWindLayer" Filename=".\Secteur_neufpas.p05.hdf">
+          <ResampleMethod>near</ResampleMethod>
+          <Surface On="True" />
+          <Metadata BandIndex="0" SubDataset="" />
+        </Layer>
+      </Layer>
+      <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p05.hdf">
+        <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
+        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
+        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+        <Layer Type="StructureLayer" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
+        <Layer Type="FinalNValueLayer">
+          <ResampleMethod>near</ResampleMethod>
+          <Surface On="True" />
+        </Layer>
+        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p05.hdf">
+          <ResampleMethod>near</ResampleMethod>
+          <Surface On="True" />
+        </Layer>
+        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p05.hdf">
+          <ResampleMethod>near</ResampleMethod>
+          <Surface On="True" />
+        </Layer>
+      </Layer>
+      <Layer Name="Plan" Type="RASPlan" Filename=".\Secteur_neufpas.p05.hdf" GeometryHDF=".\Secteur_neufpas.p05.hdf">
+        <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p05.hdf" />
+      </Layer>
+      <Layer Name="Depth" Type="RASResultsMap">
+        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="PF 1" />
+      </Layer>
+      <Layer Name="Velocity" Type="RASResultsMap">
+        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="PF 1" />
+      </Layer>
+      <Layer Name="WSE" Type="RASResultsMap">
+        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="PF 1" />
       </Layer>
     </Layer>
   </Results>
-  <MapLayers Checked="True" Expanded="True">
+  <MapLayers Expanded="True">
     <Layer Name="ArcGIS World Imagery" Type="WMSLayer" Filename="%LocalAppData%\HEC\Mapping\5.1\XML\ArcGIS World Imagery.xml">
       <ResampleMethod>near</ResampleMethod>
     </Layer>
@@ -283,10 +408,10 @@
     </Layer>
   </Terrains>
   <CurrentView>
-    <MaxX>305828.537995378</MaxX>
-    <MinX>303525.594606696</MinX>
-    <MaxY>5105472.65755256</MaxY>
-    <MinY>5103771.44260008</MinY>
+    <MaxX>308569.815298485</MaxX>
+    <MinX>303219.945819013</MinX>
+    <MaxY>5107042.81695007</MaxY>
+    <MinY>5103090.7971145</MinY>
   </CurrentView>
   <VelocitySettings>
     <Density>1.5</Density>

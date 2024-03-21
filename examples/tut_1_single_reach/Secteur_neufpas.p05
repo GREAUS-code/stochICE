@@ -1,6 +1,6 @@
-Plan Title=80_20cm_glace
+Plan Title=secteur_neufpas_80_20cm_glace
 Program Version=6.41
-Short Identifier=80_20cm_glace                                                   
+Short Identifier=80_glace                                                        
 Simulation Date=,,,
 Geom File=g02
 Flow File=f01

@@ -14,6 +14,10 @@ import shutil
 import subprocess
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.interpolate
+
+
+import irregularSection
 
 class StochRIVICE():
     
@@ -1953,13 +1957,77 @@ class StochRIVICE():
         ax.set_ylabel('water surface elevation (m)', fontsize=10)        
             
         
+    def get_downstream_xs_data(self):
         
+        #get bathymetry for most downstream xs
+        downstream_xs=self.stochICE.xs_data[list(self.stochICE.xs_data)[-1]]['MainChannelGeometry']['xy']
         
+        elevation = downstream_xs[1::2] # Elements from list1 starting from 1 iterating by 2
+        station = downstream_xs[::2]    # Elements from list1 starting from 0 iterating by 2
         
-        
+        downstream_data_df=pd.DataFrame({'station': station,'elevation':elevation})
+        self.dwn_xs_data = tuple(downstream_data_df.loc[:, ['station', 'elevation']].to_records(index=False))        
+        self.min_dwn_xs_ele=min(elevation)
+        self.max_dwn_xs_ele=max(elevation)
         
             
+    def make_downstream_stage_discharge_curve(self):    
+        
+        
+        interval = 0.03 #hard coded at 3 cm
+        intervals = ((self.max_dwn_xs_ele - self.min_dwn_xs_ele) / interval)
+        
+        self.elevations = []
+        self.discharges = []
+        self.wetted_perimeters=[]
+        self.wetted_areas=[]
+        self.top_widths=[]
+        
+        n=self.stochICE.xs_data[list(self.stochICE.xs_data)[-1]]['Manning']['val_MAIN']
+
+        channel = irregularSection.IrregularSection(self.dwn_xs_data)
+        channel.set_average_rougness(float(n))
+        channel.set_bed_slope(self.stochICE.ds_slope)
+        
+        for i in range(int(intervals) + 1):
             
+            #keeping 2 decimal places causes errors, so I only keep 1
+            elev = round(self.min_dwn_xs_ele + ((i+1) * interval),1)
+            
+            channel.set_water_elevation(elev)
+            
+            channel.analyze()
+           
+            if bool(channel.state) == True:
+                
+                if channel.discharge <= self.stochICE.max_Q:
+                    self.elevations.append(elev)
+                    self.discharges.append(channel.discharge)
+                    self.wetted_perimeters.append(channel.wetted_perimeter)
+                    self.wetted_areas.append(channel.wetted_area)
+                    self.top_widths.append(channel.top_width)
+                else:
+                    break
+            
+            if bool(channel.state) == False:
+                break
+                
+        
+        """
+        Make pdf figure
+        """
+        fig, ax = plt.subplots(1,1,frameon=False,constrained_layout=True)
+        fig.set_figwidth(6,forward=True)
+        fig.set_figheight(3,forward=True)
+        
+        ax.plot(self.discharges, self.elevations, c ='black')
+            
+        fig.suptitle('Stage-discharge relation downstream x-section')
+        ax.set_xlabel('Discharge (CMS)', fontsize=10)
+        ax.set_ylabel('Water surface elevation (m)', fontsize=10)      
+        
+        plt.savefig(self.stochICE.prjDir+"\Dwn_stream_stage_discharge.pdf", format='pdf', dpi=1200)
+
             
             
             
