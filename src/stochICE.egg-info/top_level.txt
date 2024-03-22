@@ -1,6 +1,8 @@
 HECRAS_HDF
+Ice_water_surface_prediction
 __init__
 clear_RIVICE_case
+irregularSection
 stochHECRAS
 stochICE
 stochRIVICE

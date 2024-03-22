@@ -27,6 +27,7 @@ class stochICE():
                       ds_slope,
                       max_Q,
                       locations,
+                      riv_dwn_bc_opt,
                       code,
                       interval,
                       days,
@@ -68,6 +69,7 @@ class stochICE():
         self.sleep=sleep
         #RIVICE input
         self.riv_interval=interval
+        self.riv_dwn_ice_opt=riv_dwn_bc_opt
         self.riv_timestep=timestep
         self.riv_days=days
         self.riv_ice_start=ice_start
@@ -163,13 +165,17 @@ class stochICE():
             self.stochRIVICE.set_time_parameters()
             self.stochRIVICE.set_profile_times()
             self.stochRIVICE.init_default_ice_parms()
-            self.stochRIVICE.set_stochastic_variables()
+            
+            if self.riv_dwn_ice_opt == 1:
+                self.stochRIVICE.set_ice_adjusted_dwn_bc()
+                
+            # self.stochRIVICE.set_stochastic_variables()
 
 
-            self.stochRIVICE.delete_sim_folders()
-            self.stochRIVICE.make_sim_folders()
-            self.stochRIVICE.call_write_TAPE5()
-            self.stochRIVICE.launch_Cd1xe_with_INTP()
+            # self.stochRIVICE.delete_sim_folders()
+            # self.stochRIVICE.make_sim_folders()
+            # self.stochRIVICE.call_write_TAPE5()
+            # self.stochRIVICE.launch_Cd1xe_with_INTP()
             
             
             

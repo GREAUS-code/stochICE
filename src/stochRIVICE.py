@@ -805,7 +805,6 @@ class StochRIVICE():
         
         for sim in range(self.stochICE.NSims):
             self.sim='sim_%d' %sim
-            # print(self.sim)
             self.write_TAPE5()
 
     def write_TAPE5(self):
@@ -1956,6 +1955,18 @@ class StochRIVICE():
         ax.set_xlabel('exceedence probability (m)', fontsize=10)
         ax.set_ylabel('water surface elevation (m)', fontsize=10)        
             
+
+    def set_ice_adjusted_dwn_bc(self):
+        
+        wp_ice=list(np.asarray(self.wetted_perimeters)+np.asarray(self.top_widths))
+
+        n=0.03
+        n_ice=0.04
+        s=0.000450 # need this from hecras model (or ask the user to manually input it for each case)
+        t=0.2
+        target_Q=150
+    
+        n_c=((1+(n_ice/n)**(3/2))/2)**(2/3)*n
         
     def get_downstream_xs_data(self):
         

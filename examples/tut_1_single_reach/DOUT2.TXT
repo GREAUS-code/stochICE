@@ -1,0 +1,352 @@
+1
+  REACH 1                                                                         
+
+                               REACH  PARAMETERS
+
+       REACH    1
+       PERCENTAGE OF ICE COVER CHANGE PER TIME STEP=   0.0
+       PERCENTAGE OF INITIAL ICE COVER=   0.0
+       TIME LAG FOR ICE COVER CHANGE TO BEGIN IN NUMBER OF TIME STEP=    0
+          TABLE PRINTOUT
+       UPSTREAM NODE DATUM=      0.00    DOWNSTREAM NODE DATUM=       0.00
+       TOTAL REACH LENGTH=    8300.00    ESTIMATED MESH SPACING=     50.00
+       REACH MANNING'S N AT MINIMUM EXPECTED WATER LEVEL=   0.03000
+       REACH MANNING'S N AT BOTTOM ELEVATION=   0.00000
+        3 TABLES VALUES     65.600 -     70.200
+
+
+
+                     REACH    1 - CROSS SECTION PARAMETERS
+
+   SECTION  ESTIMATED  ESTIMATED  MANNING'S N  MANNING'S N  BOTTOM       CONVEYANCE AREA
+    NO.     SURFACE     INITIAL   AT MAXIMUM   AT MINIMUM  ELEVATION  LEFT EDGE  RIGHT EDGE
+            ELEVATION  DISCHARGE  TABLE ENTRY  TABLE ENTRY
+
+      1       69.18       80.0       0.0000       0.0000      65.52   LEFT BANK  RIGHT BANK
+
+      2       69.08       80.0       0.0000       0.0000      65.80   LEFT BANK  RIGHT BANK
+
+      3       68.94       80.0       0.0000       0.0000      65.74   LEFT BANK  RIGHT BANK
+
+      4       68.96       80.0       0.0000       0.0000      65.66   LEFT BANK  RIGHT BANK
+
+      5       68.91       80.0       0.0000       0.0000      65.60   LEFT BANK  RIGHT BANK
+
+      6       68.83       80.0       0.0000       0.0000      65.38   LEFT BANK  RIGHT BANK
+
+      7       68.78       80.0       0.0000       0.0000      65.30   LEFT BANK  RIGHT BANK
+
+      8       68.73       80.0       0.0000       0.0000      65.08   LEFT BANK  RIGHT BANK
+
+      9       68.63       80.0       0.0000       0.0000      64.97   LEFT BANK  RIGHT BANK
+
+     10       68.63       80.0       0.0000       0.0000      65.09   LEFT BANK  RIGHT BANK
+
+     11       68.62       80.0       0.0000       0.0000      65.02   LEFT BANK  RIGHT BANK
+
+     12       68.59       80.0       0.0000       0.0000      64.66   LEFT BANK  RIGHT BANK
+
+     13       68.53       80.0       0.0000       0.0000      64.57   LEFT BANK  RIGHT BANK
+
+     14       68.51       80.0       0.0000       0.0000      64.36   LEFT BANK  RIGHT BANK
+
+     15       68.47       80.0       0.0000       0.0000      64.11   LEFT BANK  RIGHT BANK
+
+     16       68.46       80.0       0.0000       0.0000      64.27   LEFT BANK  RIGHT BANK
+
+     17       68.43       80.0       0.0000       0.0000      63.83   LEFT BANK  RIGHT BANK
+
+     18       68.40       80.0       0.0000       0.0000      63.40   LEFT BANK  RIGHT BANK
+
+     19       68.35       80.0       0.0000       0.0000      63.85   LEFT BANK  RIGHT BANK
+1
+
+                     REACH    1 - CROSS SECTION PARAMETERS
+
+   SECTION  ESTIMATED  ESTIMATED  MANNING'S N  MANNING'S N  BOTTOM       CONVEYANCE AREA
+    NO.     SURFACE     INITIAL   AT MAXIMUM   AT MINIMUM  ELEVATION  LEFT EDGE  RIGHT EDGE
+            ELEVATION  DISCHARGE  TABLE ENTRY  TABLE ENTRY
+
+     20       68.31       80.0       0.0000       0.0000      64.49   LEFT BANK  RIGHT BANK
+
+     21       68.28       80.0       0.0000       0.0000      64.21   LEFT BANK  RIGHT BANK
+
+     22       68.21       80.0       0.0000       0.0000      63.98   LEFT BANK  RIGHT BANK
+
+     23       68.18       80.0       0.0000       0.0000      64.17   LEFT BANK  RIGHT BANK
+
+     24       68.11       80.0       0.0000       0.0000      64.46   LEFT BANK  RIGHT BANK
+
+     25       68.09       80.0       0.0000       0.0000      64.26   LEFT BANK  RIGHT BANK
+
+     26       68.01       80.0       0.0000       0.0000      63.88   LEFT BANK  RIGHT BANK
+
+     27       67.98       80.0       0.0000       0.0000      63.52   LEFT BANK  RIGHT BANK
+
+     28       67.92       80.0       0.0000       0.0000      63.74   LEFT BANK  RIGHT BANK
+
+     29       67.84       80.0       0.0000       0.0000      64.38   LEFT BANK  RIGHT BANK
+
+     30       67.79       80.0       0.0000       0.0000      64.56   LEFT BANK  RIGHT BANK
+
+     31       67.70       80.0       0.0000       0.0000      64.42   LEFT BANK  RIGHT BANK
+
+     32       67.61       80.0       0.0000       0.0000      64.13   LEFT BANK  RIGHT BANK
+
+     33       67.47       80.0       0.0000       0.0000      63.72   LEFT BANK  RIGHT BANK
+
+     34       67.40       80.0       0.0000       0.0000      63.71   LEFT BANK  RIGHT BANK
+
+     35       67.32       80.0       0.0000       0.0000      63.02   LEFT BANK  RIGHT BANK
+
+     36       67.19       80.0       0.0000       0.0000      62.83   LEFT BANK  RIGHT BANK
+
+     37       67.06       80.0       0.0000       0.0000      63.45   LEFT BANK  RIGHT BANK
+
+     38       66.96       80.0       0.0000       0.0000      64.06   LEFT BANK  RIGHT BANK
+
+     39       66.89       80.0       0.0000       0.0000      63.21   LEFT BANK  RIGHT BANK
+
+     40       66.74       80.0       0.0000       0.0000      62.79   LEFT BANK  RIGHT BANK
+
+     41       66.65       80.0       0.0000       0.0000      63.49   LEFT BANK  RIGHT BANK
+
+     42       66.56       80.0       0.0000       0.0000      63.77   LEFT BANK  RIGHT BANK
+1
+
+
+
+
+                        REACH    1    ELEVATION TABLES
+
+                        DEPTH OR    TOTAL      CORE     CORE     WETTED     TOTAL
+                        ELEVATION  TOPWIDTH  TOPWIDTH   AREA   PERIMETER    AREA
+
+                          68.68       43.       43.      102.       46.      102.     SECTION   1
+                          69.18       44.       44.      124.       47.      124.
+                          69.68       45.       45.      147.       49.      147.
+
+
+                          68.58       38.       38.       83.       41.       83.     SECTION   2
+                          69.08       39.       39.      102.       42.      102.
+                          69.58       40.       40.      122.       43.      122.
+
+
+                          68.44       40.       40.       79.       42.       79.     SECTION   3
+                          68.94       41.       41.       99.       43.       99.
+                          69.44       43.       43.      120.       45.      120.
+
+
+                          68.46       66.       66.      154.       68.      154.     SECTION   4
+                          68.96       68.       68.      188.       70.      188.
+                          69.46       69.       69.      222.       72.      222.
+
+
+                          68.41       52.       52.      116.       53.      116.     SECTION   5
+                          68.91       55.       55.      143.       56.      143.
+                          69.41       59.       59.      171.       60.      171.
+
+
+                          68.33       39.       39.       93.       41.       93.     SECTION   6
+                          68.83       41.       41.      114.       43.      114.
+                          69.33       43.       43.      135.       46.      135.
+
+
+                          68.28       57.       57.      136.       58.      136.     SECTION   7
+                          68.78       60.       60.      165.       61.      165.
+                          69.28       63.       63.      196.       64.      196.
+
+
+                          68.23       51.       51.      117.       52.      117.     SECTION   8
+                          68.73       54.       54.      143.       55.      143.
+                          69.23       57.       57.      171.       58.      171.
+
+
+                          68.13       40.       40.       86.       41.       86.     SECTION   9
+                          68.63       43.       43.      107.       44.      107.
+                          69.13       45.       45.      129.       47.      129.
+
+
+                          68.13       54.       54.      134.       56.      134.     SECTION  10
+                          68.63       56.       56.      162.       58.      162.
+                          69.13       58.       58.      191.       61.      191.
+
+
+                          68.12       56.       56.      146.       58.      146.     SECTION  11
+                          68.62       57.       57.      174.       60.      174.
+                          69.12       58.       58.      203.       61.      203.
+
+
+                          68.09       59.       59.      141.       61.      141.     SECTION  12
+                          68.59       61.       61.      171.       63.      171.
+                          69.09       63.       63.      202.       66.      202.
+
+
+                          68.03       44.       44.      118.       47.      118.     SECTION  13
+                          68.53       45.       45.      140.       48.      140.
+1
+                        REACH    1    ELEVATION TABLES
+
+                        DEPTH OR    TOTAL      CORE     CORE     WETTED     TOTAL
+                        ELEVATION  TOPWIDTH  TOPWIDTH   AREA   PERIMETER    AREA
+
+                          69.03       51.       51.      163.       55.      163.     SECTION  13
+
+
+                          68.01       49.       49.      133.       51.      133.     SECTION  14
+                          68.51       52.       52.      158.       54.      158.
+                          69.01       56.       56.      186.       59.      186.
+
+
+                          67.97       42.       42.      113.       44.      113.     SECTION  15
+                          68.47       43.       43.      134.       46.      134.
+                          68.97       45.       45.      156.       48.      156.
+
+
+                          67.96       45.       45.      121.       46.      121.     SECTION  16
+                          68.46       46.       46.      144.       48.      144.
+                          68.96       48.       48.      168.       50.      168.
+
+
+                          67.93       49.       49.      135.       51.      135.     SECTION  17
+                          68.43       50.       50.      160.       53.      160.
+                          68.93       52.       52.      185.       55.      185.
+
+
+                          67.90       45.       45.      128.       48.      128.     SECTION  18
+                          68.40       48.       48.      152.       50.      152.
+                          68.90       51.       51.      176.       53.      176.
+
+
+                          67.85       39.       39.      108.       42.      108.     SECTION  19
+                          68.35       46.       46.      129.       50.      129.
+                          68.85       51.       51.      154.       55.      154.
+
+
+                          67.81       50.       50.      126.       51.      126.     SECTION  20
+                          68.31       51.       51.      151.       53.      151.
+                          68.81       53.       53.      177.       55.      177.
+
+
+                          67.78       44.       44.      119.       46.      119.     SECTION  21
+                          68.28       45.       45.      141.       48.      141.
+                          68.78       46.       46.      164.       49.      164.
+
+
+                          67.71       40.       40.      104.       42.      104.     SECTION  22
+                          68.21       42.       42.      124.       44.      124.
+                          68.71       44.       44.      146.       46.      146.
+
+
+                          67.68       46.       46.      124.       49.      124.     SECTION  23
+                          68.18       47.       47.      147.       50.      147.
+                          68.68       49.       49.      171.       52.      171.
+
+
+                          67.61       45.       45.      117.       47.      117.     SECTION  24
+                          68.11       47.       47.      140.       48.      140.
+                          68.61       50.       50.      164.       52.      164.
+
+
+                          67.59       53.       53.      147.       55.      147.     SECTION  25
+                          68.09       55.       55.      174.       58.      174.
+                          68.59       56.       56.      202.       59.      202.
+
+
+                          67.51       43.       43.      114.       45.      114.     SECTION  26
+1
+                        REACH    1    ELEVATION TABLES
+
+                        DEPTH OR    TOTAL      CORE     CORE     WETTED     TOTAL
+                        ELEVATION  TOPWIDTH  TOPWIDTH   AREA   PERIMETER    AREA
+
+                          68.01       44.       44.      135.       47.      135.     SECTION  26
+                          68.51       45.       45.      158.       48.      158.
+
+
+                          67.48       47.       47.      124.       49.      124.     SECTION  27
+                          67.98       48.       48.      147.       50.      147.
+                          68.48       49.       49.      172.       52.      172.
+
+
+                          67.42       45.       45.      115.       47.      115.     SECTION  28
+                          67.92       49.       49.      138.       51.      138.
+                          68.42       50.       50.      163.       53.      163.
+
+
+                          67.34       52.       52.      124.       54.      124.     SECTION  29
+                          67.84       53.       53.      150.       55.      150.
+                          68.34       54.       54.      177.       57.      177.
+
+
+                          67.29       48.       48.      112.       51.      112.     SECTION  30
+                          67.79       52.       52.      136.       55.      136.
+                          68.29       57.       57.      163.       60.      163.
+
+
+                          67.20       48.       48.      102.       49.      102.     SECTION  31
+                          67.70       50.       50.      127.       52.      127.
+                          68.20       52.       52.      153.       54.      153.
+
+
+                          67.11       43.       43.       96.       45.       96.     SECTION  32
+                          67.61       45.       45.      118.       47.      118.
+                          68.11       47.       47.      141.       50.      141.
+
+
+                          66.97       46.       46.      108.       47.      108.     SECTION  33
+                          67.47       47.       47.      131.       49.      131.
+                          67.97       49.       49.      155.       51.      155.
+
+
+                          66.90       49.       49.      116.       50.      116.     SECTION  34
+                          67.40       51.       51.      141.       52.      141.
+                          67.90       52.       52.      167.       54.      167.
+
+
+                          66.82       46.       46.      112.       48.      112.     SECTION  35
+                          67.32       48.       48.      136.       50.      136.
+                          67.82       49.       49.      160.       52.      160.
+
+
+                          66.69       60.       60.      118.       61.      118.     SECTION  36
+                          67.19       60.       60.      148.       62.      148.
+                          67.69       66.       66.      179.       68.      179.
+
+
+                          66.56       47.       47.       91.       49.       91.     SECTION  37
+                          67.06       49.       49.      115.       51.      115.
+                          67.56       51.       51.      140.       53.      140.
+
+
+                          66.46       52.       52.      105.       54.      105.     SECTION  38
+                          66.96       54.       54.      131.       56.      131.
+                          67.46       57.       57.      159.       59.      159.
+
+
+                          66.39       54.       54.      118.       55.      118.     SECTION  39
+1
+                        REACH    1    ELEVATION TABLES
+
+                        DEPTH OR    TOTAL      CORE     CORE     WETTED     TOTAL
+                        ELEVATION  TOPWIDTH  TOPWIDTH   AREA   PERIMETER    AREA
+
+                          66.89       55.       55.      146.       56.      146.     SECTION  39
+                          67.39       55.       55.      173.       57.      173.
+
+
+                          66.24       43.       43.       90.       45.       90.     SECTION  40
+                          66.74       49.       49.      114.       51.      114.
+                          67.24       51.       51.      139.       53.      139.
+
+
+                          66.15       69.       69.      121.       70.      121.     SECTION  41
+                          66.65       70.       70.      156.       72.      156.
+                          67.15       72.       72.      191.       74.      191.
+
+
+                          66.06       71.       71.      121.       73.      121.     SECTION  42
+                          66.56       75.       75.      158.       76.      158.
+                          67.06       77.       77.      196.       79.      196.
+
+

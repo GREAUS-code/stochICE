@@ -1,0 +1,79 @@
+Message  | Plan: 'secteur_neufpas_50_20cm_glace' (Secteur_neufpas.p04)
+Message  | Simulation started at: 21mars2024 08:31:19 AM
+Message  | 
+Message  | PROCESS:RasProcess
+Message  | Writing Plan GIS Data...
+Progress | 100
+Message  | Completed Writing Plan GIS Data
+Message  | Writing Geometry...
+Message  | Completed Writing Geometry
+Message  | Writing Event Conditions ...
+Message  | Completed Writing Event Condition Data
+Message  | 
+Message  | PROCESS:RasSteady
+Progress | 0.1
+Progress | 0.2
+Message  | 	
+Message  | Steady Flow Simulation HEC-RAS 6.4.1 June 2023
+Progress | 0.1
+Progress | 0.3
+Progress | 0.4
+Message  |  
+Progress | 0.5
+Progress | 0.6
+Progress | 0.7
+Progress | 0.8
+Progress | 0.9
+Progress | 1
+Progress | 0.024
+Progress | 0.048
+Progress | 0.071
+Progress | 0.095
+Progress | 0.119
+Progress | 0.143
+Progress | 0.167
+Progress | 0.19
+Progress | 0.214
+Progress | 0.238
+Progress | 0.262
+Progress | 0.286
+Progress | 0.31
+Progress | 0.333
+Progress | 0.357
+Progress | 0.381
+Progress | 0.405
+Progress | 0.429
+Progress | 0.452
+Progress | 0.476
+Progress | 0.5
+Progress | 0.524
+Progress | 0.548
+Progress | 0.571
+Progress | 0.595
+Progress | 0.619
+Progress | 0.643
+Progress | 0.667
+Progress | 0.69
+Progress | 0.714
+Progress | 0.738
+Progress | 0.762
+Progress | 0.786
+Progress | 0.81
+Progress | 0.833
+Progress | 0.857
+Progress | 0.881
+Progress | 0.905
+Progress | 0.929
+Progress | 0.952
+Progress | 0.976
+Progress | 1
+Message  | 
+Message  | Finished Steady Flow Simulation
+Message  | 
+Message  | 
+Message  | Computations Summary
+Message  | 
+Message  | Computation Task	Time(hh:mm:ss)
+Message  | Completing Geometry, Flow and Plan	<1
+Message  | Steady Flow Computations	<1
+Message  | Complete Process	<1

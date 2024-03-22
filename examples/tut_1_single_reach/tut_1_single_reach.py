@@ -23,11 +23,11 @@ Step 2: specify input files and paths
 
 
 #Change to the the path containing your HECRAS files
-path = r'C:\Users\jason\Desktop\stochICE\examples\tut_1_single_reach'
+path = r'C:\Users\dugj2403\Desktop\stochICE\examples\tut_1_single_reach'
 batch_ID="Secteur_neufpas"
 ras = "Secteur_neufpas.prj"
 geo = "Secteur_neufpas.g01"
-flowFile = "Secteur_neufpas.f03"
+flowFile = "Secteur_neufpas.f01"
 wse= 'WSE (13 avril 2011).Terrain.MNT_Point_a_neuf_pas.tif'
 
 
@@ -57,7 +57,7 @@ riv_ice_start=0.5        # days
 riv_ice_end=2            # days
 riv_interInt = 50        # x-section interpolation interval (m) (recommendation: width of the river)
 riv_profile_interval=0.5 #Profile time output interval in days (must be a divisor of riv_sim_days)
-
+riv_dwn_bc_opt = 1       # 1 - Normal depth, adjusted for ice cover, 2 - as a stochastic variable (define distribution in stoch_variables dictionary)
 
 
 """
@@ -68,7 +68,7 @@ Step 4: specify variables to stochastically model.
 
 #Syntax: 'VariableName in TAPE5.txt':[mean, std, nmb_samples], see init_default_ice_parms() in stochRIVICE_JD for a complete list.
 #At the moment, only a normal distribution has been implemented. 
-stoch_variables={'Frontthick':[0.2,0.0,5000],'Q':[80,30,5000],'DWSE':[65.4,0,5000],'IceVol':[270,30,5000],'RLOCBRG':[130,0,5000],'DAYSBR':[0.5,0,5000]}
+stoch_variables={'Frontthick':[0.2,0.0,5000],'Q':[80,30,5000],'IceVol':[270,30,5000],'RLOCBRG':[130,0,5000],'DAYSBR':[0.5,0,5000]}
 
 
 """
@@ -89,6 +89,7 @@ Roger=ice.stochICE(prjDir=path,
                                   ds_slope=ds_slope,
                                   max_Q=max_Q,
                                   locations=locations,
+                                  riv_dwn_bc_opt=riv_dwn_bc_opt,
                                   code='RIVICE',
                                   days=riv_sim_days,
                                   timestep=riv_timestep,

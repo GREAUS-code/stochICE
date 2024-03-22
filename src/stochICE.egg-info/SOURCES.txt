@@ -1,8 +1,10 @@
 README.md
 pyproject.toml
 src/HECRAS_HDF.py
+src/Ice_water_surface_prediction.py
 src/__init__.py
 src/clear_RIVICE_case.py
+src/irregularSection.py
 src/stochHECRAS.py
 src/stochICE.py
 src/stochRIVICE.py
