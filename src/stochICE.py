@@ -166,16 +166,19 @@ class stochICE():
             self.stochRIVICE.set_profile_times()
             self.stochRIVICE.init_default_ice_parms()
             
+
+                
+            self.stochRIVICE.set_stochastic_variables()
+            self.stochRIVICE.get_downstream_xs_data()
+            self.stochRIVICE.make_downstream_stage_discharge_curve()
+
             if self.riv_dwn_ice_opt == 1:
                 self.stochRIVICE.set_ice_adjusted_dwn_bc()
-                
-            # self.stochRIVICE.set_stochastic_variables()
 
-
-            # self.stochRIVICE.delete_sim_folders()
-            # self.stochRIVICE.make_sim_folders()
-            # self.stochRIVICE.call_write_TAPE5()
-            # self.stochRIVICE.launch_Cd1xe_with_INTP()
+            self.stochRIVICE.delete_sim_folders()
+            self.stochRIVICE.make_sim_folders()
+            self.stochRIVICE.call_write_TAPE5()
+            self.stochRIVICE.launch_Cd1xe_with_INTP()
             
             
             

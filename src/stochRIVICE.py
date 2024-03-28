@@ -706,7 +706,7 @@ class StochRIVICE():
             self.sim_data['sim_%d'%sim]['DIAICE']=0.6
             self.sim_data['sim_%d'%sim]['FRMAX']=0.5
             self.sim_data['sim_%d'%sim]['EROPT']=99
-            self.sim_data['sim_%d'%sim]['VERODE']=1.5
+            self.sim_data['sim_%d'%sim]['VERODE']=1.7
             self.sim_data['sim_%d'%sim]['FTRLIM']=99
             self.sim_data['sim_%d'%sim]['LEOPT']=3
             self.sim_data['sim_%d'%sim]['Frontthick']=0.1
@@ -735,12 +735,12 @@ class StochRIVICE():
             self.sim_data['sim_%d'%sim]['IceVol_init']=[(2800,0)]
             self.sim_data['sim_%d'%sim]['ZZK1TAN']=0.218
             self.sim_data['sim_%d'%sim]['ZZK2']=7.52
-            self.sim_data['sim_%d'%sim]['ICENOPT']=2
-            self.sim_data['sim_%d'%sim]['IX']=0 #HAVE TO GET THIS FROM THE SIMULATION
-            self.sim_data['sim_%d'%sim]['FACTOR1']=".5"
-            self.sim_data['sim_%d'%sim]['FACTOR2']=".12"
-            self.sim_data['sim_%d'%sim]['FACTOR3']=".027"
-            self.sim_data['sim_%d'%sim]['CNBED']=".026"
+            self.sim_data['sim_%d'%sim]['ICENOPT']=3                           #1 = Beltaos method, 2 = KGS group method, 3 = User specified
+            self.sim_data['sim_%d'%sim]['IX']=0                                #Placing this at 0 means, the ice roughness applies to the whole reach 
+            self.sim_data['sim_%d'%sim]['FACTOR1']=".5"                        #Coefficient if Beltaos method is selected2 = KGS group method, 3 = User specified
+            self.sim_data['sim_%d'%sim]['FACTOR2']=".12"                       #Manning n-value for KGS Method for 8 m thick ice cover
+            self.sim_data['sim_%d'%sim]['FACTOR3']=".027"                      #User specified n-value for ice
+            self.sim_data['sim_%d'%sim]['CNBED']=".026"                        #n-value of river bed (is used in the Beltaos method)
             self.sim_data['sim_%d'%sim]['IBORD']=1
             self.sim_data['sim_%d'%sim]['DAYBORDSTART']=31
             self.sim_data['sim_%d'%sim]['BORDUPBRK']=1.0
@@ -768,8 +768,11 @@ class StochRIVICE():
             for variable, dist_parms in self.stochICE.riv_stochvars.items():
                 
                 if variable == 'RLOCBRG':
+                    
                     sample=self.get_normal_distribution_sample(dist_parms[0], dist_parms[1], dist_parms[2])
                     self.sim_data[sim][variable]=round(float(random.choice(sample)))
+                    
+                    
                 else:  
                     sample=self.get_normal_distribution_sample(dist_parms[0], dist_parms[1], dist_parms[2])
                     self.sim_data[sim][variable]=float(random.choice(sample))
@@ -984,7 +987,7 @@ class StochRIVICE():
             time_steps=int(end_of_ice/self.stochICE.riv_timestep)
             IV_bc_inputs.append([time_steps,self.sim_data[self.sim]['IceVol']])
 
-        print(IV_bc_inputs)
+        
                                                
         # RIVICE default parameters (voir le manuel de l'utilisateur de RIVICE pour plus de détails sur ces options)        
         DEPOPT = self.sim_data[self.sim]['DEPOPT']
@@ -1682,7 +1685,7 @@ class StochRIVICE():
             
         # Upstream incoming ice volume  
         for i in range(len(IV_bc_inputs)):
-            print(IV_bc_inputs[i])
+            
             
             time_step = int(IV_bc_inputs[i][0])
             ice_volume = IV_bc_inputs[i][1]
@@ -1731,7 +1734,7 @@ class StochRIVICE():
         value_5 = string_length_adjustment(str(CNBED),5,'F')
         extra_txt = '          IX,FACTOR1, FACTOR2, FACTOR3, CNBED'
         line = value_1 + value_2 + value_3 + value_4 + value_5 + extra_txt
-        print(FACTOR1,FACTOR2)
+       
         TAPE5.write(line)
         TAPE5.write("\n")
         
@@ -1956,17 +1959,7 @@ class StochRIVICE():
         ax.set_ylabel('water surface elevation (m)', fontsize=10)        
             
 
-    def set_ice_adjusted_dwn_bc(self):
-        
-        wp_ice=list(np.asarray(self.wetted_perimeters)+np.asarray(self.top_widths))
 
-        n=0.03
-        n_ice=0.04
-        s=0.000450 # need this from hecras model (or ask the user to manually input it for each case)
-        t=0.2
-        target_Q=150
-    
-        n_c=((1+(n_ice/n)**(3/2))/2)**(2/3)*n
         
     def get_downstream_xs_data(self):
         
@@ -2041,10 +2034,41 @@ class StochRIVICE():
 
             
             
+    def set_ice_adjusted_dwn_bc(self):
+        
+        #add ice width to open-water wetter perimeter
+        wp_ice=list(np.asarray(self.wetted_perimeters)+np.asarray(self.top_widths))
+        
+        #Iterate over simulations
+        for sim, value in self.sim_data.items():
+
+            n=float(self.stochICE.xs_data[list(self.stochICE.xs_data)[-1]]['Manning']['val_MAIN'])
+    
+            n_ice=float(self.sim_data[sim]['FACTOR3'])
+            s=self.stochICE.ds_slope # need this from hecras model (or ask the user to manually input it for each case)
+            t=self.sim_data[sim]['Frontthick']
+            target_Q=self.sim_data[sim]['Q']
+        
+            n_c=((1+(n_ice/n)**(3/2))/2)**(2/3)*n
+
             
+            ice_cover_discharges=[]
+            for i, area in enumerate(self.wetted_areas):
+                
+                V=(1/n_c)*((area/wp_ice[i])**(2/3))*(s)**0.5
+                Q=V*area
+                # print(Q)
+                ice_cover_discharges.append(Q)
             
+            y_interp = scipy.interpolate.interp1d(ice_cover_discharges, self.elevations)
             
+            # Uncomment if you want to verify values with HECRAS
+            # print('DWSE = %f for thickness %f and ice roughness %f and discharge %f' %(y_interp(target_Q)+t*0.91, t, n_ice, target_Q))     
             
+            self.sim_data[sim]['DWSE']=y_interp(target_Q)+t*0.91
+
+                        
+                        
             
             
             
