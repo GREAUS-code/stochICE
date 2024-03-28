@@ -1867,25 +1867,25 @@ class StochRIVICE():
                     poll=p.poll()
                     print('Group %s is processing ...' %str(number+1))
             
-            # print('Removing unnecessary files from simulation folders.')
-            # for sim in group:
+            print('Removing unnecessary files from simulation folders.')
+            for sim in group:
                 
-            #     files=['TAPE6.txt','TAPE10.txt',
-            #             'TAPE12.txt','TAPE13.txt','TAPE14.txt',
-            #             'TAPE15.txt','TAPE16.txt','TAPE17.txt',
-            #             'TAPE66.txt','TAPE70.txt','TAPE71.txt',
-            #             'TAPE72.txt','TAPE73.txt',
-            #             'intpxs.txt','intpxs1.txt',
-            #             'Rivice_Aug6_11d.exe','Rivice_Aug6_11e.exe',
-            #             'rivice.bat','lf90.eer',]
+                files=['TAPE6.txt','TAPE10.txt',
+                        'TAPE12.txt','TAPE13.txt','TAPE14.txt',
+                        'TAPE15.txt','TAPE16.txt','TAPE17.txt',
+                        'TAPE66.txt','TAPE70.txt','TAPE71.txt',
+                        'TAPE72.txt','TAPE73.txt',
+                        'intpxs.txt','intpxs1.txt',
+                        'Rivice_Aug6_11d.exe','Rivice_Aug6_11e.exe',
+                        'rivice.bat','lf90.eer',]
                 
                 
-            #     for file in files:
+                for file in files:
                     
-            #         try:
-            #             os.remove(self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim +'\\' + file)
-            #         except FileNotFoundError:
-            #             pass        
+                    try:
+                        os.remove(self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim +'\\' + file)
+                    except FileNotFoundError:
+                        pass        
         
 
     def get_profiles(self):
