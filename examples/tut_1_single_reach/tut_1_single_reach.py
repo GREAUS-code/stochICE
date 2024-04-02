@@ -39,10 +39,10 @@ Step 3: specify RIVICE simulation parameters
 """
 
 #Number of simulations 
-NSims = 100
+NSims = 10
 
 #Simulation batch size (NSims/GrpSize must not have a remainder)
-GrpSize=25
+GrpSize=10
 
 #Inputs necessary for HECRAS precursor openwater simulation
 thick=[0,0]
@@ -52,14 +52,26 @@ locations=[[0,0]]        # 0's remove ice jams from HECRAS precursor simulation
 ds_slope=0.00031
 max_Q=350
 
+
 #RIVICE simulation parameters
 riv_sim_days = 2         # days
 riv_timestep = 30        # seconds
 riv_ice_start=0.5        # days 
 riv_ice_end=2            # days
-riv_interInt = 50        # x-section interpolation interval (m) (recommendation: width of the river)
+riv_interInt = 30        # x-section interpolation interval (m) (recommendation: width of the river)
 riv_profile_interval=0.5 #Profile time output interval in days (must be a divisor of riv_sim_days)
 riv_dwn_bc_opt = 1       # 1 - Normal depth, adjusted for ice cover, 2 - as a stochastic variable (define distribution in stoch_variables dictionary)
+
+
+
+# #RIVICE simulation parameters
+# riv_sim_days = 0.208         # days
+# riv_timestep = 1        # seconds
+# riv_ice_start=0.083        # days 
+# riv_ice_end=0.208            # days
+# riv_interInt = 20        # x-section interpolation interval (m) (recommendation: width of the river)
+# riv_profile_interval=0.208 #Profile time output interval in days (must be a divisor of riv_sim_days)
+# riv_dwn_bc_opt = 1       # 1 - Normal depth, adjusted for ice cover, 2 - as a stochastic variable (define distribution in stoch_variables dictionary)
 
 
 """
@@ -70,13 +82,19 @@ Step 4: specify variables to stochastically model.
 
 #Syntax: 'VariableName in TAPE5.txt':[mean, std, nmb_samples], see init_default_ice_parms() in stochRIVICE_JD for a complete list.
 #At the moment, only a normal distribution has been implemented. 
-stoch_variables={'Frontthick':[0.3,0.1,5000],
-                 'Q':[50,10,5000],
-                 'IceVol':[270,30,5000],
-                 'RLOCBRG':[130,0,5000],
-                 'DAYSBR':[0.5,0,5000], 
-                 'FACTOR3':[0.025,0.01,5000]}
+# stoch_variables={'Frontthick':[0.3,0.1,5000],
+#                  'Q':[50,10,5000],
+#                  'IceVol':[270,30,5000],
+#                  'RLOCBRG':[7750,3000,5000],
+#                  'DAYSBR':[0.5,0,5000], 
+#                  'FACTOR3':[0.025,0.01,5000]}
 
+stoch_variables={'Frontthick':['uniform',[0.1,0.6],2],
+                 'Q':['uniform',[50,100],2],
+                 'IceVol':['uniform',[1,10],2],
+                 'RLOCBRG':['uniform',[1000,8000],0],
+                 'FACTOR3':['uniform',[0.01,0.08],2]
+                 }
 
 """
 Step 5: Setup up simulation folders and write TAPE5.txt for each simulation.
@@ -111,6 +129,7 @@ Roger=ice.stochICE(prjDir=path,
                                   stochvars=stoch_variables)
 
 
+
 """
 Step 6: Launch simulations in parallel
 """
@@ -124,22 +143,53 @@ Step 7: Plot water surface profile envelope for reach
 
 Roger.stochRIVICE.plot_profiles()
 
+profiles=Roger.stochRIVICE.sim_profiles
+
 """
 Step 8: Plot exceedance probability for a specified chainage along reach
 """
 
-chainage=8000
+chainage=4000
 Roger.stochRIVICE.plot_prob_exceedance(chainage)
 
 
 
 
+"""
+Code for general distribution spec
+"""
+import random
 
 
+                
 
+def 
+variable_values={}
 
+for variable, parms in test_variables.items():
+    
+    if parms[0] == 'uniform':
 
+        secure_random = random.SystemRandom()
+        random_value = round(secure_random.uniform(parms[1][0], parms[1][1]), parms[2])
+        variable_values[variable]=random_value
+        
+    if parms[0] == 'normal':
+        
+        """
+        Careful, this code can produce unphysical negative values!
+        """
 
+        rng = np.random.default_rng()
+        values = rng.normal(parms[1][0], parms[1][1], size=parms[1][2])
+        variable_values[variable]=random.choice(values)
+
+    if parms[0] == 'Gumbel': 
+        
+        print('Gumbel distributions not yet implemented')
+       
+
+plt.hist(values)
 
 
 

@@ -765,17 +765,50 @@ class StochRIVICE():
         for sim, value in self.sim_data.items():
             
             #Iterate over stochastic variables
-            for variable, dist_parms in self.stochICE.riv_stochvars.items():
+            for variable, parms in self.stochICE.riv_stochvars.items():
                 
-                if variable == 'RLOCBRG':
+                    if parms[0] == 'uniform':
+                
+                        secure_random = random.SystemRandom()
+                        
+                        if variable == 'RLOCBRG':
+                            
+                            ice_jam_location=round(secure_random.uniform(parms[1][0], parms[1][1]), parms[2])
+                            self.sim_data[sim][variable]=round((float(self.stochICE.xs_data[list(self.stochICE.xs_data)[0]]['chainage'])-ice_jam_location)/self.stochICE.riv_interval)+1
+                            
+                        else:
+                             self.sim_data[sim][variable] = round(secure_random.uniform(parms[1][0], parms[1][1]), parms[2])
+                        
+                    if parms[0] == 'normal':
+                        
+                        """
+                        Careful, this code can produce unphysical negative values,especially with wide std!
+                        """
+                
+                        rng = np.random.default_rng()
+                        values = rng.normal(parms[1][0], parms[1][1], size=parms[1][2])
+                        self.sim_data[sim][variable]=float(random.choice(values))
+                
+                    if parms[0] == 'Gumbel': 
+                        
+                        print('Gumbel distributions not yet implemented')                
+                
+                
+                
+                
+                
+                
+                # if variable == 'RLOCBRG':
                     
-                    sample=self.get_normal_distribution_sample(dist_parms[0], dist_parms[1], dist_parms[2])
-                    self.sim_data[sim][variable]=round(float(random.choice(sample)))
                     
+                #     self.sample=self.get_normal_distribution_sample(dist_parms[0], dist_parms[1], dist_parms[2])
                     
-                else:  
-                    sample=self.get_normal_distribution_sample(dist_parms[0], dist_parms[1], dist_parms[2])
-                    self.sim_data[sim][variable]=float(random.choice(sample))
+                #     self.sim_data[sim][variable]=round((float(self.stochICE.xs_data[list(self.stochICE.xs_data)[0]]['chainage'])-float(random.choice(self.sample)))/self.stochICE.riv_interval)+1
+                #     print(self.sim_data[sim][variable])
+                    
+                # else:  
+                #     sample=self.get_normal_distribution_sample(dist_parms[0], dist_parms[1], dist_parms[2])
+                #     self.sim_data[sim][variable]=float(random.choice(sample))
                 
     def make_sim_folders(self):
 
