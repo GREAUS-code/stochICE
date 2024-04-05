@@ -16,6 +16,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.interpolate
 
+import matplotlib 
+from matplotlib.backends.backend_pdf import PdfPages 
+
 
 import irregularSection
 
@@ -779,23 +782,13 @@ class StochRIVICE():
                         else:
                              self.sim_data[sim][variable] = round(secure_random.uniform(parms[1][0], parms[1][1]), parms[2])
                         
-                    if parms[0] == 'normal':
+                    if parms[0] == 'Gumbel':
                         
-                        """
-                        Careful, this code can produce unphysical negative values,especially with wide std!
-                        """
-                
-                        rng = np.random.default_rng()
-                        values = rng.normal(parms[1][0], parms[1][1], size=parms[1][2])
+                        values = np.random.gumbel(parms[1][0], parms[1][1], size=parms[1][2]) #location, scale, size
                         self.sim_data[sim][variable]=float(random.choice(values))
-                
-                    if parms[0] == 'Gumbel': 
                         
-                        print('Gumbel distributions not yet implemented')                
-                
-                
-                
-                
+                        
+            
                 
                 
                 # if variable == 'RLOCBRG':
@@ -1955,6 +1948,40 @@ class StochRIVICE():
         
         ax.set_xlabel('chainage (m)', fontsize=10)
         ax.set_ylabel('water surface elevation (m)', fontsize=10)        
+
+
+
+    
+    
+    def make_ice_profile_pdf(self):
+        matplotlib.use('Agg')
+        
+        plt.rcParams["figure.figsize"] = [7.00, 3.50] 
+        plt.rcParams["figure.autolayout"] = True
+        
+        for sim, profile in self.sim_profiles.items():
+           
+            plt.figure() 
+            plt.fill_between(max(self.sim_profiles[sim]['chainage']) - self.sim_profiles[sim]['chainage'],self.sim_profiles[sim]['wse'],self.sim_profiles[sim]['wse']-self.sim_profiles[sim]['thick'],color='lightblue')
+            plt.fill_between(max(self.sim_profiles[sim]['chainage']) - self.sim_profiles[sim]['chainage'],self.sim_profiles[sim]['wse'],self.sim_profiles[sim]['wse'],color='blue')
+            plt.plot(max(self.sim_profiles[sim]['chainage']) - self.sim_profiles[sim]['chainage'],self.sim_profiles[sim]['wse']-self.sim_profiles[sim]['depth'],c='darkgray')
+            plt.xlim([min(self.sim_profiles[sim]['chainage']),max(self.sim_profiles[sim]['chainage'])])   
+            plt.xlabel('chainage (m)', fontsize=10)
+            plt.ylabel('water surface elevation (m)', fontsize=10)  
+            plt.title('Ice thicknesses and w.s.e. self.sim_profiles for %s' %sim, fontsize=10)
+        
+        p = PdfPages(self.stochICE.prjDir+"\Ice_thicknesses_plots.pdf") 
+          
+        fig_nums = plt.get_fignums()   
+        figs = [plt.figure(n) for n in fig_nums] 
+          
+        for fig in figs:  
+            
+            
+            fig.savefig(p, format='pdf')  
+          
+        p.close()   
+        matplotlib.use('Qt5Agg')
         
         
     def plot_prob_exceedance(self,chainage):
@@ -1988,7 +2015,7 @@ class StochRIVICE():
         plt.gca().invert_xaxis()
         ax.set_xscale('log')
         fig.suptitle('Chainage: %d m'%closest_chainage)
-        ax.set_xlabel('exceedence probability (m)', fontsize=10)
+        ax.set_xlabel('exceedence probability', fontsize=10)
         ax.set_ylabel('water surface elevation (m)', fontsize=10)        
             
 
