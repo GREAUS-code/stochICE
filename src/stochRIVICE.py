@@ -45,15 +45,21 @@ class StochRIVICE():
         """
         
         self.stochICE=stochICE
+
+        if not os.path.exists(self.stochICE.prjDir+'\\Results'):
+            os.makedirs(self.stochICE.prjDir+'\\Results')
+            print("Created .\Results folder")
         
-        self.simFolder=self.stochICE.prjDir+'\\RIVICE_simulations'
+        self.results_folder=self.stochICE.prjDir+'\\Results\\Rivice'
 
     
-        if not os.path.exists(self.simFolder):
-            os.makedirs(self.simFolder)
-            print("Created .\RIVICE_simulations")
+        if not os.path.exists(self.results_folder):
+            os.makedirs(self.results_folder)
+            print("Created .\Results folder")
         
-
+        if not os.path.exists(self.results_folder + '\%s' %self.stochICE.ID):
+            os.makedirs(self.results_folder + '\%s' %self.stochICE.ID)
+            print("Created folder for result of batch %s" %self.stochICE.ID )
 
     def make_RIVICE_xs(self): 
         
@@ -808,12 +814,12 @@ class StochRIVICE():
         #makes simulation directories
         
         
-        if not os.path.exists(self.simFolder):
-            os.makedirs(self.simFolder)
+        # if not os.path.exists(self.results_folder  + '\%s' %self.stochICE.ID):
+        #     os.makedirs(self.results_folder + '\%s' %self.stochICE.ID)
         
         for sim in range(self.stochICE.NSims):
             
-            simPath = self.simFolder+'\\sim_%s' %sim
+            simPath = self.results_folder + '\%s' %self.stochICE.ID +'\\sim_%s' %sim
             
             if not os.path.exists(simPath):
                 os.makedirs(simPath)
@@ -821,9 +827,9 @@ class StochRIVICE():
     def delete_sim_folders(self):
         
         #deletes simulation directories
-        for fname in os.listdir(self.simFolder):
+        for fname in os.listdir(self.results_folder + '\%s' %self.stochICE.ID):
             
-                folderpath = os.path.join(self.simFolder, fname)
+                folderpath = os.path.join(self.results_folder + '\%s' %self.stochICE.ID, fname)
                 
                 if os.path.isdir(folderpath):
                         if 'sim_' in fname:
@@ -1072,7 +1078,7 @@ class StochRIVICE():
         Écriture du fichier de contrôle TAPE5        
         """
         
-        TAPE5 = open(self.stochICE.prjDir + '/RIVICE_simulations' + '\\%s' % self.sim + '\\TAPE5.txt','w')
+        TAPE5 = open(self.stochICE.prjDir + '/Results/RIVICE/%s/' %self.stochICE.ID + '\\%s' % self.sim + '\\TAPE5.txt','w')
          
         # Writing project name
         if len(Project_title) > 80:            
@@ -1872,17 +1878,17 @@ class StochRIVICE():
             
             for sim in group:
                 
-                shutil.copy('rivice.bat',self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim)
-                shutil.copy('Rivice_Aug6_11d.exe',self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim)
-                shutil.copy('Rivice_Aug6_11e.exe',self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim)
-                shutil.copy('lf90.eer',self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim)
-                shutil.copy('intpxs.txt',self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim)
-                shutil.copy('intpxs1.txt',self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim)        
+                shutil.copy('rivice.bat',self.stochICE.prjDir+'\Results\RIVICE\%s\%s'%(self.stochICE.ID,sim))
+                shutil.copy('Rivice_Aug6_11d.exe',self.stochICE.prjDir+'\Results\RIVICE\%s\%s'%(self.stochICE.ID,sim))
+                shutil.copy('Rivice_Aug6_11e.exe',self.stochICE.prjDir+'\Results\RIVICE\%s\%s'%(self.stochICE.ID,sim))
+                shutil.copy('lf90.eer',self.stochICE.prjDir+'\Results\RIVICE\%s\%s'%(self.stochICE.ID,sim))
+                shutil.copy('intpxs.txt',self.stochICE.prjDir+'\Results\RIVICE\%s\%s'%(self.stochICE.ID,sim))
+                shutil.copy('intpxs1.txt',self.stochICE.prjDir+'\Results\RIVICE\%s\%s'%(self.stochICE.ID,sim))        
         
             for sim in group:
                 
                 time.sleep(0.5)
-                P=subprocess.Popen([self.stochICE.prjDir+'\RIVICE_simulations\%s' %sim + "\\" + "rivice.bat"], cwd=self.stochICE.prjDir+'\RIVICE_simulations\%s' %sim)
+                P=subprocess.Popen([self.stochICE.prjDir+'\Results\RIVICE\%s\%s' %(self.stochICE.ID, sim) + "\\" + "rivice.bat"], cwd=self.stochICE.prjDir+'\Results\RIVICE\%s\%s' %(self.stochICE.ID, sim))
                 processes.append(P)
                 
             for p in processes:
@@ -1909,7 +1915,7 @@ class StochRIVICE():
                 for file in files:
                     
                     try:
-                        os.remove(self.stochICE.prjDir+'\RIVICE_simulations\%s'%sim +'\\' + file)
+                        os.remove(self.stochICE.prjDir+'\Results\RIVICE\%s\%s'%(self.stochICE.ID,sim) +'\\' + file)
                     except FileNotFoundError:
                         pass        
         
@@ -1924,7 +1930,7 @@ class StochRIVICE():
             
             try:
             
-                self.sim_profiles[sim]=pd.read_csv(self.stochICE.prjDir+'\RIVICE_simulations\%s\%s'%(sim,last_profile), header = None, delimiter= '\s+', index_col=False) 
+                self.sim_profiles[sim]=pd.read_csv(self.stochICE.prjDir+'\Results\RIVICE\%s\%s\%s'%(self.stochICE.ID,sim,last_profile), header = None, delimiter= '\s+', index_col=False) 
                 self.sim_profiles[sim].columns =['chainage','wse','depth','discharge','velocity','n','C','area','rH','thick']
                 max_chainage=self.sim_profiles[sim]['chainage'].max()
                 self.sim_profiles[sim]['RIVICE_chainage']=max_chainage-self.sim_profiles[sim]['chainage']
@@ -1949,7 +1955,7 @@ class StochRIVICE():
         ax.set_xlabel('chainage (m)', fontsize=10)
         ax.set_ylabel('water surface elevation (m)', fontsize=10)        
 
-
+        plt.savefig(self.stochICE.prjDir+"\Results\RIVICE\%s\wse_envelope_%s.pdf" %(self.stochICE.ID, self.stochICE.ID), format='pdf', dpi=1200)
 
     
     
@@ -1970,7 +1976,7 @@ class StochRIVICE():
             plt.ylabel('water surface elevation (m)', fontsize=10)  
             plt.title('Ice thicknesses and w.s.e. self.sim_profiles for %s' %sim, fontsize=10)
         
-        p = PdfPages(self.stochICE.prjDir+"\Ice_thicknesses_plots.pdf") 
+        p = PdfPages(self.stochICE.prjDir+"\Results\RIVICE\%s\Ice_thicknesses_plots_%s.pdf" %(self.stochICE.ID,self.stochICE.ID)) 
           
         fig_nums = plt.get_fignums()   
         figs = [plt.figure(n) for n in fig_nums] 
@@ -2018,6 +2024,7 @@ class StochRIVICE():
         ax.set_xlabel('exceedence probability', fontsize=10)
         ax.set_ylabel('water surface elevation (m)', fontsize=10)        
             
+        plt.savefig(self.stochICE.prjDir+"\Results\RIVICE\%s\prob_exceed_%sm_%s.pdf" %(self.stochICE.ID,str(chainage),self.stochICE.ID), format='pdf', dpi=1200)
 
 
         
@@ -2080,6 +2087,8 @@ class StochRIVICE():
         """
         Make pdf figure
         """
+        matplotlib.use('Agg')
+        
         fig, ax = plt.subplots(1,1,frameon=False,constrained_layout=True)
         fig.set_figwidth(6,forward=True)
         fig.set_figheight(3,forward=True)
@@ -2090,8 +2099,9 @@ class StochRIVICE():
         ax.set_xlabel('Discharge (CMS)', fontsize=10)
         ax.set_ylabel('Water surface elevation (m)', fontsize=10)      
         
-        plt.savefig(self.stochICE.prjDir+"\Dwn_stream_stage_discharge.pdf", format='pdf', dpi=1200)
-
+        plt.savefig(self.stochICE.prjDir+"\Results\RIVICE\%s\dwstr_ratingCurve_%s.pdf" %(self.stochICE.ID,self.stochICE.ID), format='pdf', dpi=1200)
+        
+        matplotlib.use('Qt5Agg')
             
             
     def set_ice_adjusted_dwn_bc(self):

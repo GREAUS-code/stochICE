@@ -25,6 +25,24 @@ class StochHECRAS():
 
         if self.stochICE.clr:
             self.clear_results()
+
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # Don't pickle baz
+        del state["RC"]
+        del state["read_geofile"]
+        del state["out"]
+
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # Add RC back since it doesn't exist in the pickle
+        self.RC = win32com.client.Dispatch("RAS641.HECRASCONTROLLER")
+        print(state['stochICE'])
+        # self.read_geofile = open(state['stochICE'].geo_file, 'r')
+
         
     def preprocess_sims(self):
 
@@ -391,12 +409,12 @@ class StochHECRAS():
         floodmap_output = self.floodmap_path+"\ensemble_floodmap.tif"
         
         result = rasterio.open(floodmap_output,'w',driver='GTiff',
-                               height=tiff.shape[0],
-                               width=tiff.shape[1],
-                               count=1,
-                               dtype=stoch.dtype,
-                               crs=tiff.crs,
-                               transform=tiff.transform)
+                                height=tiff.shape[0],
+                                width=tiff.shape[1],
+                                count=1,
+                                dtype=stoch.dtype,
+                                crs=tiff.crs,
+                                transform=tiff.transform)
         
         result.write(stoch[0,:,:],1)
         result.close()

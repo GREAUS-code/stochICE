@@ -3,13 +3,14 @@ import os
 import shutil
 import numpy as np
 import time
+import pickle
 
 
 
 
 import stochRIVICE
 import stochHECRAS
-import irregularSection
+# import irregularSection
 
 class stochICE():
 
@@ -185,6 +186,19 @@ class stochICE():
             # time.sleep(self.sleep)
             # print('Running RIVICE in a separate console ... please be patient.')
             # self.stochRIVICE.launch_RIVICE()
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # Don't pickle baz
+
+
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # Add RC back since it doesn't exist in the pickle
+        # self.RC = win32com.client.Dispatch("RAS641.HECRASCONTROLLER")
+
 
     def copy_geofile(self):
         
@@ -528,11 +542,25 @@ class stochICE():
         self.open_HECRAS_wse={}
         self.open_HECRAS_wse['chainage']=[float(i) for i in list(self.xs_data.keys())]
         self.open_HECRAS_wse['wse']=self.stochHECRAS.result_profiles['sim_1']['WSE'].tolist()
-        print(self.open_HECRAS_wse['wse'][-1])
         self.open_HECRAS_wse['discharge'] = flow
 
 
 
+
+
+def save_batch(stochICE_instance):
+    
+    path=stochICE_instance.prjDir+'\Results\RIVICE\%s\%s.ice' %(stochICE_instance.ID,stochICE_instance.ID)
+    with open(path, "wb") as f:
+        pickle.dump(stochICE_instance, f)
+   
+
+def open_batch(path):
+    
+    with open(path, "rb") as f:
+        reloaded_batch = pickle.load(f)
+        
+    return reloaded_batch
 
 
 

@@ -6,14 +6,25 @@ This is a tutorial/testing input script for running RIVICE stochastically with s
 import stochICE as ice
 
 
+
 """
-Step 1: specify input files and paths
+Step 1: Either load in stochICE data from a previous stochastic modelling scenario, or ...
 """
 
+previousRun=ice.open_batch(r'C:\Users\jason\Desktop\stochICE\examples\tut_1_single_reach\Results\RIVICE\test01\test01.ice')
+previousRun.stochRIVICE.plot_profiles()
+
+
+previousRun2=ice.open_batch(r'C:\Users\jason\Desktop\stochICE\examples\tut_1_single_reach\Results\RIVICE\test02\test02.ice')
+previousRun2.stochRIVICE.plot_profiles()
+
+"""
+Step 1: ... specify input files and paths to begin a new stochastic modelling scenario (i.e. 'batch')
+"""
 
 #Change to the the path containing your HECRAS files
 path = r'C:\Users\jason\Desktop\stochICE\examples\tut_1_single_reach'
-batch_ID="Secteur_neufpas"
+batch_ID="test01"
 ras = "Secteur_neufpas.prj"
 geo = "Secteur_neufpas.g01"
 flowFile = "Secteur_neufpas.f01"
@@ -41,12 +52,12 @@ max_Q=350
 
 
 #RIVICE simulation parameters
-riv_sim_days = 1         # days
+riv_sim_days = 0.2         # days
 riv_timestep = 30        # seconds
-riv_ice_start=0.5        # days 
-riv_ice_end=1            # days
+riv_ice_start=0.1        # days 
+riv_ice_end=0.2            # days
 riv_interInt = 30        # x-section interpolation interval (m) (recommendation: width of the river)
-riv_profile_interval=0.5 #Profile time output interval in days (must be a divisor of riv_sim_days)
+riv_profile_interval=0.2 #Profile time output interval in days (must be a divisor of riv_sim_days)
 riv_dwn_bc_opt = 1       # 1 - Normal depth, adjusted for ice cover, 2 - as a stochastic variable (define distribution in stoch_variables dictionary)
 
 
@@ -94,8 +105,6 @@ Roger=ice.stochICE(prjDir=path,
                                   sleep=5,
                                   stochvars=stoch_variables)
 
-
-
 """
 Step 5: Launch simulations in parallel
 """
@@ -104,12 +113,20 @@ Roger.stochRIVICE.launch_RIVICE_parallel()
 
 
 """
+Step 6: Save batch data to reload later
+"""
+
+
+ice.save_batch(Roger)
+
+
+
+"""
 Step 7: Plot water surface profile envelope for reach
 """
 
 Roger.stochRIVICE.plot_profiles()
 
-profiles=Roger.stochRIVICE.sim_profiles
 
 
 
@@ -118,6 +135,8 @@ Step 8: Plot exceedance probability for a specified chainage along reach
 """
 chainage=4000
 Roger.stochRIVICE.plot_prob_exceedance(chainage)
+
+
 
 
 
