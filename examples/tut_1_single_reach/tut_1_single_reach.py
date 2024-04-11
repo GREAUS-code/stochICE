@@ -13,6 +13,8 @@ Step 1: Either load in stochICE data from a previous stochastic modelling scenar
 
 previousRun=ice.open_batch(r'C:\Users\jason\Desktop\stochICE\examples\tut_1_single_reach\Results\RIVICE\test01\test01.ice')
 previousRun.stochRIVICE.plot_profiles()
+previousRun.stochRIVICE.plot_prob_exceedance(4000)
+previousRun.stochRIVICE.make_ice_profile_pdf()
 
 
 previousRun2=ice.open_batch(r'C:\Users\jason\Desktop\stochICE\examples\tut_1_single_reach\Results\RIVICE\test02\test02.ice')
@@ -37,7 +39,7 @@ Step 2: specify simulation parameters
 """
 
 #Number of simulations 
-NSims = 20
+NSims = 100
 
 #Simulation batch size (NSims/GrpSize must not have a remainder)
 GrpSize=20
@@ -137,12 +139,69 @@ chainage=4000
 Roger.stochRIVICE.plot_prob_exceedance(chainage)
 
 
+import pandas as pd
+
+sim_data=Roger.stochRIVICE.sim_data
+sim_profiles=Roger.stochRIVICE.sim_profiles
+
+
+def extract_from_sim_data(variable):
+    
+    values=[]
+    
+    for key, data in sim_data.items():
+        
+        values.append(data[variable])
+        
+    return values
+
+
+def extract_sim_data_at_chainage(chainage):
+    
+    df1=pd.DataFrame()
+    
+    df1['sim']=sim_data.keys()
+    
+    #extract stochastic variables
+    for key, data in stoch_variables.items():
+        df1[key]=extract_from_sim_data(key)
+    
+    
+    #extract results from simulation profiles at specified cross-section
+    result_names=['wse','depth','velocity','rH','area','thick']
+
+    results={}
+    
+    for name in result_names:
+        
+        results[name]=[]
+        
+    for sim, notused in sim_profiles.items():
+        
+        profile=sim_profiles[sim]
+        row=profile['chainage'].sub(chainage).abs().idxmin()
+        
+        for result in result_names:
+            
+            results[result].append(profile.iloc[row][result])
+            
+    df2=pd.DataFrame.from_dict(results)
+    
+    df=pd.concat([df1,df2],axis=1)
+
+    df.to_excel("results_xs_%s.xlsx" %str(chainage))
+    return df
 
 
 
+for_export2=Roger.stochRIVICE.extract_sim_data_at_chainage(6000)
 
 
+import seaborn as sn
+import matplotlib.pyplot as plt
 
+sn.heatmap(concat.corr(), annot=True)
+plt.show()
 
 
 # #RIVICE simulation parameters

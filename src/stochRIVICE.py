@@ -2004,8 +2004,8 @@ class StochRIVICE():
         for sim, notused in self.sim_profiles.items():
             
             profile=self.sim_profiles[sim]
-            row=profile['RIVICE_chainage'].sub(chainage).abs().idxmin()
-            closest_chainage=profile.iloc[row]['RIVICE_chainage']
+            row=profile['chainage'].sub(chainage).abs().idxmin()
+            closest_chainage=profile.iloc[row]['chainage']
             wse=profile.iloc[row]['wse']
             water_surface_levels.append(wse)
             
@@ -2139,7 +2139,54 @@ class StochRIVICE():
 
                         
                         
+    def extract_from_sim_data(self,variable):
+        
+        values=[]
+        
+        for key, data in self.sim_data.items():
             
+            values.append(data[variable])
+            
+        return values
+    
+    
+    def extract_sim_data_at_chainage(self,chainage):
+        
+        df1=pd.DataFrame()
+        
+        df1['sim']=self.sim_data.keys()
+        
+        #extract stochastic variables
+        for key, data in self.stochICE.riv_stochvars.items():
+            df1[key]=self.extract_from_sim_data(key)
+        
+        
+        #extract results from simulation profiles at specified cross-section
+        result_names=['wse','depth','velocity','rH','area','thick']
+    
+        results={}
+        
+        for name in result_names:
+            
+            results[name]=[]
+            
+        for sim, notused in self.sim_profiles.items():
+            
+            profile=self.sim_profiles[sim]
+            row=profile['chainage'].sub(chainage).abs().idxmin()
+            
+            for result in result_names:
+                
+                results[result].append(profile.iloc[row][result])
+                
+        df2=pd.DataFrame.from_dict(results)
+        
+        df=pd.concat([df1,df2],axis=1)
+        path=self.stochICE.prjDir +"\Results\RIVICE\%s\\results_xs_%s.xlsx" % (self.stochICE.ID,str(chainage))
+        print(path)
+        df.to_excel(path)
+        
+        return df       
             
             
             
