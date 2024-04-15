@@ -37,10 +37,12 @@ class StochHECRAS():
         return state
 
     def __setstate__(self, state):
+        
         self.__dict__.update(state)
+        
         # Add RC back since it doesn't exist in the pickle
         self.RC = win32com.client.Dispatch("RAS641.HECRASCONTROLLER")
-        print(state['stochICE'])
+        
         # self.read_geofile = open(state['stochICE'].geo_file, 'r')
 
         
@@ -211,7 +213,7 @@ class StochHECRAS():
         self.input_parms['jam_loc_upstream']=self.jam_loc_upstream
         self.input_parms['jam_loc_downstream']=self.jam_loc_downstream
 
-        print('\nHECRAS simulation(s) complete!')
+        # print('\nHECRAS simulation(s) complete!')
         
         
     def randomize_variables(self):

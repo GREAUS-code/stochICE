@@ -38,11 +38,10 @@ class stochICE():
                       profile_int,
                       clrRes,
                       compRes,
-                      fun_mode,
                       sleep,
                       stochvars):
 
-        print('This is a test')
+        
         #paths
         self.prjDir = prjDir
         self.ID=batch_ID
@@ -66,7 +65,7 @@ class stochICE():
         
         self.clr=clrRes
         self.compress=compRes
-        # self.fun=fun_mode
+      
         self.sleep=sleep
         #RIVICE input
         self.riv_interval=interval
@@ -95,11 +94,6 @@ class stochICE():
 
 		#Add functions here to run them by default
 
-        # if self.fun:
-        #     self.p = vlc.MediaPlayer(self.prjDir + "\Jamming.mp3")
-        #     # self.p = vlc.MediaPlayer(self.prjDir + "\Trololol.mp3")            
-        #     self.p.play()
-
         self.print_header()
         self.setup_monte_carlo_dir()
         self.copy_geofile()
@@ -119,7 +113,7 @@ class stochICE():
         """
 
         if code =='HECRAS':
-            print('Modeling with the HECRAS backend')
+            
             self.stochHECRAS=stochHECRAS.StochHECRAS(self)
             self.stochHECRAS.preprocess_sims()
             self.stochHECRAS.launch_sims()
@@ -134,8 +128,6 @@ class stochICE():
 
         if code =='RIVICE':
         
-            print('Modeling with the RIVICE backend.')
-            
             #create stochRIVICE instance
             self.stochRIVICE=stochRIVICE.StochRIVICE(self)
             self.stochRIVICE.clean_RIVICE_case()
@@ -180,6 +172,9 @@ class stochICE():
             self.stochRIVICE.make_sim_folders()
             self.stochRIVICE.call_write_TAPE5()
             self.stochRIVICE.launch_Cd1xe_with_INTP()
+            
+            print("Ready to launch RIVICE simulations in parallel.")
+            print("Use batchID.stochRIVICE.launch_RIVICE_parallel() command.\n")
             
             
             
@@ -241,7 +236,7 @@ class stochICE():
 
         print("\n")
         print("----------------------------------------------------------")
-        print("Running HEC-RAS iceJammer2000 flood modelling system v0.1")
+        print("      Running stochICE flood modelling system v0.0.1      ")
         print("----------------------------------------------------------")
 
         print(r"""⠀⠀⠀
@@ -272,11 +267,12 @@ class stochICE():
         print("                 Batch ID is: %s\n" % self.ID)
         print('                 ------------------\n')
 
-        print("A total of %s simulations will be run." % str(self.NSims))
-        print("Ice thickness varies between %3.2f and %3.2f m" %(self.thick[0],self.thick[1]))
-        print("Discharges vary between %3.2f and %3.2f m**3/s" %(self.flows[0],self.flows[1]))
-        print("Phi varies between %3.2f and %3.2f\n" %(self.phi[0],self.phi[1]))
-        print("Lodgement location randomly chosen between %2.0f provided locations.\n" %(len(self.locations)))
+        print("       A total of %s simulations will be run." % str(self.NSims))
+        print("                 Using %s backend.\n\n" %self.code)
+        # print("Ice thickness varies between %3.2f and %3.2f m" %(self.thick[0],self.thick[1]))
+        # print("Discharges vary between %3.2f and %3.2f m**3/s" %(self.flows[0],self.flows[1]))
+        # print("Phi varies between %3.2f and %3.2f\n" %(self.phi[0],self.phi[1]))
+        # print("Lodgement location randomly chosen between %2.0f provided locations.\n" %(len(self.locations)))
 
     
     def setup_monte_carlo_dir(self):
@@ -515,8 +511,12 @@ class stochICE():
         by the user.
         """
         
-        print("\nRunning openwater HECRAS simulation with average discharge")
-        print("This is necessary to populate a hydraulic table in RIVICE\n")
+        print("\n\n")
+        
+        
+        print("\n***********************************************************")
+        print("\n            Running openwater HECRAS simulation         ")
+        print("              to populate RIVICE hydraulic table \n")
         
         self.NSims = 1
 
@@ -544,7 +544,8 @@ class stochICE():
         self.open_HECRAS_wse['wse']=self.stochHECRAS.result_profiles['sim_1']['WSE'].tolist()
         self.open_HECRAS_wse['discharge'] = flow
 
-
+        print("\n        *** HECRAS precursor simulation complete ***")
+        print("------------------------------------------------------------\n\n")
 
 
 

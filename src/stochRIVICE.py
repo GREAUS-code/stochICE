@@ -841,10 +841,12 @@ class StochRIVICE():
         for sim in range(self.stochICE.NSims):
             self.sim='sim_%d' %sim
             self.write_TAPE5()
+            
+        print("Wrote tape5.txt files for %s simulations" % str(self.stochICE.NSims))
 
     def write_TAPE5(self):
         
-        print("Writing TAPE5 ...")
+        
         
         def string_length_adjustment(string,length,position):
             
