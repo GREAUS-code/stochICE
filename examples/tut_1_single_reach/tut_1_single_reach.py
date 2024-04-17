@@ -55,7 +55,7 @@ max_Q=350
 #RIVICE simulation parameters
 riv_sim_days = 0.2       # days
 riv_timestep = 30        # seconds
-riv_ice_start=0.1        # days 
+riv_ice_start=0.2        # days 
 riv_ice_end=0.2          # days
 riv_interInt = 30        # x-section interpolation interval (m) (recommendation: width of the river)
 riv_profile_interval=0.2 # Profile output interval in days (must be a divisor of riv_sim_days)
@@ -67,9 +67,9 @@ Step 3: specify distribution type of the varaibles to stochastically model.
 """
 
 
-stoch_variables={'Frontthick':['uniform',[0.1,0.6],2],
+stoch_variables={'Frontthick':['uniform',[0.0,0.0],2],
                  'Q':['Gumbel',[50,10,1000],2],
-                 'IceVol':['uniform',[1,10],2],
+                 'IceVol':['uniform',[0,0],2],
                  'RLOCBRG':['uniform',[1000,8000],0],
                  'FACTOR3':['uniform',[0.08,0.09],2]
                  }
@@ -105,6 +105,8 @@ test01=ice.stochICE(prjDir=path,
                                   sleep=5,
                                   stochvars=stoch_variables)
 
+test01.stochRIVICE.inflow_data
+bobbby=test01.stochRIVICE.xs_data
 """
 Step 5: Launch simulations in parallel
 """
@@ -128,7 +130,7 @@ Step 7: Plot water surface profile envelope for reach
 """
 
 test01.stochRIVICE.plot_profiles()
-
+test01.stochRIVICE.
 
 
 for_export2=test01.stochRIVICE.extract_sim_data_at_chainage(8000)
@@ -138,8 +140,135 @@ for_export2=test01.stochRIVICE.extract_sim_data_at_chainage(8000)
 """
 Step 8: Plot exceedance probability for a specified chainage along reach
 """
-# chainage=4000
-# Roger.stochRIVICE.plot_prob_exceedance(chainage)
+chainage=4000
+test01.stochRIVICE.plot_prob_exceedance(chainage)
+
+
+
+import os
+
+lateral_flow_path = path +'\\'+ 'Lateral_flows.txt'
+inflow_data={}
+
+
+if os.path.isfile(lateral_flow_path):
+    
+    with open(lateral_flow_path, 'r') as f:
+    			
+    
+        for count, line in enumerate(f):
+    
+            if "NLAT" in line:
+    					
+                NLAT=int(line.split("=")[1].strip())
+                
+                for inflow in range(NLAT):
+                    inflow_data[str(inflow+1)]={}
+            
+            if "NBR" in line:
+                
+                # Changed IL to NBR to prevent reading other variables with "IL" such as "TIL"
+                NBR = int(line.split("=")[1].strip())
+
+            if "KLAT" in line:
+                
+                KLAT = int(line.split("=")[1].strip())
+                inflow_data[str(NBR)]["KLAT"]=KLAT
+
+            if "XLAT" in line:
+                
+                XLAT = int(line.split("=")[1].strip())
+                inflow_data[str(NBR)]["XLAT"]=XLAT
+
+            if "DX_LAT" in line:
+                
+                # Changed DXLAT to DX_LAT to prevent confusion with "XLAT"
+                DXLAT = int(line.split("=")[1].strip())
+                inflow_data[str(NBR)]["DXLAT"]=DXLAT
+
+            if "ILAT" in line:
+                
+                ILAT = int(line.split("=")[1].strip())
+                inflow_data[str(NBR)]["ILAT"]=ILAT
+
+            if "IT" in line:
+                
+                IT = int(line.split("=")[1].strip())
+                inflow_data[str(NBR)]["IT"]=IT
+
+            if "TIL" in line:
+                
+                TIL = int(line.split("=")[1].strip())
+                inflow_data[str(NBR)]["TIL"]=TIL
+
+            if "QLAT" in line:
+                
+                QLAT = float(line.split("=")[1].strip())
+                inflow_data[str(NBR)]["QLAT"]=QLAT
+
+            if "CLAT" in line:
+                
+                CLAT = int(line.split("=")[1].strip())
+                inflow_data[str(NBR)]["CLAT"]=CLAT
+
+            if "SYM" in line:
+                
+                SYM = line.split("=")[1].strip()
+                inflow_data[str(NBR)]["SYM"]=SYM
+
+
+
+                
+            #     self.xs_data[xs]={}
+            #     self.xs_data[xs]['chainage']=float(xs)
+                
+            #     for variable in self.ice_variables:
+            #         self.xs_data[xs][variable]={}
+                
+            #     flag=True
+            #     variable_counter=0
+    					
+            # else:
+                
+            #     if flag:
+                    
+            #         for variable in self.ice_variables:
+                        
+                        
+            #             if variable in line:
+                            
+            #                 variable_counter = variable_counter + 1
+                            
+            #                 self.xs_data[xs][variable]['val']=line.split("=")[1].strip()
+            #                 self.xs_data[xs][variable]['lnNum']=count
+                            
+            #             if variable_counter == len(self.ice_variables):
+            #                 flag=False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # import pandas as pd

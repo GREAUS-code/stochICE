@@ -63,7 +63,8 @@ class StochHECRAS():
         # HECRAS controller variable output codes (Available in Annexe E of Breaking the HEC-RAS code)
         self.WSE_id = 2
         self.ice_thickness_id = 184
-        self.MinChEle= 5        
+        self.MinChEle= 5
+        self.station_nbr_id=161        
 
 
     def launch_sims(self):
@@ -137,6 +138,7 @@ class StochHECRAS():
             wse_list=[]
             ice_thick_list=[]
             min_channel_ele_list=[]
+            stations=[]
 
             self.V1,self.v2,self.NNod,self.TabRS,self.TabNTyp = self.RC.Geometry_GetNodes(self.RiverID,
                                                                                           self.ReachID,
@@ -172,6 +174,16 @@ class StochHECRAS():
                                                                                                          self.MinChEle)
                     min_channel_ele_list.append(minChEle)
 
+            #get station of main channel
+            for i in range(0,self.NNod):
+                if self.TabNTyp[i] =="":
+                    stationNbr,self.v1,self.v2,self.v3,self.v4,self.v5,self.v6 = self.RC.Output_NodeOutput(self.RiverID,
+                                                                                                         self.ReachID,
+                                                                                                         i+1,0,1,
+                                                                                                         self.station_nbr_id)
+
+                    stations.append(stationNbr)
+                    
  			#-----------------------
  			#store simulation data
  			#-----------------------
@@ -180,10 +192,11 @@ class StochHECRAS():
             self.result_profiles[self.sim_key]['IceThick']=np.asarray(ice_thick_list)
             self.result_profiles[self.sim_key]['MinChEle']=np.asarray(min_channel_ele_list)
             self.result_profiles[self.sim_key]['TopIceMaxDepth']=self.result_profiles[self.sim_key]['WSE']-self.result_profiles[self.sim_key]['MinChEle']
+            self.result_profiles[self.sim_key]['station']=np.asarray(stations)
 
  			#copy and store 2D flood map for 
-            # tif_filename=self.stochICE.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\WSE_"+str(self.flow)+"_"+str(self.ice_thickness)+"_"+str(self.phi)+".tif"
-            # shutil.copyfile(self.stochICE.wse_map_path,tif_filename)
+            tif_filename=self.stochICE.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\WSE_"+str(self.flow)+"_"+str(self.ice_thickness)+"_"+str(self.phi)+".tif"
+            shutil.copyfile(self.stochICE.wse_map_path,tif_filename)
             # os.remove(self.stochICE.wse_map_path)
 
             vrts_to_remove = glob.glob(self.stochICE.prjDir+"\\MonteCarlo\\SimulationTifs"+"\\*.vrt")
@@ -222,7 +235,7 @@ class StochHECRAS():
 
         #randomly select between min and max
         self.ice_thickness = round(secure_random.uniform(self.stochICE.thick[0], self.stochICE.thick[1]),2)
-        self.phi = round(secure_random.uniform(self.stochICE.phi[0], self.stochICE.phi[1]),0)
+        self.phi = round(secure_random.uniform(self.stochICE.phi[0], self.stochICE.phi[1]),2)
         self.thicknesses= [[str(self.ice_thickness)+","+str(self.ice_thickness)+","+str(self.ice_thickness)]]
 
         self.xs_data_modified=self.stochICE.xs_data
@@ -420,10 +433,6 @@ class StochHECRAS():
         
         result.write(stoch[0,:,:],1)
         result.close()
-
-
-
-
 
 
 class Stopwatch:

@@ -1,0 +1,25 @@
+NLAT = 2
+
+NBR = 1
+KLAT = 1
+XLAT = 1000.
+DX_LAT = 400.00
+ILAT = 1
+IT = 1
+TIL = 0.0
+QLAT = 0.1
+CLAT = 32.0
+NPAR=1
+SYM = T
+
+NBR = 2
+KLAT = 1
+XLAT = 5000.
+DX_LAT = 400.00
+ILAT = 1
+IT = 1
+TIL = 0.0
+QLAT = 0.2
+CLAT = 32.0
+NPAR=1
+SYM = T

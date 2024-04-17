@@ -835,6 +835,92 @@ class StochRIVICE():
                         if 'sim_' in fname:
                             shutil.rmtree(folderpath)
                             # os.rmdir(folderpath)
+
+
+    def get_lateral_inflows(self):
+
+        self.lateral_flow_path = self.stochICE.prjDir +'\\'+ 'Lateral_flows.txt'
+        
+        
+        
+        if os.path.isfile(self.lateral_flow_path):
+            
+            self.inflow_data={}
+            
+            print("\nLateral_inflows.txt file present.")
+            
+            with open(self.lateral_flow_path, 'r') as f:
+            			
+            
+                for count, line in enumerate(f):
+            
+                    if "NLAT" in line:
+            					
+                        NLAT=int(line.split("=")[1].strip())
+                        
+                        for inflow in range(NLAT):
+                            self.inflow_data[str(inflow+1)]={}
+                        
+                        print("%s lateral inflows or outflows specified.\n" %NLAT)
+                    
+                    if "NBR" in line:
+                        
+                        # Changed IL to NBR to prevent reading other variables with "IL" such as "TIL"
+                        self.NBR_lat_inflow = int(line.split("=")[1].strip())
+        
+                    if "KLAT" in line:
+                        
+                        KLAT = int(line.split("=")[1].strip())
+                        print(self.inflow_data)
+                        self.inflow_data[str(self.NBR_lat_inflow)]["KLAT"]=KLAT
+        
+                    if "XLAT" in line:
+                        
+                        XLAT = line.split("=")[1].strip()
+                        self.inflow_data[str(self.NBR_lat_inflow)]["XLAT"]=XLAT
+        
+                    if "DX_LAT" in line:
+                        
+                        # Changed DXLAT to DX_LAT to prevent confusion with "XLAT"
+                        DXLAT = line.split("=")[1].strip()
+                        self.inflow_data[str(self.NBR_lat_inflow)]["DXLAT"]=DXLAT
+        
+                    if "ILAT" in line:
+                        
+                        ILAT = int(line.split("=")[1].strip())
+                        self.inflow_data[str(self.NBR_lat_inflow)]["ILAT"]=ILAT
+        
+                    if "IT" in line:
+                        
+                        IT = int(line.split("=")[1].strip())
+                        self.inflow_data[str(self.NBR_lat_inflow)]["IT"]=IT
+        
+                    if "TIL" in line:
+                        
+                        TIL = line.split("=")[1].strip()
+                        self.inflow_data[str(self.NBR_lat_inflow)]["TIL"]=TIL
+        
+                    if "QLAT" in line:
+                        
+                        QLAT = float(line.split("=")[1].strip())
+                        self.inflow_data[str(self.NBR_lat_inflow)]["QLAT"]=QLAT
+        
+                    if "CLAT" in line:
+                        
+                        CLAT = line.split("=")[1].strip()
+                        self.inflow_data[str(self.NBR_lat_inflow)]["CLAT"]=CLAT
+
+                    if "NPAR" in line:
+                        
+                        NPAR = int(line.split("=")[1].strip())
+                        self.inflow_data[str(self.NBR_lat_inflow)]["NPAR"]=NPAR
+        
+                    if "SYM" in line:
+                        
+                        SYM = line.split("=")[1].strip()
+                        self.inflow_data[str(self.NBR_lat_inflow)]["SYM"]=SYM
+
+
     
     def call_write_TAPE5(self):
         
@@ -993,33 +1079,51 @@ class StochRIVICE():
         """
         IV_bc_inputs = []
 
-        if self.stochICE.riv_ice_start != 0:
+        if self.stochICE.riv_ice_start == 0:
+            
+            IV_bc_inputs.append([0,self.sim_data[self.sim]['IceVol']])
+
+        if self.stochICE.riv_ice_start < self.stochICE.riv_days:
             
             IV_bc_inputs.append([0,0])
             
             start_of_ice=self.stochICE.riv_ice_start*(60*60*24)
             time_steps=int(start_of_ice/self.stochICE.riv_timestep)
+            self.sim_data[self.sim]['DAYSBR']=self.stochICE.riv_ice_start
+            IV_bc_inputs.append([time_steps,self.sim_data[self.sim]['IceVol']])
+            
+            end_of_sim=self.stochICE.riv_days*(60*60*24)
+            time_steps=int(end_of_sim/self.stochICE.riv_timestep)
             IV_bc_inputs.append([time_steps,self.sim_data[self.sim]['IceVol']])
 
-        if self.stochICE.riv_ice_start == 0:
+        if self.stochICE.riv_ice_start == self.stochICE.riv_days:
             
-            IV_bc_inputs.append([0,self.sim_data[self.sim]['IceVol']])
-
-        if self.stochICE.riv_ice_end != self.stochICE.riv_days:
-            print("I am in here")
-            end_of_ice=self.stochICE.riv_ice_end*(60*60*24)
-            time_steps=int(end_of_ice/self.stochICE.riv_timestep)
-            IV_bc_inputs.append([time_steps,0])
+            IV_bc_inputs.append([0,0])
             
-            end_of_ice=self.stochICE.riv_days*(60*60*24)
-            time_steps=int(end_of_ice/self.stochICE.riv_timestep)
-            IV_bc_inputs.append([time_steps,0])
-
-        if self.stochICE.riv_ice_end == self.stochICE.riv_days:
-            
-            end_of_ice=self.stochICE.riv_days*(60*60*24)
-            time_steps=int(end_of_ice/self.stochICE.riv_timestep)
+            end_of_sim=self.stochICE.riv_days*(60*60*24)
+            time_steps=int(end_of_sim/self.stochICE.riv_timestep)
+            self.sim_data[self.sim]['DAYSBR']=self.stochICE.riv_ice_start
             IV_bc_inputs.append([time_steps,self.sim_data[self.sim]['IceVol']])
+
+
+
+        # if self.stochICE.riv_ice_end == self.stochICE.riv_days:
+            
+        #     end_of_ice=self.stochICE.riv_days*(60*60*24)
+        #     time_steps=int(end_of_ice/self.stochICE.riv_timestep)
+        #     IV_bc_inputs.append([time_steps,self.sim_data[self.sim]['IceVol']])
+
+        # if self.stochICE.riv_ice_end < self.stochICE.riv_days:
+            
+        #     end_of_ice=self.stochICE.riv_ice_end*(60*60*24)
+        #     time_steps=int(end_of_ice/self.stochICE.riv_timestep)
+        #     IV_bc_inputs.append([time_steps,0])
+            
+            # end_of_ice=self.stochICE.riv_days*(60*60*24)
+            # time_steps=int(end_of_ice/self.stochICE.riv_timestep)
+            # IV_bc_inputs.append([time_steps,0])
+
+
 
         
                                                
@@ -1273,11 +1377,39 @@ class StochRIVICE():
                 TAPE5.write("\n")
                 
                 
+        
         # Writing Lateral Inflow parameters of the reaches 
         TAPE5.write("D              LATERAL INFLOW")
         TAPE5.write("\n")
-        TAPE5.write("         0")
-        TAPE5.write("\n")
+        
+        try:
+            
+            TAPE5.write("         %s\n"%self.NBR_lat_inflow)
+            
+            for inflow, data in self.inflow_data.items():
+                
+                IL= string_length_adjustment(inflow,10,'F')
+                KLAT=string_length_adjustment(str(self.inflow_data[inflow]['KLAT']),10,'F' )
+                XLAT=string_length_adjustment(str(self.inflow_data[inflow]['XLAT']),10,'F' )
+                DXLAT=string_length_adjustment(str(self.inflow_data[inflow]['DXLAT']),10,'F' )
+                ILAT=string_length_adjustment(str(self.inflow_data[inflow]['ILAT']),10,'F' )
+                IT=string_length_adjustment(str(self.inflow_data[inflow]['IT']),5,'F' )
+                NPAR=string_length_adjustment(str(self.inflow_data[inflow]['NPAR']),5,'F' )
+                TAPE5.write(IL+KLAT+XLAT+DXLAT+ILAT+IT+NPAR+"\n")
+                
+                #Coded for steady. This would need to be looped for unsteady lateral inflows.
+                TAPE5.write(string_length_adjustment(str(self.inflow_data[inflow]['SYM']),10,'B' )+"\n")
+                TIL=string_length_adjustment(str(self.inflow_data[inflow]['TIL']),10,'F' )
+                QLAT=string_length_adjustment(str(self.inflow_data[inflow]['QLAT']),10,'F' )
+                CLAT=string_length_adjustment(str(self.inflow_data[inflow]['CLAT']),10,'F' )
+                TAPE5.write(TIL+QLAT+CLAT+"\n")
+            
+        except AttributeError:
+             
+            TAPE5.write(string_length_adjustment("0",10,'F' ))
+            
+            
+        
         
         # Writing Injection Points parameters of the reaches 
         TAPE5.write("E              INJECTION POINTS")
