@@ -1,9 +1,9 @@
-Plan Title=secteur_neufpas_50
+Plan Title=MonteCarlo
 Program Version=6.41
-Short Identifier=50_sans_glace                                                   
+Short Identifier=MonteCarlo                                                      
 Simulation Date=,,,
 Geom File=g01
-Flow File=f02
+Flow File=f01
 Subcritical Flow
 K Sum by GR= 0 
 Std Step Tol= 0.003 
@@ -47,7 +47,7 @@ Run UNet= 0
 Run Sediment= 0 
 Run PostProcess= 0 
 Run WQNet= 0 
-Run RASMapper= 0 
+Run RASMapper=-1 
 UNET Theta= 1 
 UNET Theta Warmup= 1 
 UNET ZTol= 0.006 

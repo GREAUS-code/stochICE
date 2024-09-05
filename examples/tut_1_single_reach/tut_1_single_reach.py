@@ -25,12 +25,12 @@ Step 1: ... specify input files and paths to begin a new stochastic modelling sc
 """
 
 #Change to the the path containing your HECRAS files
-path = r'C:\Users\dugj2403\Desktop\stochICE\examples\tut_1_single_reach'
+path = r'C:\Users\Jason\Desktop\stochICE\examples\tut_1_single_reach'
 batch_ID="test01"
 ras = "Secteur_neufpas.prj"
 geo = "Secteur_neufpas.g01"
 flowFile = "Secteur_neufpas.f01"
-wse= 'WSE (13 avril 2011).Terrain.MNT_Point_a_neuf_pas.tif'
+wse= 'WSE (PF 1).Terrain.MNT_Point_a_neuf_pas.tif'
 
 
 
@@ -39,15 +39,15 @@ Step 2: specify simulation parameters
 """
 
 #Number of simulations 
-NSims = 10
+NSims = 5
 
 #Simulation batch size (NSims/GrpSize must not have a remainder)
 GrpSize=10
 
 #Inputs necessary for HECRAS precursor openwater simulation
-thick=[0,0]
+thick=[0.10,0.8]
 phi=[0,0]
-flows=[100,100]            
+flows=[20,600]            
 locations=[[0,0]]          
 ds_slope=0.00031
 max_Q=350
@@ -77,7 +77,7 @@ stoch_variables={'Frontthick':['uniform',[0.0,0.0],2],
 """
 Step 4: Setup up simulation folders and write TAPE5.txt for each simulation.
 """
-test01=ice.stochICE(prjDir=path,
+test01=ice.StochICE(prjDir=path,
 
                                   batch_ID=batch_ID,
                                   ras_file=ras,
@@ -93,7 +93,7 @@ test01=ice.stochICE(prjDir=path,
                                   max_Q=max_Q,
                                   locations=locations,
                                   riv_dwn_bc_opt=riv_dwn_bc_opt,
-                                  code='RIVICE',
+                                  code='HECRAS',
                                   days=riv_sim_days,
                                   timestep=riv_timestep,
                                   ice_start=riv_ice_start,

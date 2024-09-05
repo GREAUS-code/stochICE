@@ -1,12 +1,12 @@
 <RASMapper>
   <Version>2.0.0</Version>
-  <RASProjectionFilename Filename=".\NAD83SCRSMTM8.prj" />
+  <RASProjectionFilename Filename=".\Terrain\Projection.prj" />
   <Features>
     <Layer Name="Profile Lines" Type="PolylineFeatureLayer" Filename="..\secteur_Pointe_a_noeuf_pas_MT - Copie\Features\Profile Lines.shp" />
   </Features>
   <Geometries Checked="True" Expanded="True">
     <Layer Name="geometry_1D" Type="RASGeometry" Checked="True" Expanded="True" Filename=".\Secteur_neufpas.g01.hdf">
-      <Layer Type="RASRiver" Checked="True" Expanded="True" />
+      <Layer Type="RASRiver" Checked="True" />
       <Layer Type="RASJunction" Checked="True" />
       <Layer Type="RASBankLines" Checked="True" />
       <Layer Type="FlowPaths" Checked="True" />
@@ -86,16 +86,16 @@
     </Layer>
   </Geometries>
   <Plans>
-    <Layer Name="Secteur_neufpas_avec_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p02" GeometryHDF=".\Secteur_neufpas.g02.hdf">
+    <Layer Name="secteur_neufpas_80" Type="RASPlan" Filename=".\Secteur_neufpas.p02" GeometryHDF=".\Secteur_neufpas.g01.hdf">
       <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p02" />
     </Layer>
-    <Layer Name="Secteur_neufpas_sans_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p01" GeometryHDF=".\Secteur_neufpas.g01.hdf">
+    <Layer Name="MonteCarlo" Type="RASPlan" Filename=".\Secteur_neufpas.p01" GeometryHDF=".\Secteur_neufpas.g01.hdf">
       <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p01" />
     </Layer>
-    <Layer Name="Plan 03" Type="RASPlan" Filename=".\Secteur_neufpas.p03" GeometryHDF=".\Secteur_neufpas.g01.hdf">
+    <Layer Name="secteur_neufpas_150" Type="RASPlan" Filename=".\Secteur_neufpas.p03" GeometryHDF=".\Secteur_neufpas.g01.hdf">
       <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p03" />
     </Layer>
-    <Layer Name="50_20cm_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p04" GeometryHDF=".\Secteur_neufpas.g02.hdf">
+    <Layer Name="secteur_neufpas_50_20cm_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p04" GeometryHDF=".\Secteur_neufpas.g02.hdf">
       <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p04" />
     </Layer>
     <Layer Name="80_20cm_glace" Type="RASPlan" Filename=".\Secteur_neufpas.p05" GeometryHDF=".\Secteur_neufpas.g02.hdf">
@@ -112,63 +112,27 @@
     <Layer Name="Q_calib_2022_04_30" Type="RASEventConditions" Filename="..\secteur_Pointe_a_noeuf_pas_MT - Copie\sans_ponts.u01.hdf" />
     <Layer Name="Q_calib_2022_04_30" Type="RASEventConditions" Filename=".\Secteur_neufpas.u01.hdf" />
   </EventConditions>
-  <Results Expanded="True">
-    <Layer Name="MonteCarlo" Type="RASResults" Checked="True" Expanded="True" Filename=".\Secteur_neufpas.p02.hdf">
-      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p02.hdf" />
-      <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p02.hdf">
-        <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Type="StructureLayer" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
-        <Layer Type="FinalNValueLayer">
+  <Results Checked="True" Expanded="True">
+    <Layer Name="MonteCarlo" Type="RASResults" Checked="True" Expanded="True" Filename=".\Secteur_neufpas.p01.hdf">
+      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p01.hdf">
+        <Layer Name="Wind Layer" Type="ResultWindLayer" Filename=".\Secteur_neufpas.p01.hdf">
           <ResampleMethod>near</ResampleMethod>
           <Surface On="True" />
-        </Layer>
-        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p02.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p02.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
+          <Metadata BandIndex="0" SubDataset="" />
         </Layer>
       </Layer>
-      <Layer Name="Plan" Type="RASPlan" Filename=".\Secteur_neufpas.p02.hdf" GeometryHDF=".\Secteur_neufpas.p02.hdf">
-        <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p02.hdf" />
-      </Layer>
-      <Layer Name="Depth" Type="RASResultsMap">
-        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="None" />
-      </Layer>
-      <Layer Name="Velocity" Type="RASResultsMap">
-        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="None" />
-      </Layer>
-      <Layer Name="WSE" Type="RASResultsMap" Checked="True" Filename="WSE (None).vrt">
-        <LabelFeatures Checked="True" PercentPosition="0" rows="1" cols="1" r0c0="FID" Position="5" Color="-16777216" FontSize="8.25" />
-        <MapParameters MapType="elevation" LayerName="Water Surface Elevation" OutputMode="Stored Current Terrain" StoredFilename="WSE (None).vrt" Terrain="Terrain" ProfileIndex="0" ProfileName="None" ArrivalDepth="0" />
-      </Layer>
-    </Layer>
-    <Layer Name="Plan 01" Type="RASResults" Expanded="True" Filename=".\Secteur_neufpas.p01.hdf">
-      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p01.hdf" />
       <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p01.hdf">
         <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
+        <Layer Type="RASD2FlowArea">
+          <DataColumnGroupVisibilities>
+            <DataColumnGroupVisibility DisplayName="Feature Parameters" IsVisible="False" />
+          </DataColumnGroupVisibilities>
+        </Layer>
+        <Layer Type="MeshPerimeterLayer">
+          <DataColumnGroupVisibilities>
+            <DataColumnGroupVisibility DisplayName="Feature Parameters" IsVisible="True" />
+          </DataColumnGroupVisibilities>
+        </Layer>
         <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
         <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
         <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
@@ -207,183 +171,12 @@
         <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p01.hdf" />
       </Layer>
       <Layer Name="Depth" Type="RASResultsMap">
-        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="None" />
-      </Layer>
-      <Layer Name="Velocity" Type="RASResultsMap">
-        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="None" />
-      </Layer>
-      <Layer Name="WSE" Type="RASResultsMap">
-        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="None" />
-      </Layer>
-    </Layer>
-    <Layer Name="sans_glace_50" Type="RASResults" Expanded="True" Filename=".\Secteur_neufpas.p03.hdf">
-      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p03.hdf">
-        <Layer Name="Wind Layer" Type="ResultWindLayer" Filename=".\Secteur_neufpas.p03.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-          <Metadata BandIndex="0" SubDataset="" />
-        </Layer>
-      </Layer>
-      <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p03.hdf">
-        <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Type="StructureLayer" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
-        <Layer Type="FinalNValueLayer">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p03.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p03.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-      </Layer>
-      <Layer Name="Plan" Type="RASPlan" Filename=".\Secteur_neufpas.p03.hdf" GeometryHDF=".\Secteur_neufpas.p03.hdf">
-        <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p03.hdf" />
-      </Layer>
-      <Layer Name="Depth" Type="RASResultsMap">
         <MapParameters MapType="depth" ProfileIndex="0" ProfileName="PF 1" />
       </Layer>
       <Layer Name="Velocity" Type="RASResultsMap">
         <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="PF 1" />
       </Layer>
-      <Layer Name="WSE" Type="RASResultsMap">
-        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="PF 1" />
-      </Layer>
-    </Layer>
-    <Layer Name="50_20cm_glace" Type="RASResults" Filename=".\Secteur_neufpas.p04.hdf">
-      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p04.hdf">
-        <Layer Name="Wind Layer" Type="ResultWindLayer" Filename=".\Secteur_neufpas.p04.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-          <Metadata BandIndex="0" SubDataset="" />
-        </Layer>
-      </Layer>
-      <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p04.hdf">
-        <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Type="StructureLayer" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
-        <Layer Type="FinalNValueLayer">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p04.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p04.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-      </Layer>
-      <Layer Name="Plan" Type="RASPlan" Filename=".\Secteur_neufpas.p04.hdf" GeometryHDF=".\Secteur_neufpas.p04.hdf">
-        <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p04.hdf" />
-      </Layer>
-      <Layer Name="Depth" Type="RASResultsMap">
-        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="PF 1" />
-      </Layer>
-      <Layer Name="Velocity" Type="RASResultsMap">
-        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="PF 1" />
-      </Layer>
-      <Layer Name="WSE" Type="RASResultsMap">
-        <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="PF 1" />
-      </Layer>
-    </Layer>
-    <Layer Name="80_20cm_glace" Type="RASResults" Filename=".\Secteur_neufpas.p05.hdf">
-      <Layer Name="Event Conditions" Type="RASEventConditions" Filename=".\Secteur_neufpas.p05.hdf">
-        <Layer Name="Wind Layer" Type="ResultWindLayer" Filename=".\Secteur_neufpas.p05.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-          <Metadata BandIndex="0" SubDataset="" />
-        </Layer>
-      </Layer>
-      <Layer Type="RASGeometry" Filename=".\Secteur_neufpas.p05.hdf">
-        <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
-        <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
-        <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
-        <Layer Type="StructureLayer" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
-        <Layer Type="FinalNValueLayer">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p05.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-        <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Secteur_neufpas.p05.hdf">
-          <ResampleMethod>near</ResampleMethod>
-          <Surface On="True" />
-        </Layer>
-      </Layer>
-      <Layer Name="Plan" Type="RASPlan" Filename=".\Secteur_neufpas.p05.hdf" GeometryHDF=".\Secteur_neufpas.p05.hdf">
-        <Layer Name="Encroachment Regions" Type="RASEncroachmentPolygons" Filename=".\Secteur_neufpas.p05.hdf" />
-      </Layer>
-      <Layer Name="Depth" Type="RASResultsMap">
-        <MapParameters MapType="depth" ProfileIndex="0" ProfileName="PF 1" />
-      </Layer>
-      <Layer Name="Velocity" Type="RASResultsMap">
-        <MapParameters MapType="velocity" ProfileIndex="0" ProfileName="PF 1" />
-      </Layer>
-      <Layer Name="WSE" Type="RASResultsMap">
+      <Layer Name="WSE" Type="RASResultsMap" Checked="True">
         <MapParameters MapType="elevation" ProfileIndex="0" ProfileName="PF 1" />
       </Layer>
     </Layer>
@@ -392,26 +185,18 @@
     <Layer Name="ArcGIS World Imagery" Type="WMSLayer" Filename="%LocalAppData%\HEC\Mapping\5.1\XML\ArcGIS World Imagery.xml">
       <ResampleMethod>near</ResampleMethod>
     </Layer>
-    <Layer Name="Assomption_P_ligne_eau_2020_05_02" Type="PointFeatureLayer" Filename="..\secteur_Pointe_a_noeuf_pas_MT - Copie\01observations\Assomption_P_ligne_eau_2020_05_02.shp">
-      <LabelFeatures Checked="True" PercentPosition="0" rows="1" cols="1" r0c0="Z" Position="3" Color="-16777216" FontSize="8.25" />
-    </Layer>
-    <Layer Name="Assomption_P_ligne_eau_2021_03_31" Type="PointFeatureLayer" Filename="..\secteur_Pointe_a_noeuf_pas_MT - Copie\01observations\Assomption_P_ligne_eau_2021_03_31.shp" />
-    <Layer Name="Assomption_HB_ligne_eau_2022_04_30" Type="PointFeatureLayer" Filename="..\secteur_Pointe_a_noeuf_pas_MT - Copie\01observations\Assomption_HB_ligne_eau_2022_04_30.shp" />
   </MapLayers>
   <Terrains Checked="True" Expanded="True">
-    <Layer Name="Terrain" Type="TerrainLayer" Checked="True" Filename=".\Terrain\Terrain.hdf">
-      <Symbology>
-        <SurfaceFill Colors="-10039894,-256,-16744448,-23296,-7667712,-5952982,-8355712,-1286" Values="55.5859375,75.0324252804147,79.3972220909734,82.5737827228075,86.1702891841927,89.1933744727708,93.2891007255157,111.5078125" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
-      </Symbology>
+    <Layer Name="Terrain (1)" Type="TerrainLayer" Checked="True" Filename=".\Terrain\Terrain (1).hdf">
       <ResampleMethod>near</ResampleMethod>
       <Surface On="True" />
     </Layer>
   </Terrains>
   <CurrentView>
-    <MaxX>308569.815298485</MaxX>
-    <MinX>303219.945819013</MinX>
-    <MaxY>5107042.81695007</MaxY>
-    <MinY>5103090.7971145</MinY>
+    <MaxX>307721.553030265</MaxX>
+    <MinX>302361.553030265</MinX>
+    <MaxY>5107017.63765868</MaxY>
+    <MinY>5102803.63765868</MinY>
   </CurrentView>
   <VelocitySettings>
     <Density>1.5</Density>
@@ -447,7 +232,7 @@
     </ProjectSettings>
     <Folders>
       <TerrainDestinationFolder>.\Terrain</TerrainDestinationFolder>
-      <TerrainSourceFolder>..\Secteur_NeufPas</TerrainSourceFolder>
+      <TerrainSourceFolder>.\Terrain</TerrainSourceFolder>
       <AddDataFolder>.\01observations</AddDataFolder>
     </Folders>
   </CurrentSettings>
