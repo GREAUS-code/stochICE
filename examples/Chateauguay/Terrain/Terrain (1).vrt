@@ -1,0 +1,32 @@
+<VRTDataset rasterXSize="4000" rasterYSize="7000">
+  <SRS dataAxisToSRSAxisMapping="1,2">PROJCS["NAD83(CSRS98) / MTM zone 8",GEOGCS["NAD83(CSRS98)",DATUM["NAD83_Canadian_Spatial_Reference_System",SPHEROID["GRS 1980",6378137,298.257222101004,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6140"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-73.5],PARAMETER["scale_factor",0.9999],PARAMETER["false_easting",304800],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]</SRS>
+  <GeoTransform>  2.8300000000000000e+05,  1.0000000000000000e+00,  0.0000000000000000e+00,  5.0300000000000000e+06,  0.0000000000000000e+00, -1.0000000000000000e+00</GeoTransform>
+  <VRTRasterBand dataType="Float32" band="1">
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">99</MDI>
+      <MDI key="STATISTICS_MEAN">26.543182810394</MDI>
+      <MDI key="STATISTICS_MINIMUM">6.90625</MDI>
+      <MDI key="STATISTICS_STDDEV">6.8785416425122</MDI>
+    </Metadata>
+    <NoDataValue>-9999</NoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <Histograms>
+      <HistItem>
+        <HistMin>6.90625</HistMin>
+        <HistMax>99</HistMax>
+        <BucketCount>256</BucketCount>
+        <IncludeOutOfRange>1</IncludeOutOfRange>
+        <Approximate>0</Approximate>
+        <HistCounts>200|519|639|572|522|504|426|401|437|927|2942|2173|945|695|546|482|451|412|388|357|381|385|561|1586|3115|7474|11903|22540|40736|57377|77527|73942|67952|75245|85088|140366|173912|163206|99426|2622748|4380298|2601091|1215707|780532|911006|700112|604669|545777|407410|355425|357386|338818|329680|310900|298281|220274|218515|219484|233985|282372|356617|401884|465359|466350|420853|356655|279905|278590|308660|312377|340596|323214|305950|303290|257309|228086|204943|202856|173495|143673|96948|81410|64685|64110|71472|75049|64972|58972|60829|81298|91669|85933|86240|79957|87392|76967|71326|68920|71197|68637|76769|90655|86977|86168|86636|99828|105596|73244|54080|46777|45489|52603|101063|86176|24448|14634|10902|11160|13726|12701|14155|12879|21271|20591|30165|25425|4137|385|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|985</HistCounts>
+      </HistItem>
+    </Histograms>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">Terrain (1).Terrain.20220929_modele_aval_final_piliers.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="4000" RasterYSize="7000" DataType="Float32" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="4000" ySize="7000" />
+      <DstRect xOff="0" yOff="0" xSize="4000" ySize="7000" />
+      <NODATA>-9999</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

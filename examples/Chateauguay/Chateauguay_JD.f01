@@ -1,0 +1,29 @@
+Flow Title=MonteCarlo
+Program Version=6.41
+Number of Profiles= 1 
+Profile Names=PF 1
+River Rch & RM=River 1,Chateauguay_up  ,10046   
+     189.63
+River Rch & RM=River 2,ds_left         ,1800    
+     94.815
+River Rch & RM=River 3,ds_right        ,2318    
+     94.815
+Boundary for River Rch & Prof#=River 1,Chateauguay_up  , 1 
+Up Type= 0 
+Dn Type= 0 
+Boundary for River Rch & Prof#=River 2,ds_left         , 1 
+Up Type= 0 
+Dn Type= 1 
+Dn Known WS=22.44
+Boundary for River Rch & Prof#=River 3,ds_right        , 1 
+Up Type= 0 
+Dn Type= 1 
+Dn Known WS=22.34
+DSS Import StartDate=
+DSS Import StartTime=
+DSS Import EndDate=
+DSS Import EndTime=
+DSS Import GetInterval= 0 
+DSS Import Interval=
+DSS Import GetPeak= 0 
+DSS Import FillOption= 0 
