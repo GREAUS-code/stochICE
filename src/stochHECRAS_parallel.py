@@ -10,6 +10,21 @@ import pandas as pd
 import pickle
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
+import datetime
+import sys
+import select
+import time
+
+import threading
+
+
+from rasterio.features import shapes
+import geopandas as gpd
+from shapely.geometry import shape
+
+
+
+from shapely.ops import unary_union
 
 
 class StochHECRASParallel:
@@ -18,8 +33,7 @@ class StochHECRASParallel:
     for ice-jam flood modeling using HEC-RAS.
     """
 
-
-    def __init__(self, src_folder, script_path, n, params, cleanup_after_run=False):
+    def __init__(self, src_folder, script_path, n, params, cleanup_after_run=False, seed=[]):
         """
         Constructor for the StochHECRASParallel class.
     
@@ -30,8 +44,7 @@ class StochHECRASParallel:
             params (dict): Configuration parameters for the simulations.
             cleanup_after_run (bool, optional): If True, cleans up generated files after execution.
         """
-        import datetime
-    
+        
         self.src_folder = src_folder
         self.script_path = script_path
         self.n = n
@@ -39,11 +52,17 @@ class StochHECRASParallel:
         self.cleanup_after_run = cleanup_after_run
         self.scripts_list = []
     
+        #location of list of parameters to resuse
+        if seed:
+            self.seed=seed
+            print(self.seed[0])
+            print(self.seed[1])
+    
         # Get batch name and timestamp
         batch_name = params.get("batch_ID", "Unknown Batch")
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-        print(f"{'='*60}")
+        print(f"\n{'='*60}")
         print(f"            StochICE Parallel Simulation Launch")
         print(f"{'='*60}\n")
         print(f"Batch Name    : {batch_name}")
@@ -52,7 +71,7 @@ class StochHECRASParallel:
         print(f"Source Folder : {self.src_folder}")
         print(f"Script Path   : {self.script_path}")
         print(f"Cleanup After : {'Yes' if self.cleanup_after_run else 'No'}\n")
-        print(f"Simulation Parameters:")
+        print(f"Simulation Parameters:\n")
     
         for key, value in self.params.items():
             if isinstance(value, dict):  # Check if the value is a dictionary (e.g., stochVars)
@@ -69,42 +88,44 @@ class StochHECRASParallel:
             else:
                 print(f"  {key}: {value}")
     
-
-    
         # Initialize required directories and create scripts for simulation
-        self.setup_stochice_data_directory()
+        
         self.create_control_file()
+        self.setup_stochice_data_directory()
         self.scripts_list = self.copy_folders_and_modify_script()
-    
-       
+        
         print(f"\nStochICE will now run in parallel on {self.n} processes.")
         print("The console output below displays logs from the first process only:")
         
-        
         # Execute simulations and process results
         if self.scripts_list:
-            self.run_scripts_in_parallel()
             
+            # self.setup_stochice_data_directory()
+            self.run_scripts_in_parallel()
             self.copy_generated_data_back()
             self.create_combined_maximum_depth_map()
             self.create_combined_frequency_map()
+            self.create_combined_maximum_wse_map()
+            # self.make_matrice_intensite()
+            self.process_objectives_de_protection()
             self.plot_wse_envelope()
 
             if self.cleanup_after_run:
                 self.cleanup_generated_files()
     
         # Save state and input scripts for reproducibility
-        save_state(self)
-        self.save_script_to_inputs()
-
+        # save_state(self)
+        # self.save_script_to_inputs()
 
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
        
         print(f"\n{'='*57}")
         print(f"       Batch complete at: {timestamp}")
-        print(f"{'='*57}")
+        print(f"{'='*57}\n")
         
     def create_control_file(self):
+        
+        
         """
         Creates a control Python script for configuring and running simulations.
 
@@ -117,6 +138,7 @@ class StochHECRASParallel:
         Returns:
             None
         """
+        
         with open(self.script_path, 'w') as file:
             file.write("import stochICE as ice\n\n")
 
@@ -126,7 +148,8 @@ class StochHECRASParallel:
             file.write(f"ras = '{self.params['ras']}'\n")
             file.write(f"geo = '{self.params['geo']}'\n")
             file.write(f"flowFile = '{self.params['flowFile']}'\n")
-            file.write(f"wse = r'{self.params['wse']}'\n\n")
+            file.write(f"wse = '{self.params['wse']}'\n\n")
+            file.write(f"depth = '{self.params['depth']}'\n\n")
 
             file.write(f"NSims = {self.params['NSims']}\n")
             file.write(f"ice_jam_reach = {self.params['ice_jam_reach']}\n\n")
@@ -140,72 +163,85 @@ class StochHECRASParallel:
             # Final script setup
             file.write(
                 "Chateauguay_embacle = ice.StochICE_HECRAS("
-                "path, batch_ID, ras, geo, flowFile, wse, NSims, ice_jam_reach, stochVars)\n"
+                "path, batch_ID, ras, geo, flowFile, wse, depth, NSims, ice_jam_reach, stochVars)\n"
             )
 
     def setup_stochice_data_directory(self):
         """
         Sets up the directory structure for simulation data.
-
-        If directories already exist, their contents are deleted; otherwise, new directories are created.
-
+    
+        If the directory already exists, prompts the user whether to overwrite it or exit.
+    
         Args:
             None
-
+    
         Returns:
             None
         """
         self.data_path = os.path.join(self.src_folder, f"StochICE_data_{self.params['batch_ID']}")
         self.inputs_path = os.path.join(self.data_path, "Inputs")
         self.results_path = os.path.join(self.data_path, "Results")
+        self.logs_path = os.path.join(self.data_path, "Logs")
         self.distributions_path = os.path.join(self.inputs_path, "Variable_distributions")
-        self.depths_path = os.path.join(self.results_path, "Individual_depth_tifs")
-        self.wse_path = os.path.join(self.results_path, "Individual_WSE_profiles")
+        self.depth_tifs_path = os.path.join(self.results_path, "Individual_depth_tifs")
+        self.wse_tifs_path = os.path.join(self.results_path, "Individual_wse_tifs")
+        self.wse_profiles_path = os.path.join(self.results_path, "Individual_WSE_profiles")
+        self.max_wse_path = os.path.join(self.results_path, "Ensemble_maximum_wse_maps")
         self.max_depth_path = os.path.join(self.results_path, "Ensemble_maximum_depth_maps")
-        self.frequency_path = os.path.join(self.results_path, "Ensemble_frequency_maps")
+        self.frequency_tif_path = os.path.join(self.results_path, "Ensemble_frequency_maps")
+        self.obj_prot_path = os.path.join(self.results_path, "Objectives_de_protection")
         self.data_geo_files_path = os.path.join(self.inputs_path, "Individual_GeoFiles")
         self.data_flow_files_path = os.path.join(self.inputs_path, "Individual_FlowFiles")
-
+    
         paths = [
             self.data_path,
             self.inputs_path,
             self.distributions_path,
             self.results_path,
-            self.depths_path,
-            self.wse_path,
+            self.logs_path,
+            self.depth_tifs_path,
+            self.wse_tifs_path,
+            self.wse_profiles_path,
             self.max_depth_path,
-            self.frequency_path,
+            self.max_wse_path,
+            self.frequency_tif_path,
+            self.obj_prot_path,
             self.data_geo_files_path,
             self.data_flow_files_path,
         ]
+    
+        if os.path.exists(self.data_path):
+            while True:
 
+                print(f"\n{'='*57}")
+                print(f"                   User input required")
+                print(f"{'='*57}")
+                
+                user_input = input(f"\nThe directory {self.data_path} already exists. Overwrite? (y/N): ").strip().lower()
+                if user_input == 'y':
+                    shutil.rmtree(self.data_path)
+                    break
+                elif user_input == 'n' or user_input == '':
+                    print("Operation cancelled. Exiting StochICE.")
+                    exit()
+                else:
+                    print("Invalid input. Please enter 'y' to overwrite or 'n' to exit.")
+    
         for path in paths:
-            if os.path.exists(path):
-                # Remove existing contents
-                for filename in os.listdir(path):
-                    file_path = os.path.join(path, filename)
-                    try:
-                        if os.path.isfile(file_path) or os.path.islink(file_path):
-                            os.unlink(file_path)
-                        elif os.path.isdir(file_path):
-                            shutil.rmtree(file_path)
-                    except Exception as e:
-                        print(f"Failed to delete {file_path}. Reason: {e}")
-            else:
-                os.makedirs(path)
-
+            os.makedirs(path, exist_ok=True)
+        
         print("\nStochICE data directory set up successfully.")
+
 
     def copy_folders_and_modify_script(self):
         """
-        Copies the source folder for each simulation and modifies the script for parallel execution.
-
-        This method creates `n` copies of the source folder and modifies each script to
-        include the correct folder paths for the simulation.
-
+        Copies the source folder for each simulation and copies the launch script for parallel execution.
+        Also splits a CSV file containing simulation parameters into `n` smaller files,
+        ensuring each split file contains the header.
+        
         Args:
             None
-
+    
         Returns:
             list: A list of paths to the modified scripts for each simulation.
         """
@@ -214,28 +250,147 @@ class StochHECRASParallel:
         script_dir = os.path.dirname(self.script_path)
         script_name = os.path.basename(self.script_path)
         scripts = []
-
+    
+        src_folder_abs = os.path.abspath(self.src_folder)
+        script_path_abs = os.path.abspath(self.script_path)
+    
+        existing_found = False
         for i in range(1, self.n + 1):
-            # Create a new folder for this simulation
             new_folder_name = f"{folder_name}_{i}"
             new_folder_path = os.path.join(parent_dir, new_folder_name)
-            shutil.copytree(self.src_folder, new_folder_path)
-
-            # Modify the script for the new folder
-            with open(self.script_path, 'r') as script_file:
+            new_script_name = f"{os.path.splitext(script_name)[0]}_{i}.py"
+            new_script_path = os.path.join(script_dir, new_script_name)
+    
+            if os.path.exists(new_folder_path) or os.path.exists(new_script_path):
+                existing_found = True
+                break
+    
+        if existing_found:
+            print(f"\n{'='*57}")
+            print(f"                   User input required")
+            print(f"{'='*57}")
+            user_input = input("\nSome parallel folders or scripts already exist. Permission to delete them before proceeding? (y/N): ").strip().lower()
+            if user_input != 'y':
+                print("\nOperation cancelled. Exiting StochICE.\n")
+                exit()
+    
+        for i in range(1, self.n + 1):
+            new_folder_name = f"{folder_name}_{i}"
+            new_folder_path = os.path.join(parent_dir, new_folder_name)
+            new_script_name = f"{os.path.splitext(script_name)[0]}_{i}.py"
+            new_script_path = os.path.join(script_dir, new_script_name)
+    
+            if os.path.exists(new_folder_path):
+                shutil.rmtree(new_folder_path)
+            if os.path.exists(new_script_path):
+                os.remove(new_script_path)
+    
+        print(f"\n{'='*57}")
+        print(f"             Creating parallel folders")
+        print(f"{'='*57}\n")
+    
+        for i in range(1, self.n + 1):
+            new_folder_name = f"{folder_name}_{i}"
+            new_folder_path = os.path.join(parent_dir, new_folder_name)
+    
+            def ignore_stochice_data(dir, files):
+                return [f for f in files if os.path.isdir(os.path.join(dir, f)) and f.startswith('StochICE_data')]
+    
+            shutil.copytree(src_folder_abs, new_folder_path, ignore=ignore_stochice_data)
+    
+            with open(script_path_abs, 'r') as script_file:
                 script_content = script_file.read()
-            modified_script_content = script_content.replace(
-                repr(self.src_folder).strip("'"), repr(new_folder_path).strip("'")
-            )
-
-            # Save the modified script
+    
+            modified_script_content = script_content.replace(src_folder_abs, new_folder_path)
+    
             new_script_name = f"{os.path.splitext(script_name)[0]}_{i}.py"
             new_script_path = os.path.join(script_dir, new_script_name)
             with open(new_script_path, 'w') as new_script_file:
                 new_script_file.write(modified_script_content)
             scripts.append(new_script_path)
 
+
+        if hasattr(self, 'seed') and isinstance(self.seed, list) and len(self.seed) > 0:
+            csv_path = self.seed[0]
+            csv_filename = os.path.basename(csv_path)
+            if os.path.exists(csv_path):
+                df = pd.read_csv(csv_path)
+                num_rows = len(df)
+                
+                if num_rows % self.n != 0:
+                    valid_splits = [i for i in range(1, num_rows + 1) if num_rows % i == 0]
+                    print(f"Error: The number of data lines ({num_rows}) in '{csv_filename}' cannot be evenly divided into {self.n} processes.")
+                    print(f"Consider using one of the following values for 'n' to allow an even split: {valid_splits}.")
+                    exit()
+                
+                if isinstance(self.params, dict) and 'NSims' in self.params:
+                    expected_rows = self.params['NSims'] * self.n
+                    if expected_rows != num_rows:
+                        correct_NSims = num_rows // self.n
+                        print(f"Error: The total number of data lines (i.e. {num_rows}) in '{csv_filename}' does not equal NSims*n_procs (i.e. {expected_rows}).")
+                        print(f"Consider setting 'NSims' to {correct_NSims} to ensure consistency.")
+                        exit()
+        
+                chunk_size = num_rows // self.n
+                start = 0
+        
+                for i in range(1, self.n + 1):
+                    end = start + chunk_size
+                    df_chunk = df.iloc[start:end]
+                    start = end
+        
+                    new_folder_name = f"{folder_name}_{i}"
+                    new_folder_path = os.path.join(parent_dir, new_folder_name)
+                    chunk_csv_path = os.path.join(new_folder_path, "seed_parameters.csv")
+                    
+                    with open(chunk_csv_path, 'w', newline='') as f:
+                        for item in self.seed[1]:
+                            f.write(f"{item}\n")
+                        df_chunk.to_csv(f, index=False, mode='a', header=True)
+
+
+
+
+    
+        # if hasattr(self, 'seed') and isinstance(self.seed, list) and len(self.seed) > 0:
+        #     csv_path = self.seed[0]
+        #     csv_filename = os.path.basename(csv_path)
+        #     if os.path.exists(csv_path):
+        #         df = pd.read_csv(csv_path)
+        #         num_rows = len(df)
+                
+        #         if num_rows % self.n != 0:
+        #             valid_splits = [i for i in range(1, num_rows + 1) if num_rows % i == 0]
+        #             print(f"Error: The number of data lines ({num_rows}) in '{csv_filename}' cannot be evenly divided into {self.n} processes.")
+        #             print(f"Consider using one of the following values for 'n' to allow an even split: {valid_splits}.")
+        #             exit()
+                
+        #         if isinstance(self.params, dict) and 'NSims' in self.params:
+        #             expected_rows = self.params['NSims'] * self.n
+        #             if expected_rows != num_rows:
+        #                 correct_NSims = num_rows // self.n
+        #                 print(f"Error: The total number of data lines (i.e. {num_rows}) in '{csv_filename}' does not equal NSims*n_procs (i.e. {expected_rows}).")
+        #                 print(f"'NSims' to {correct_NSims} to ensure consistency.")
+        #                 exit()
+    
+        #         chunk_size = num_rows // self.n
+        #         start = 0
+    
+        #         for i in range(1, self.n + 1):
+        #             end = start + chunk_size
+        #             df_chunk = df.iloc[start:end]
+        #             start = end
+    
+        #             new_folder_name = f"{folder_name}_{i}"
+        #             new_folder_path = os.path.join(parent_dir, new_folder_name)
+        #             chunk_csv_path = os.path.join(new_folder_path, "seed_parameters.csv")
+        #             df_chunk.to_csv(chunk_csv_path, index=False)
+            else:
+                print(f"Error: Seed CSV file '{csv_filename}' not found. Exiting StochICE.")
+                exit()
+        
         return scripts
+
 
     def parse_simulation_count(self, variable_name="NSims"):
         """
@@ -272,42 +427,53 @@ class StochHECRASParallel:
             raise ValueError(f"Could not find the '{variable_name}' variable in the script.")
 
 
-
     def run_scripts_in_parallel(self):
         """
         Executes simulation scripts in parallel.
     
-        Real-time output of the first subprocess is streamed to the console, 
-        while other subprocesses log their output to separate files.
+        - The first subprocess streams output to the console in real-time.
+        - Other subprocesses log their output to separate files.
         """
         processes = []
         log_files = []
         first_process = None
     
+        # Ensure logs directory exists
+        os.makedirs(self.logs_path, exist_ok=True)
+    
+        # Ensure stdout is unbuffered for real-time console output
+        sys.stdout.reconfigure(line_buffering=True)
+    
         for i, script in enumerate(self.scripts_list):
-            log_file = open(f"process_{i + 1}.log", "w")
+            log_file_path = os.path.join(self.logs_path, f"process_{i + 1}.log")
+            log_file = open(log_file_path, "w")
             log_files.append(log_file)
-            
+    
             if i == 0:
-                # Capture real-time output for the first process
+                # Start the first process with real-time output
                 first_process = subprocess.Popen(
-                    ["python", "-u", script],
+                    ["python", "-u", script],  # -u ensures unbuffered output
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
-                    text=True
+                    text=True,
+                    bufsize=1
                 )
-            else:
-                # Redirect output to a log file for other processes
-                processes.append(subprocess.Popen(["python", script], stdout=log_file, stderr=subprocess.STDOUT))
     
-        # Stream the first subprocess's output
+            else:
+                # Other processes log output to files
+                processes.append(subprocess.Popen(["python", "-u", script], stdout=log_file, stderr=subprocess.STDOUT))
+    
+        # Process first script's output in real-time
         if first_process:
-            try:
-                for line in iter(first_process.stdout.readline, ''):
-                    print(line, end='', flush=True)
-            finally:
-                first_process.stdout.close()
-                first_process.wait()
+            while True:
+                output = first_process.stdout.readline()
+                if output:
+                    print(output, end='', flush=True)  # Print immediately
+                if first_process.poll() is not None and not output:
+                    break  # Exit loop if process has finished
+    
+            first_process.stdout.close()
+            first_process.wait()
     
         # Wait for other processes to complete
         for process in processes:
@@ -318,16 +484,18 @@ class StochHECRASParallel:
             log_file.close()
 
 
+
     def copy_generated_data_back(self):
         """
-        Copies generated data from simulation folders back to the source folder.
-
+        Copies generated data from simulation folders back to the source folder and
+        vertically stacks the contents of `sim_parameters.csv` files from each simulation folder.
+    
         This method collects results from all parallel simulation folders
         and appends identifiers (_i) to distinguish outputs from different processes.
-
+    
         Args:
             None
-
+    
         Returns:
             None
         """
@@ -336,30 +504,49 @@ class StochHECRASParallel:
             r'Inputs\Individual_GeoFiles',
             r'Results\Individual_depth_tifs',
             r'Results\Individual_WSE_profiles',
+            r'Results\Individual_WSE_tifs',
             r'Results\Ensemble_frequency_maps',
-            r'Results\Ensemble_maximum_depth_maps'
+            r'Results\Ensemble_maximum_depth_maps',
+            r'Results\Ensemble_maximum_wse_maps'
         ]
-
+        
+        all_dataframes = []
+    
         for i in range(1, self.n + 1):
             new_folder_name = f"{os.path.basename(self.src_folder)}_{i}"
             new_folder_path = os.path.join(os.path.dirname(self.src_folder), new_folder_name)
-
+            
+            # Process `sim_parameters.csv` if it exists
+            csv_path = os.path.join(new_folder_path, "sim_parameters.csv")
+            if os.path.exists(csv_path):
+                df = pd.read_csv(csv_path)
+                df['simulation_id'] = i  # Add identifier column
+                all_dataframes.append(df)
+            
             for subfolder in data_subfolders:
                 src_subfolder_path = os.path.join(new_folder_path, f"StochICE_data_{self.params['batch_ID']}", subfolder)
                 dest_subfolder_path = os.path.join(self.src_folder, f"StochICE_data_{self.params['batch_ID']}", subfolder)
-
+    
                 if os.path.exists(src_subfolder_path):
                     for item in os.listdir(src_subfolder_path):
                         src_item = os.path.join(src_subfolder_path, item)
                         dest_item_base = os.path.join(dest_subfolder_path, item)
                         dest_item = f"{os.path.splitext(dest_item_base)[0]}_{i}{os.path.splitext(dest_item_base)[1]}"
-
+    
                         if os.path.isfile(src_item):
                             shutil.copy2(src_item, dest_item)
                         elif os.path.isdir(src_item):
                             shutil.copytree(src_item, dest_item)
                 else:
                     print(f"Subfolder '{src_subfolder_path}' does not exist")
+        
+        # Stack and save the consolidated `sim_parameters.csv`
+        if all_dataframes:
+            combined_df = pd.concat(all_dataframes, ignore_index=True)
+            combined_csv_path = os.path.join(self.logs_path, "Batch_sim_parameters.csv")
+            combined_df.to_csv(combined_csv_path, index=False)
+            print(f"Batch simulation parameters saved to {combined_csv_path}")
+
 
     def plot_wse_envelope(self):
         """
@@ -377,7 +564,7 @@ class StochHECRASParallel:
         river_files = {}
 
         # Collect files grouped by river number
-        for root, dirs, files in os.walk(self.wse_path):
+        for root, dirs, files in os.walk(self.wse_profiles_path):
             for file in files:
                 if file.endswith('.csv') and 'River' in file:
                     river_number = file.split('_')[0]  # Extract river number
@@ -423,7 +610,7 @@ class StochHECRASParallel:
         depth_map_files = glob.glob(os.path.join(self.max_depth_path, "maximum_depth_map_*.tif"))
 
         if not depth_map_files:
-            print("No 'maximum_depth_map' files found.")
+            print("Warning: No 'maximum_depth_map' files found. Path too long?")
             return
 
         with rasterio.open(depth_map_files[0]) as src:
@@ -438,12 +625,12 @@ class StochHECRASParallel:
             dst.write(max_depth.astype(rasterio.float32), 1)
         
 
-    def create_combined_frequency_map(self):
+    def create_combined_maximum_wse_map(self):
         """
-        Creates a combined flood frequency map from individual frequency map files.
+        Creates a combined maximum wse map from individual wse map files.
 
-        This method calculates the flood frequency across all simulations and
-        generates a combined map representing the probability of flooding.
+        This method finds and combines all maximum wse map TIFF files into
+        a single raster file representing the maximum wse across all simulations.
 
         Args:
             None
@@ -451,37 +638,268 @@ class StochHECRASParallel:
         Returns:
             None
         """
-        frequency_map_files = glob.glob(os.path.join(self.frequency_path, "frequency_floodmap_*.tif"))
+        wse_map_files = glob.glob(os.path.join(self.max_wse_path, "maximum_wse_map_*.tif"))
 
+        if not wse_map_files:
+            print("No 'maximum_wse_map' files found.")
+            return
+
+        with rasterio.open(wse_map_files[0]) as src:
+            meta = src.meta
+            wse_stack = np.stack([rasterio.open(f).read(1) for f in wse_map_files])
+
+        max_wse = np.max(wse_stack, axis=0)
+        meta.update(dtype=rasterio.float32, count=1, compress='DEFLATE')
+
+        combined_path = os.path.join(self.max_wse_path, "combined_maximum_wse_map.tif")
+        with rasterio.open(combined_path, 'w', **meta) as dst:
+            dst.write(max_wse.astype(rasterio.float32), 1)
+        
+
+    def create_combined_frequency_map(self):
+        """
+        Creates a combined flood frequency map from individual frequency map files.
+    
+        This method calculates the global flood frequency across all simulations and
+        generates a combined map with values representing the percentage of flooding (0-100).
+    
+        Args:
+            None
+    
+        Returns:
+            None
+        """
+        import numpy as np
+    
+        # Get list of frequency map files
+        frequency_map_files = glob.glob(os.path.join(self.frequency_tif_path, "frequency_floodmap_*.tif"))
         if not frequency_map_files:
             print("No 'frequency_floodmap' files found.")
             return
-
+    
+        # Number of simulations per map (from your parse method)
         simulations_per_process = self.parse_simulation_count()
-        total_simulations = simulations_per_process * len(frequency_map_files)
-
+        num_maps = len(frequency_map_files)
+        total_simulations = simulations_per_process * num_maps
+    
+        # Read and process the maps
         with rasterio.open(frequency_map_files[0]) as src:
             meta = src.meta
-            frequency_sum = sum(rasterio.open(f).read(1) for f in frequency_map_files)
-
-        frequency = frequency_sum / total_simulations
+            # Initialize array to accumulate the number of flooded instances
+            flooded_count = np.zeros(src.shape, dtype=np.float32)
+    
+        # For each map, convert percentage to flooded count and accumulate
+        for f in frequency_map_files:
+            with rasterio.open(f) as src:
+                frequency_data = src.read(1)  # Values are 0-100 (percentage)
+                # Convert percentage to number of flooded simulations for this map
+                flooded_in_map = (frequency_data / 100.0) * simulations_per_process
+                flooded_count += flooded_in_map
+    
+        # Calculate global frequency as a percentage
+        combined_frequency = (flooded_count / total_simulations) * 100.0
+        combined_frequency = np.clip(combined_frequency, 0, 100)  # Ensure range 0-100
+    
+        # Update metadata and write output
         meta.update(dtype=rasterio.float32, count=1, compress='DEFLATE')
-
-        combined_path = os.path.join(self.frequency_path, "combined_frequency_floodmap.tif")
+        combined_path = os.path.join(self.frequency_tif_path, "combined_frequency_floodmap.tif")
         with rasterio.open(combined_path, 'w', **meta) as dst:
-            dst.write(frequency, 1)
+            dst.write(combined_frequency, 1)
+    
+        print(f"Combined frequency map created at {combined_path}")
+
+
+    # def create_combined_frequency_map(self):
+    #     """
+    #     Creates a combined flood frequency map from individual frequency map files.
+
+    #     This method calculates the flood frequency across all simulations and
+    #     generates a combined map representing the probability of flooding.
+
+    #     Args:
+    #         None
+
+    #     Returns:
+    #         None
+    #     """
+    #     frequency_map_files = glob.glob(os.path.join(self.frequency_tif_path, "frequency_floodmap_*.tif"))
+
+    #     if not frequency_map_files:
+    #         print("No 'frequency_floodmap' files found.")
+    #         return
+
+    #     simulations_per_process = self.parse_simulation_count()
+    #     total_simulations = simulations_per_process * len(frequency_map_files)
+
+    #     with rasterio.open(frequency_map_files[0]) as src:
+    #         meta = src.meta
+    #         frequency_sum = sum(rasterio.open(f).read(1) for f in frequency_map_files)
+
+    #     frequency = frequency_sum / total_simulations
+    #     meta.update(dtype=rasterio.float32, count=1, compress='DEFLATE')
+
+    #     combined_path = os.path.join(self.frequency_tif_path, "combined_frequency_floodmap.tif")
+    #     with rasterio.open(combined_path, 'w', **meta) as dst:
+    #         dst.write(frequency, 1)
+
+
+    def make_matrice_intensite(self):
+        """
+        Creates continuous polygons from valid pixels of the maximum depth GeoTIFF:
+        - Level 1: Pixels with values > 0.3
+        - Level 2: Pixels between 0 and 0.3
         
+        No polygons are generated for nodata values.
+        The result is saved into a new shapefile with fields:
+        - "depth_zone": Description of the depth range.
+        - "level": Integer representing the level (1 or 2).
+        """
+    
+        # Define file paths
+        depth_raster_path = os.path.join(self.max_depth_path, "combined_maximum_depth_map.tif")
+        output_vector = os.path.join(self.max_depth_path, "split_depth_zones.shp")
+    
+        try:
+            with rasterio.open(depth_raster_path) as src:
+                raster_data = src.read(1)
+                nodata = src.nodata
+                transform = src.transform
+                crs = src.crs
+    
+                # Create list for polygons
+                features = []
+    
+                # Extract polygons for pixels > 0.3
+                deep_mask = (raster_data > 0.3) & (raster_data != nodata)
+                for geom, value in shapes(raster_data, mask=deep_mask, transform=transform):
+                    poly = shape(geom)
+                    features.append({
+                        "properties": {
+                            "depth_zone": "greater_than_0.3",
+                            "level": 1
+                        },
+                        "geometry": poly
+                    })
+    
+                # Extract polygons for pixels between 0 and 0.3
+                shallow_mask = (raster_data <= 0.3) & (raster_data > 0) & (raster_data != nodata)
+                for geom, value in shapes(raster_data, mask=shallow_mask, transform=transform):
+                    poly = shape(geom)
+                    features.append({
+                        "properties": {
+                            "depth_zone": "between_0_and_0.3",
+                            "level": 2
+                        },
+                        "geometry": poly
+                    })
+    
+                # Create a GeoDataFrame and save to a shapefile
+                gdf = gpd.GeoDataFrame.from_features(features, crs=crs)
+                gdf.to_file(output_vector, driver="ESRI Shapefile")
+                print(f"Polygons saved to {output_vector}")
+    
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+
+
+    def process_objectives_de_protection(self):
+        """
+        Processes the maximum WSE raster by:
+        1. Reclassifying values by rounding up to the first decimal place.
+        2. Saving the reclassified raster.
+        3. Extracting polygons from the reclassified raster.
+        4. Merging small polygons (< 100 m²) into larger neighbors.
+        5. Removing polygons corresponding to NoData values.
+        """
+    
+        # Define file paths
+        combined_path = os.path.join(self.max_wse_path, "combined_maximum_wse_map.tif")
+        output_vector = os.path.join(self.obj_prot_path, "objectives_de_protection.shp")
+        output_reclassified_raster = os.path.join(self.obj_prot_path, "objectives_de_protection.tif")
+    
+        # Open the input raster
+        with rasterio.open(combined_path) as src:
+            raster_data = src.read(1)
+            profile = src.profile
+            nodata = src.nodata if src.nodata is not None else -9999.0
+    
+            # Mask NoData values
+            raster_data = np.where(raster_data == nodata, np.nan, raster_data)
+    
+            # Reclassify by rounding up to one decimal place
+            reclassified_data = np.ceil(raster_data * 10) / 10
+    
+            # Replace NaN values with the original NoData value
+            reclassified_data = np.where(np.isnan(reclassified_data), nodata, reclassified_data)
+    
+            # Ensure float32 compatibility
+            reclassified_data = reclassified_data.astype(np.float32)
+    
+            # Update metadata and save the reclassified raster
+            profile.update(dtype=rasterio.float32, count=1, nodata=nodata)
+    
+            with rasterio.open(output_reclassified_raster, 'w', **profile) as dst:
+                dst.write(reclassified_data, 1)
+    
+            print("Generated protection objectives geotiff.")
+    
+            # Extract valid polygons
+            mask = (reclassified_data != nodata)
+            results = (
+                {
+                    "properties": {"wse_value": format(value, ".1f")},
+                    "geometry": shape(geom),
+                }
+                for geom, value in shapes(reclassified_data, mask=mask, transform=src.transform)
+                if value != nodata  # Ensure we exclude NoData polygons
+            )
+    
+            # Create GeoDataFrame and filter out NoData values
+            gdf = gpd.GeoDataFrame.from_features(results, crs=src.crs)
+            gdf = gdf[gdf["wse_value"] != str(nodata)]  # Remove NoData polygons
+    
+        # Identify small polygons
+        small_polygons = gdf[gdf.geometry.area < 100]
+    
+        # Process small polygons
+        for idx, small_poly in small_polygons.iterrows():
+            neighbors = gdf[gdf.geometry.touches(small_poly.geometry)]
+    
+            if not neighbors.empty:
+                # Find the largest shared boundary
+                best_match_idx = None
+                max_shared_length = 0
+    
+                for neighbor_idx, neighbor in neighbors.iterrows():
+                    shared_boundary = small_poly.geometry.intersection(neighbor.geometry).length
+    
+                    if shared_boundary > max_shared_length:
+                        max_shared_length = shared_boundary
+                        best_match_idx = neighbor_idx
+    
+                # Merge small polygon into the best-matching neighbor
+                if best_match_idx is not None:
+                    gdf.loc[best_match_idx, 'geometry'] = unary_union(
+                        [gdf.loc[best_match_idx, 'geometry'], small_poly.geometry]
+                    )
+                    gdf.drop(idx, inplace=True)
+    
+        # Save the updated shapefile
+        gdf.to_file(output_vector, driver="ESRI Shapefile")
+        print("Generated protection objectives shapefile.")
+
 
     def cleanup_generated_files(self):
         """
         Cleans up folders and scripts generated during parallel execution.
-
+    
         This method deletes all copied folders and modified scripts to
         free up disk space after the simulation run.
-
+    
         Args:
             None
-
+    
         Returns:
             None
         """
@@ -494,16 +912,28 @@ class StochHECRASParallel:
         folder_name = os.path.basename(self.src_folder)
         script_dir = os.path.dirname(self.script_path)
         script_base_name = os.path.splitext(os.path.basename(self.script_path))[0]
+    
+        # Delete all folders matching folder_name_<number>
+        for folder in os.listdir(parent_dir):
+            if re.match(rf"{re.escape(folder_name)}_\d+$", folder):
+                folder_to_remove = os.path.join(parent_dir, folder)
+                if os.path.exists(folder_to_remove):
+                    shutil.rmtree(folder_to_remove)
+        
+        # Delete all scripts matching script_base_name_<number>.py
+        for script in os.listdir(script_dir):
+            if re.match(rf"{re.escape(script_base_name)}_\d+\.py$", script):
+                script_to_remove = os.path.join(script_dir, script)
+                if os.path.exists(script_to_remove):
+                    os.remove(script_to_remove)
 
-        for i in range(1, self.n + 1):
-            folder_to_remove = os.path.join(parent_dir, f"{folder_name}_{i}")
-            if os.path.exists(folder_to_remove):
-                shutil.rmtree(folder_to_remove)
+        script_to_remove = os.path.join(script_dir, f"{script_base_name}.py")
+        if os.path.exists(script_to_remove):
+            os.remove(script_to_remove)
 
-            script_to_remove = os.path.join(script_dir, f"{script_base_name}_{i}.py")
-            if os.path.exists(script_to_remove):
-                os.remove(script_to_remove)
-        print("Cleanup of parallel processing folders completed.")
+        
+        print("Cleanup of parallel processing folders and scripts completed.")
+
 
 
     def probability_exceedance_curve(self, chainage, filter_string="", show_plot=False, run_regression=True):
@@ -523,7 +953,7 @@ class StochHECRASParallel:
         Returns:
             None
         """
-        input_path = os.path.join(self.wse_path)
+        input_path = os.path.join(self.wse_profiles_path)
 
         closest_chainage = None  # Placeholder for the closest chainage
 
@@ -1264,6 +1694,5 @@ def load_state(file_path):
 #         instance = pickle.load(file)
 #     print(f"State loaded from {file_path}")
 #     return instance
-
 
 

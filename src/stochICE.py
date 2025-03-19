@@ -43,7 +43,7 @@ class StochICE_HECRAS:
     """
 
     def __init__(self, prjDir: str, batch_ID: str, ras_file: str, geo_file: str,
-                 flow_file: str, wse_file: str, NSims: int, ice_jam_reach: int, stochvars: dict):
+                 flow_file: str, wse_file: str, depth_file: str, NSims: int, ice_jam_reach: int, stochvars: dict):
         """
         Initializes the StochICE_HECRAS class and sets up the simulation environment.
 
@@ -65,6 +65,7 @@ class StochICE_HECRAS:
         self.flow_file = os.path.join(self.prjDir, flow_file)
         self.geo_file_temp = os.path.join(self.prjDir, geo_file + '.temp')
         self.wse_map_path = os.path.join(self.prjDir, "MonteCarlo", wse_file)
+        self.depth_map_path = os.path.join(self.prjDir, "MonteCarlo", depth_file)
 
         self.NSims = NSims
         self.ice_jam_reach = ice_jam_reach
@@ -80,7 +81,7 @@ class StochICE_HECRAS:
 
         self.setup_stochice_data_directory()
         self.print_header()
-        self.setup_monte_carlo_dir()
+        # self.setup_monte_carlo_dir()
         self.copy_geofile()
         self.get_XS_ice_params()
         self.get_XS_manning()
@@ -101,7 +102,7 @@ class StochICE_HECRAS:
         print("----------------------------------------------------------\n")
         self.stochHECRAS.make_frequency_flood_map()
         self.stochHECRAS.make_maximum_depth_map()
-
+        self.stochHECRAS.make_maximum_wse_map()
 
     def __getstate__(self):
         """
@@ -143,7 +144,7 @@ class StochICE_HECRAS:
         print(f"HEC-RAS geometry file: {self.geo_file}")
         print(f"HEC-RAS flow file: {self.flow_file}")
         print(f"Batch ID: {self.ID}")
-        print(f"Total simulations: {self.NSims}")
+        print(f"Total simulations on process 1: {self.NSims}")
 
     def setup_stochice_data_directory(self):
         """
@@ -155,21 +156,44 @@ class StochICE_HECRAS:
         """
         self.data_path = os.path.join(self.prjDir, f"StochICE_data_{self.ID}")
         self.inputs_path = os.path.join(self.data_path, "Inputs")
-        self.outputs_path = os.path.join(self.data_path, "Outputs")
+        # self.outputs_path = os.path.join(self.data_path, "Outputs")
         self.results_path = os.path.join(self.data_path, "Results")
 
+        
         self.distributions_path = os.path.join(self.inputs_path, "Variable_distributions")
-        self.depths_path = os.path.join(self.results_path, "Individual_depth_tifs")
-        self.wse_path = os.path.join(self.results_path, "Individual_WSE_profiles")
-        self.max_depth_path = os.path.join(self.results_path, "Ensemble_maximum_depth_maps")
-        self.frequency_path = os.path.join(self.results_path, "Ensemble_frequency_maps")
+        
+        #depth related
+        self.depth_tifs_path = os.path.join(self.results_path, "Individual_depth_tifs")
+        self.max_depth_tif_path = os.path.join(self.results_path, "Ensemble_maximum_depth_maps")
+        
+        #water surface related
+        self.wse_profiles_path = os.path.join(self.results_path, "Individual_WSE_profiles")
+        self.wse_tifs_path = os.path.join(self.results_path, "Individual_WSE_tifs")
+        self.max_wse_tif_path = os.path.join(self.results_path, "Ensemble_maximum_wse_maps")
+        
+        #frequency
+        self.frequency_tif_path = os.path.join(self.results_path, "Ensemble_frequency_maps")
+        
+        #HECRAS files
         self.data_geo_files_path = os.path.join(self.inputs_path, "Individual_GeoFiles")
         self.data_flow_files_path = os.path.join(self.inputs_path, "Individual_FlowFiles")
 
         paths = [
-            self.data_path, self.inputs_path, self.outputs_path, self.distributions_path,
-            self.results_path, self.depths_path, self.wse_path, self.max_depth_path,
-            self.frequency_path, self.data_geo_files_path, self.data_flow_files_path,
+            self.data_path, 
+            self.inputs_path, 
+            # self.outputs_path, 
+            self.results_path, 
+            self.distributions_path,
+            
+            self.depth_tifs_path, 
+            self.max_depth_tif_path,
+            self.wse_profiles_path, 
+            self.wse_tifs_path, 
+            self.max_wse_tif_path,
+            
+            self.frequency_tif_path, 
+            self.data_geo_files_path, 
+            self.data_flow_files_path,
         ]
 
         for path in paths:
@@ -205,15 +229,15 @@ class StochICE_HECRAS:
             None
         """
         self.MC_path = os.path.join(self.prjDir, "MonteCarlo")
-        self.tif_path = os.path.join(self.MC_path, "SimulationTifs")
-        self.geo_files_path = os.path.join(self.MC_path, "GeoFiles")
-        self.flow_files_path = os.path.join(self.MC_path, "FlowFiles")
+        # self.tif_path = os.path.join(self.MC_path, "SimulationTifs")
+        # self.geo_files_path = os.path.join(self.MC_path, "GeoFiles")
+        # self.flow_files_path = os.path.join(self.MC_path, "FlowFiles")
 
         os.makedirs(self.MC_path, exist_ok=True)
-        os.makedirs(self.tif_path, exist_ok=True)
-        os.makedirs(self.geo_files_path, exist_ok=True)
-        os.makedirs(self.flow_files_path, exist_ok=True)
-        print("Monte Carlo directories set up successfully.")
+        # os.makedirs(self.tif_path, exist_ok=True)
+        # os.makedirs(self.geo_files_path, exist_ok=True)
+        # os.makedirs(self.flow_files_path, exist_ok=True)
+        print("Monte Carlo directory set up successfully.")
 
     def copy_geofile(self):
         """
@@ -1506,7 +1530,6 @@ def load_state(file_path):
     #     print(f"Logging stopped at {datetime.now()}")  # End log with a timestamp
     #     sys.stdout = self.original_stdout  # Restore original stdout
     #     self.log_file.close()  # Close the log file
-
 
 
 

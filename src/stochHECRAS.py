@@ -18,51 +18,142 @@ import rasterio
 import csv
 import h5py
 
+
+from scipy.ndimage import label
+
 # from sklearn.linear_model import LinearRegression
 # from sklearn.model_selection import train_test_split
 # from sklearn.metrics import mean_squared_error, r2_score
 
 
-
-# -*- coding: utf-8 -*-
-"""
-Class of functions to run HEC-RAS stochastically
-"""
-
-import pandas as pd
-import os
-import glob
-import shutil
-import random
-import time
-import win32com.client
-import numpy as np
-import rasterio
-import h5py
-
-
 class StochHECRAS:
-    """
-    Class for managing stochastic simulations using the HEC-RAS controller.
-
-    This class handles preparation, execution, and post-processing of multiple
-    stochastic simulations by modifying input parameters such as flow rates
-    and ice thicknesses.
-    """
-
+    
+    # def __init__(self, stochICE):
+    #     """
+    #     Initializes the StochHECRAS class with stochastic input configurations.
+    
+    #     Args:
+    #         stochICE (object): Object containing input configurations for the stochastic simulation.
+    #     """
+    #     self.stochICE = stochICE
+    #     self.RC = None  # HEC-RAS Controller instance
+    
+    #     # Check if seed_parameters.csv exists in the project directory
+    #     self.seed_file_path = os.path.join(self.stochICE.prjDir, "seed_parameters.csv")
+        
+    #     if os.path.exists(self.seed_file_path):
+    #         print("\n'seed_parameters.csv' file found. Values of specified variables will be reused.")
+    #         self._load_seed_parameters()
+    #     else:
+    #         print("\nAttention: No 'seed_parameters.csv' file found. New stochastic variables will be generated.")
+        
     def __init__(self, stochICE):
         """
         Initializes the StochHECRAS class with stochastic input configurations.
-
+    
         Args:
             stochICE (object): Object containing input configurations for the stochastic simulation.
         """
         self.stochICE = stochICE
         self.RC = None  # HEC-RAS Controller instance
+    
+        # Check if seed_parameters.csv exists in the project directory
+        self.seed_file_path = os.path.join(self.stochICE.prjDir, "seed_parameters.csv")
+        
+        if os.path.exists(self.seed_file_path):
+            print("\n'seed_parameters.csv' file found. Values of specified variables will be reused.")
+        else:
+            print("\nAttention: No 'seed_parameters.csv' file found. New stochastic variables will be generated.")
+        
+        self._load_seed_parameters()
+    
+    def _load_seed_parameters(self):
+        if not os.path.exists(self.seed_file_path):
+            self.parameters = []
+            self.seed_data = None
+            return
+        
+        with open(self.seed_file_path, "r") as file:
+            lines = file.readlines()
+        
+        self.parameters = [line.strip() for line in lines if "," not in line and line.strip()]
+        self.seed_data = pd.read_csv(self.seed_file_path, skiprows=len(self.parameters), header=0)
+    
+    def extract_or_randomize_data(self, index):
+        if self.seed_data is not None and index < len(self.seed_data):
+            row = self.seed_data.iloc[index]
+        else:
+            row = None
+        
+        mappings = {
+            "Q": "flow",
+            "phi": "phi",
+            "porosity": "porosity",
+            "Frontthick": "ice_thickness",
+            "jam_loc_upstream": "location_upstream",
+            "jam_loc_downstream": "location_downstream"
+        }
+        
+        for param, attr in mappings.items():
+            if param in self.parameters:
+                setattr(self, attr, row[param] if row is not None else self._randomize_variable(attr))
+            else:
+                setattr(self, attr, self._randomize_variable(attr))
+        
+        if "jam_loc_upstream" in self.parameters and "jam_loc_downstream" in self.parameters:
+            self.location = [self.location_downstream, self.location_upstream]
+        else:
+            self.location = random.choice(self.stochICE.jam_locations)
+        
+        self.apply_settings()
+    
+    def _randomize_variable(self, var_name):
+        random_mappings = {
+            "flow": random.choice(self.stochICE.Q),
+            "phi": random.choice(self.stochICE.friction_angle),
+            "porosity": random.choice(self.stochICE.porosity),
+            "ice_thickness": random.choice(self.stochICE.Frontthick),
+        }
+        return random_mappings.get(var_name, None)
+    
+    def apply_settings(self):
+        """
+        Ensures that parameters are properly applied in the system.
+        """
+        self.set_flowrate()
+        self.set_phi()
+        self.set_porosity()
+        self.thicknesses = [[f"{self.ice_thickness},{self.ice_thickness},{self.ice_thickness}"]]
+        self.set_init_ice_cover_thickness()
+        self.set_ice_jam_location()
 
-        # Uncomment the following lines to clear previous results if required
-        # if self.stochICE.clr:
-        #     self.clear_results()
+
+    # """
+    # Class for managing stochastic simulations using the HEC-RAS controller.
+
+    # This class handles preparation, execution, and post-processing of multiple
+    # stochastic simulations by modifying input parameters such as flow rates
+    # and ice thicknesses.
+    # """
+
+    # def __init__(self, stochICE):
+    #     """
+    #     Initializes the StochHECRAS class with stochastic input configurations.
+    
+    #     Args:
+    #         stochICE (object): Object containing input configurations for the stochastic simulation.
+    #     """
+    #     self.stochICE = stochICE
+    #     self.RC = None  # HEC-RAS Controller instance
+    
+    #     # Check if seed_parameters.csv exists in the project directory
+    #     self.seed_file_path = os.path.join(self.stochICE.prjDir, "seed_parameters.csv")
+        
+    #     if os.path.exists(self.seed_file_path):
+    #         print("\n'seed_parameters.csv' file found. Values of specified variables will be reused.")
+    #     if not os.path.exists(self.seed_file_path):
+    #         print("\nAttention: No 'seed_parameters.csv' file found. New stochastic variables will be generated.")
+
 
     def __getstate__(self):
         """
@@ -139,6 +230,7 @@ class StochHECRAS:
         self.flow_rates = []
         self.init_ice_thicknesses = []
         self.phi_values = []
+        self.porosity_values=[]
         self.jam_loc_upstream = []
         self.jam_loc_downstream = []
     
@@ -154,7 +246,14 @@ class StochHECRAS:
             stopwatch.start()
     
             # Randomize parameters and set up the simulation
-            self.randomize_variables()
+            self.extract_or_randomize_data(j)
+            print(self.flow)
+            print(self.phi)
+            print(self.porosity)
+            print(self.ice_thickness)
+            print(self.location)
+
+            # self.randomize_variables()
             self.write_new_geometry()
     
             # Store input variables
@@ -162,8 +261,9 @@ class StochHECRAS:
             self.flow_rates.append(self.flow)
             self.init_ice_thicknesses.append(self.ice_thickness)
             self.phi_values.append(self.phi)
-            self.jam_loc_upstream.append(self.location[0])
-            self.jam_loc_downstream.append(self.location[1])
+            self.porosity_values.append(self.porosity)
+            self.jam_loc_upstream.append(self.location[1])
+            self.jam_loc_downstream.append(self.location[0])
     
             # Save copies of geo and flow files
             self.store_geofile()
@@ -212,18 +312,34 @@ class StochHECRAS:
                 'TopIceMaxDepth': np.asarray(wse_list) - np.asarray(min_channel_ele_list),
                 'station': np.asarray(stations),
             }
-    
-            # Save the 2D flood map
+
+            #WSE map
+            self.retain_largest_pixel_area(self.stochICE.wse_map_path)
+
             tif_filename = os.path.join(
-                self.stochICE.depths_path,
+                self.stochICE.wse_tifs_path,
                 f"WSE_{self.flow}_{self.ice_thickness}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.tif",
             )
             shutil.copyfile(self.stochICE.wse_map_path, tif_filename)
     
             # Remove temporary files
-            for _file in glob.glob(os.path.join(self.stochICE.depths_path, "*.vrt")):
+            for _file in glob.glob(os.path.join(self.stochICE.wse_tifs_path, "*.vrt")):
                 os.remove(_file)
     
+    
+            #Depth surface map
+            self.retain_largest_pixel_area(self.stochICE.depth_map_path)
+
+            tif_filename = os.path.join(
+                self.stochICE.depth_tifs_path,
+                f"WSE_{self.flow}_{self.ice_thickness}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.tif",
+            )
+            shutil.copyfile(self.stochICE.depth_map_path, tif_filename)
+    
+            # Remove temporary files
+            for _file in glob.glob(os.path.join(self.stochICE.depth_tifs_path, "*.vrt")):
+                os.remove(_file)
+
             self.extract_wse_profiles()
     
             # Stop the stopwatch and calculate simulation time
@@ -238,15 +354,67 @@ class StochHECRAS:
     
         # Store input parameters across simulations
         self.input_parms = pd.DataFrame({
-            'sim_key': self.sim_keys,
+            #'sim_key': self.sim_keys,
             'Q': self.flow_rates,
             'phi': self.phi_values,
-            'init_ice_thicknesses': self.init_ice_thicknesses,
+            'porosity': self.porosity_values,
+            'Frontthick': self.init_ice_thicknesses,
             'jam_loc_upstream': self.jam_loc_upstream,
             'jam_loc_downstream': self.jam_loc_downstream,
         })
         
+        # Save to CSV
+        csv_path = os.path.join(self.stochICE.prjDir, "sim_parameters.csv")
+        self.input_parms.to_csv(csv_path, index=False)
+        print(f"Simulation parameters saved to {csv_path}")        
+        
         print(f"\n                  Simulations finished!\n")
+
+    def retain_largest_pixel_area(self, raster_path):
+        """
+        Retains only the largest contiguous area of valid pixels in the specified raster file.
+        Overwrites the original raster file with the result.
+        
+        This is useful to remove the 'puddles' not connected to the river left by HECRAS.
+    
+        Args:
+            self: Instance of the class containing the function.
+            raster_path (str): Path to the raster file to process.
+        """
+
+        # Load the raster
+        with rasterio.open(raster_path) as src:
+            raster_data = src.read(1)  # Read the first band
+            meta = src.meta  # Metadata for the raster
+            nodata_value = src.nodata  # Fetch the nodata value from the metadata
+    
+        # Identify valid pixels (non-nodata)
+        valid_mask = raster_data != nodata_value
+    
+        # Label connected components of valid pixels
+        labeled_array, num_features = label(valid_mask)
+    
+        # Calculate the size of each labeled region
+        region_sizes = np.bincount(labeled_array.ravel())
+    
+        # Ignore the background region (label 0)
+        region_sizes[0] = 0
+    
+        # Find the label of the largest region
+        largest_region_label = region_sizes.argmax()
+    
+        # Create a mask for the largest region
+        largest_region_mask = (labeled_array == largest_region_label)
+    
+        # Prepare the output data: Keep original values only in the largest region
+        output_data = np.where(largest_region_mask, raster_data, nodata_value)
+    
+        # Update metadata for writing the output raster
+        meta.update(dtype=rasterio.float32, compress='DEFLATE')
+    
+        # Overwrite the original file with the processed data
+        with rasterio.open(raster_path, 'w', **meta) as dst:
+            dst.write(output_data.astype(rasterio.float32), 1)
     
     def extract_wse_profiles(self):
         """
@@ -287,7 +455,7 @@ class StochHECRAS:
                 wse_values = [wse[idx] for idx in station_indices]
     
                 wse_filename = os.path.join(
-                    self.stochICE.wse_path,
+                    self.stochICE.wse_profiles_path,
                     f"{reach_name}_WSE_{self.flow}_{self.ice_thickness}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.csv"
                 )
     
@@ -356,6 +524,15 @@ class StochHECRAS:
                 # Set default values for non-ice jam locations
                 self.xs_data_modified[item]["Ice Is Channel"]['val'] = str(0)
                 self.xs_data_modified[item]["Ice Is OB"]['val'] = str(0)
+            
+        self.remove_ice_upstream_of_jam()
+
+    def remove_ice_upstream_of_jam(self):
+        
+        for item in self.xs_data_modified:
+            if (self.xs_data_modified[item]['Reach'] == self.stochICE.ice_jam_reach and self.xs_data_modified[item]['chainage'] >= self.location[1]):
+                self.xs_data_modified[item]["Ice Thickness"]['val'] = ["0,0,0"]
+                
     
     def write_new_geometry(self):
         """
@@ -389,7 +566,12 @@ class StochHECRAS:
     
             # Update Ice Porosity
             try:
-                self.toWrite = f"Ice Porosity={item['Ice Porosity']['val'][0]}\n"
+                
+                porosity_value = item['Ice Porosity']['val']
+                if isinstance(porosity_value, (list, tuple)):
+                    porosity_value = porosity_value[0]
+                self.toWrite = f"Ice Porosity={porosity_value}\n"
+                # self.toWrite = f"Ice Porosity={item['Ice Porosity']['val'][0]}\n"
                 self.lineNmb = item['Ice Porosity']['lnNum']
                 self.replace_line()
             except TypeError:
@@ -499,6 +681,9 @@ class StochHECRAS:
         shutil.copyfile(self.stochICE.flow_file, flow_copy_path)
 
 
+
+
+
     def make_frequency_flood_map(self):
         """
         Generates an ensemble frequency flood map by aggregating flood maps from multiple simulations.
@@ -510,42 +695,100 @@ class StochHECRAS:
         Returns:
             None
         """
-        
         start_time = time.time()
         
-        flood_maps = os.listdir(self.stochICE.depths_path)
+        # Get list of flood maps
+        flood_maps = os.listdir(self.stochICE.depth_tifs_path)
         aggregated_map = None
-    
-        for count, flood_map in enumerate(flood_maps):
-            map_path = os.path.join(self.stochICE.depths_path, flood_map)
+        
+        # Process each flood map
+        for flood_map in flood_maps:
+            map_path = os.path.join(self.stochICE.depth_tifs_path, flood_map)
             with rasterio.open(map_path) as tiff:
-                arr = tiff.read(1)  # Read the first band
-                arr = np.where(arr > 0, 1, 0)  # Convert non-zero values to 1 and others to 0
+                arr = tiff.read(1)  # Read the first band (32-bit float)
+                arr = np.where(arr > 0.001, 1, 0)  # Binary: inundated (1) or not (0), matching original threshold
     
                 if aggregated_map is None:
-                    aggregated_map = arr
+                    aggregated_map = np.zeros(arr.shape, dtype=np.float32)  # Initialize as float32
+                    aggregated_map += arr
+                    tiff_profile = tiff.profile  # Store profile for output
                 else:
                     aggregated_map += arr
     
         # Calculate the frequency of inundation as a percentage
-        frequency_map = (aggregated_map / self.stochICE.NSims) * 100
-        frequency_map = frequency_map.astype('uint8')  # Convert to integer for GeoTIFF storage
+        frequency_map = (aggregated_map / self.stochICE.NSims) * 100  # Keep as float32
     
         # Define output path for the frequency flood map
-        floodmap_output = os.path.join(self.stochICE.frequency_path, f"frequency_floodmap_{self.stochICE.ID}.tif")
+        floodmap_output = os.path.join(self.stochICE.frequency_tif_path, f"frequency_floodmap_{self.stochICE.ID}.tif")
+        
+        # Update profile for float32 output
+        tiff_profile.update(dtype='float32', nodata=-9999)  # Preserve precision with nodata value
     
         # Write the frequency map to a GeoTIFF file
         with rasterio.open(
-            floodmap_output, 'w', driver='GTiff',
-            height=aggregated_map.shape[0], width=aggregated_map.shape[1],
-            count=1, dtype=frequency_map.dtype, crs=tiff.crs, transform=tiff.transform,
-            compress='deflate'  # Use Deflate compression for smaller file size
+            floodmap_output, 'w', 
+            driver='GTiff',
+            height=aggregated_map.shape[0], 
+            width=aggregated_map.shape[1],
+            count=1, 
+            dtype='float32',  # Use float32 instead of uint8
+            crs=tiff_profile['crs'], 
+            transform=tiff_profile['transform'],
+            compress='deflate',  # Match original compression
+            nodata=-9999
         ) as result:
             result.write(frequency_map, 1)
-            
-        elapsed_time = time.time() - start_time
         
+        elapsed_time = time.time() - start_time
         print(f"Frequency flood map created successfully in {elapsed_time:.2f} seconds.")
+
+    # def make_frequency_flood_map(self):
+    #     """
+    #     Generates an ensemble frequency flood map by aggregating flood maps from multiple simulations.
+    #     The output is saved as a GeoTIFF file with pixel values representing the percentage of inundation.
+    
+    #     Args:
+    #         None
+    
+    #     Returns:
+    #         None
+    #     """
+        
+    #     start_time = time.time()
+        
+    #     flood_maps = os.listdir(self.stochICE.depth_tifs_path)
+    #     aggregated_map = None
+    
+    #     for count, flood_map in enumerate(flood_maps):
+    #         map_path = os.path.join(self.stochICE.depth_tifs_path, flood_map)
+    #         with rasterio.open(map_path) as tiff:
+    #             arr = tiff.read(1)  # Read the first band
+    #             arr = np.where(arr > 0.01, 1, 0)  # Convert non-zero values to 1 and others to 0
+    
+    #             if aggregated_map is None:
+    #                 aggregated_map = arr
+    #             else:
+    #                 aggregated_map += arr
+    
+    #     # Calculate the frequency of inundation as a percentage
+    #     frequency_map = (aggregated_map / self.stochICE.NSims) * 100
+    #     frequency_map = frequency_map.astype('uint8')  # Convert to integer for GeoTIFF storage
+    
+    #     # Define output path for the frequency flood map
+    #     floodmap_output = os.path.join(self.stochICE.frequency_tif_path, f"frequency_floodmap_{self.stochICE.ID}.tif")
+    
+    #     # Write the frequency map to a GeoTIFF file
+    #     with rasterio.open(
+    #         floodmap_output, 'w', driver='GTiff',
+    #         height=aggregated_map.shape[0], width=aggregated_map.shape[1],
+    #         count=1, dtype=frequency_map.dtype, crs=tiff.crs, transform=tiff.transform,
+    #         compress='deflate'  # Use Deflate compression for smaller file size
+    #     ) as result:
+    #         result.write(frequency_map, 1)
+            
+    #     elapsed_time = time.time() - start_time
+        
+    #     print(f"Frequency flood map created successfully in {elapsed_time:.2f} seconds.")
     
     def make_maximum_depth_map(self):
         """
@@ -560,11 +803,11 @@ class StochHECRAS:
         """
         start_time = time.time()  # Start timing the process
     
-        depth_maps = os.listdir(self.stochICE.depths_path)
+        depth_maps = os.listdir(self.stochICE.depth_tifs_path)
         max_depth = None
     
         for depth_map in depth_maps:
-            map_path = os.path.join(self.stochICE.depths_path, depth_map)
+            map_path = os.path.join(self.stochICE.depth_tifs_path, depth_map)
             with rasterio.open(map_path) as tiff:
                 arr = tiff.read(1)  # Read the first band
                 
@@ -574,7 +817,7 @@ class StochHECRAS:
                     max_depth = np.maximum(max_depth, arr)
     
         # Define output path for the maximum depth map
-        max_depth_output = os.path.join(self.stochICE.max_depth_path, f"maximum_depth_map_{self.stochICE.ID}.tif")
+        max_depth_output = os.path.join(self.stochICE.max_depth_tif_path, f"maximum_depth_map_{self.stochICE.ID}.tif")
     
         # Write the maximum depth map to a GeoTIFF file
         with rasterio.open(
@@ -587,6 +830,49 @@ class StochHECRAS:
     
         elapsed_time = time.time() - start_time  # Calculate elapsed time
         print(f"Maximum depth map created successfully in {elapsed_time:.2f} seconds.")
+
+
+    def make_maximum_wse_map(self):
+        """
+        Generates a maximum wse map by comparing water levels of the individual GeoTIFF files.
+        The output is saved as a GeoTIFF file with pixel values representing the maximum wse.
+    
+        Args:
+            None
+    
+        Returns:
+            None
+        """
+        start_time = time.time()  # Start timing the process
+    
+        wse_maps = os.listdir(self.stochICE.wse_tifs_path)
+        max_wse = None
+    
+        for wse_map in wse_maps:
+            map_path = os.path.join(self.stochICE.wse_tifs_path, wse_map)
+            with rasterio.open(map_path) as tiff:
+                arr = tiff.read(1)  # Read the first band
+                
+                if max_wse is None:
+                    max_wse = arr
+                else:
+                    max_wse = np.maximum(max_wse, arr)
+    
+        # Define output path for the maximum depth map
+        max_wse_output = os.path.join(self.stochICE.max_wse_tif_path, f"maximum_wse_map_{self.stochICE.ID}.tif")
+    
+        # Write the maximum depth map to a GeoTIFF file
+        with rasterio.open(
+            max_wse_output, 'w', driver='GTiff',
+            height=max_wse.shape[0], width=max_wse.shape[1],
+            count=1, dtype=max_wse.dtype, crs=tiff.crs, transform=tiff.transform,
+            compress='deflate'  # Use Deflate compression for smaller file size
+        ) as result:
+            result.write(max_wse, 1)
+    
+        elapsed_time = time.time() - start_time  # Calculate elapsed time
+        print(f"Maximum wse map created successfully in {elapsed_time:.2f} seconds.")
+
 
 
 class Stopwatch:
@@ -1270,4 +1556,3 @@ class Stopwatch:
     #     print(f"Mean Squared Error (MSE): {mse}")
     #     print(f"R-squared (R²): {r2}")
     
-
