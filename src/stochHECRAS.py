@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Class of functions to run HECRAS stochastically
-"""
+
 
 import pandas as pd
 
@@ -18,34 +15,11 @@ import rasterio
 import csv
 import h5py
 
-
 from scipy.ndimage import label
-
-# from sklearn.linear_model import LinearRegression
-# from sklearn.model_selection import train_test_split
-# from sklearn.metrics import mean_squared_error, r2_score
 
 
 class StochHECRAS:
     
-    # def __init__(self, stochICE):
-    #     """
-    #     Initializes the StochHECRAS class with stochastic input configurations.
-    
-    #     Args:
-    #         stochICE (object): Object containing input configurations for the stochastic simulation.
-    #     """
-    #     self.stochICE = stochICE
-    #     self.RC = None  # HEC-RAS Controller instance
-    
-    #     # Check if seed_parameters.csv exists in the project directory
-    #     self.seed_file_path = os.path.join(self.stochICE.prjDir, "seed_parameters.csv")
-        
-    #     if os.path.exists(self.seed_file_path):
-    #         print("\n'seed_parameters.csv' file found. Values of specified variables will be reused.")
-    #         self._load_seed_parameters()
-    #     else:
-    #         print("\nAttention: No 'seed_parameters.csv' file found. New stochastic variables will be generated.")
         
     def __init__(self, stochICE):
         """
@@ -90,6 +64,7 @@ class StochHECRAS:
             "phi": "phi",
             "porosity": "porosity",
             "Frontthick": "ice_thickness",
+            'ice_cover_n':"ice_cover_n",
             "jam_loc_upstream": "location_upstream",
             "jam_loc_downstream": "location_downstream"
         }
@@ -113,6 +88,8 @@ class StochHECRAS:
             "phi": random.choice(self.stochICE.friction_angle),
             "porosity": random.choice(self.stochICE.porosity),
             "ice_thickness": random.choice(self.stochICE.Frontthick),
+            "ice_cover_n": random.choice(self.stochICE.ice_cover_n),
+            "ds_elev":random.choice(self.stochICE.ds_elev),
         }
         return random_mappings.get(var_name, None)
     
@@ -125,35 +102,9 @@ class StochHECRAS:
         self.set_porosity()
         self.thicknesses = [[f"{self.ice_thickness},{self.ice_thickness},{self.ice_thickness}"]]
         self.set_init_ice_cover_thickness()
+        self.ice_cover_Manning = [[f"{self.ice_cover_n},{self.ice_cover_n},{self.ice_cover_n}"]]
+        self.set_ice_cover_manning_values()
         self.set_ice_jam_location()
-
-
-    # """
-    # Class for managing stochastic simulations using the HEC-RAS controller.
-
-    # This class handles preparation, execution, and post-processing of multiple
-    # stochastic simulations by modifying input parameters such as flow rates
-    # and ice thicknesses.
-    # """
-
-    # def __init__(self, stochICE):
-    #     """
-    #     Initializes the StochHECRAS class with stochastic input configurations.
-    
-    #     Args:
-    #         stochICE (object): Object containing input configurations for the stochastic simulation.
-    #     """
-    #     self.stochICE = stochICE
-    #     self.RC = None  # HEC-RAS Controller instance
-    
-    #     # Check if seed_parameters.csv exists in the project directory
-    #     self.seed_file_path = os.path.join(self.stochICE.prjDir, "seed_parameters.csv")
-        
-    #     if os.path.exists(self.seed_file_path):
-    #         print("\n'seed_parameters.csv' file found. Values of specified variables will be reused.")
-    #     if not os.path.exists(self.seed_file_path):
-    #         print("\nAttention: No 'seed_parameters.csv' file found. New stochastic variables will be generated.")
-
 
     def __getstate__(self):
         """
@@ -231,6 +182,7 @@ class StochHECRAS:
         self.init_ice_thicknesses = []
         self.phi_values = []
         self.porosity_values=[]
+        self.ice_cover_n_values=[]
         self.jam_loc_upstream = []
         self.jam_loc_downstream = []
     
@@ -247,11 +199,6 @@ class StochHECRAS:
     
             # Randomize parameters and set up the simulation
             self.extract_or_randomize_data(j)
-            print(self.flow)
-            print(self.phi)
-            print(self.porosity)
-            print(self.ice_thickness)
-            print(self.location)
 
             # self.randomize_variables()
             self.write_new_geometry()
@@ -262,6 +209,7 @@ class StochHECRAS:
             self.init_ice_thicknesses.append(self.ice_thickness)
             self.phi_values.append(self.phi)
             self.porosity_values.append(self.porosity)
+            self.ice_cover_n_values.append(self.ice_cover_n)
             self.jam_loc_upstream.append(self.location[1])
             self.jam_loc_downstream.append(self.location[0])
     
@@ -273,7 +221,7 @@ class StochHECRAS:
             self.RC.Project_Open(self.stochICE.ras_file)
             self.NMsg, self.TabMsg, self.block = None, None, True
     
-            print(f'Sim {j+1}/{self.stochICE.NSims} | Q = {self.flow:.2f}, Phi = {self.phi:.2f}, Ice thickness = {self.ice_thickness:.2f}')
+            print(f'Sim {j+1}/{self.stochICE.NSims} | Q = {self.flow:.2f}, Phi = {self.phi:.2f}, Porosity = {self.porosity:.2f}, Ice thickness = {self.ice_thickness:.2f}, Ice Mann = {self.ice_cover_n:.3f}')
             print(f"Ice Jam: Chainage {self.location[0]} - {self.location[1]}")
     
             # Run the current simulation plan
@@ -318,7 +266,7 @@ class StochHECRAS:
 
             tif_filename = os.path.join(
                 self.stochICE.wse_tifs_path,
-                f"WSE_{self.flow}_{self.ice_thickness}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.tif",
+                f"WSE_{self.flow}_{self.ice_thickness}_{self.ice_cover_n}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.tif",
             )
             shutil.copyfile(self.stochICE.wse_map_path, tif_filename)
     
@@ -332,7 +280,7 @@ class StochHECRAS:
 
             tif_filename = os.path.join(
                 self.stochICE.depth_tifs_path,
-                f"WSE_{self.flow}_{self.ice_thickness}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.tif",
+                f"Depth_{self.flow}_{self.ice_thickness}_{self.ice_cover_n}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.tif",
             )
             shutil.copyfile(self.stochICE.depth_map_path, tif_filename)
     
@@ -359,6 +307,7 @@ class StochHECRAS:
             'phi': self.phi_values,
             'porosity': self.porosity_values,
             'Frontthick': self.init_ice_thicknesses,
+            'ice_cover_n': self.ice_cover_n_values,
             'jam_loc_upstream': self.jam_loc_upstream,
             'jam_loc_downstream': self.jam_loc_downstream,
         })
@@ -366,8 +315,7 @@ class StochHECRAS:
         # Save to CSV
         csv_path = os.path.join(self.stochICE.prjDir, "sim_parameters.csv")
         self.input_parms.to_csv(csv_path, index=False)
-        print(f"Simulation parameters saved to {csv_path}")        
-        
+        print(f"Simulation parameters saved to {csv_path}")          
         print(f"\n                  Simulations finished!\n")
 
     def retain_largest_pixel_area(self, raster_path):
@@ -449,14 +397,14 @@ class StochHECRAS:
     
                 for i, entry in enumerate(cross):
                     if entry[0].decode('utf-8') == reach_name:
-                        station_numbers.append(int(entry[2].decode('utf-8')))
+                        station_numbers.append(float(entry[2].decode('utf-8')))
                         station_indices.append(i)
     
                 wse_values = [wse[idx] for idx in station_indices]
     
                 wse_filename = os.path.join(
                     self.stochICE.wse_profiles_path,
-                    f"{reach_name}_WSE_{self.flow}_{self.ice_thickness}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.csv"
+                    f"{reach_name}_WSE_{self.flow}_{self.ice_thickness}_{self.ice_cover_n}_{self.phi}_{self.porosity}_{self.location[0]}_{self.location[1]}.csv"
                 )
     
                 with open(wse_filename, mode='w', newline='') as csv_file:
@@ -466,39 +414,44 @@ class StochHECRAS:
                         writer.writerow([station, wse_value])
 
 
-    def randomize_variables(self):
-        """
-        Randomizes key simulation parameters such as ice thickness, phi (friction angle), 
-        and ice jam location based on specified ranges in `stochICE`.
-        """
-        self.xs_data_modified = self.stochICE.xs_data
+    # def randomize_variables(self):
+    #     """
+    #     Randomizes key simulation parameters such as ice thickness, phi (friction angle), 
+    #     and ice jam location based on specified ranges in `stochICE`.
+    #     """
+    #     self.xs_data_modified = self.stochICE.xs_data
     
-        # Randomize flow rate
-        self.flow = random.choice(self.stochICE.Q)
-        self.set_flowrate()
+    #     # Randomize flow rate
+    #     self.flow = random.choice(self.stochICE.Q)
+    #     self.set_flowrate()
     
-        # Randomize phi (internal friction angle)
-        self.phi = random.choice(self.stochICE.friction_angle)
-        self.set_phi()
+    #     # Randomize phi (internal friction angle)
+    #     self.phi = random.choice(self.stochICE.friction_angle)
+    #     self.set_phi()
     
-        # Randomize porosity
-        self.porosity = random.choice(self.stochICE.porosity)
-        self.set_porosity()
+    #     # Randomize porosity
+    #     self.porosity = random.choice(self.stochICE.porosity)
+    #     self.set_porosity()
     
-        # Randomize ice thickness
-        self.ice_thickness = random.choice(self.stochICE.Frontthick)
-        self.thicknesses = [[f"{self.ice_thickness},{self.ice_thickness},{self.ice_thickness}"]]
-        self.set_init_ice_cover_thickness()
+    #     # Randomize ice thickness
+    #     self.ice_thickness = random.choice(self.stochICE.Frontthick)
+    #     self.thicknesses = [[f"{self.ice_thickness},{self.ice_thickness},{self.ice_thickness}"]]
+    #     self.set_init_ice_cover_thickness()
     
-        # Randomize ice jam location
-        self.location = random.choice(self.stochICE.jam_locations)
-        self.set_ice_jam_location()
+    #     # Randomize ice jam location
+    #     self.location = random.choice(self.stochICE.jam_locations)
+    #     self.set_ice_jam_location()
     
     def set_init_ice_cover_thickness(self):
         """Sets the initial ice thickness for each cross-section in the geometry."""
         for item in self.xs_data_modified:
             self.xs_data_modified[item]["Ice Thickness"]['val'] = self.thicknesses[0]
-    
+
+    def set_ice_cover_manning_values(self):
+        """Sets the ice cover Manning values for each cross-section in the geometry."""
+        for item in self.xs_data_modified:
+            self.xs_data_modified[item]["Ice Mann"]['val'] = self.ice_cover_Manning[0]
+
     def set_phi(self):
         """Sets the ice friction angle for each cross-section in the geometry."""
         for item in self.xs_data_modified:
@@ -536,7 +489,7 @@ class StochHECRAS:
     
     def write_new_geometry(self):
         """
-        Writes the updated geometry with modified ice cover and ice jam locations 
+        Writes the updated geometry with modified ice cover parameters and ice jam locations 
         into the geometry file.
         """
         for key, item in self.xs_data_modified.items():
@@ -563,7 +516,15 @@ class StochHECRAS:
                 self.replace_line()
             except TypeError:
                 pass
-    
+
+            # Update Ice Mann
+            try:
+                self.toWrite = f"Ice Mann={item['Ice Mann']['val'][0]}\n"
+                self.lineNmb = item['Ice Mann']['lnNum']
+                self.replace_line()
+            except TypeError:
+                pass
+
             # Update Ice Porosity
             try:
                 
@@ -619,7 +580,35 @@ class StochHECRAS:
         """
         if hasattr(self, 'out') and self.out:
             self.out.close()
+
+    def set_ds_elevation(self):
+        """
+        Sets downstream water level in the HEC-RAS flow file.
+
+        """
+        with open(self.stochICE.flow_file, 'r') as file:
+            lines = file.readlines()
     
+        updated_lines = []
+        river_reaches = []
+    
+        # Identify the river reaches
+        for i, line in enumerate(lines):
+            if "Dn Known WS=" in line:
+                river_reaches.append(i)
+            updated_lines.append(line)
+    
+        # Update water level
+        for idx, reach_line in enumerate(river_reaches):
+            if idx == 0:
+                updated_lines[reach_line + 1] = f"Dn Known WS={self.ds_elev}\n"
+    
+        # Save the updated flow file
+        with open(self.stochICE.flow_file, 'w') as file:
+            file.writelines(updated_lines)    
+
+
+
     def set_flowrate(self):
         """
         Updates the flow rate in the HEC-RAS flow file.
@@ -663,7 +652,7 @@ class StochHECRAS:
         """
         geo_copy_path = os.path.join(
             self.stochICE.data_geo_files_path,
-            f"{self.flow}_{self.ice_thickness}_{self.phi}_{self.location[0]}_{self.location[1]}.g01"
+            f"{self.flow}_{self.ice_thickness}_{self.ice_cover_n}_{self.phi}_{self.location[0]}_{self.location[1]}.g01"
         )
         shutil.copyfile(self.stochICE.geo_file, geo_copy_path)
     
@@ -676,13 +665,9 @@ class StochHECRAS:
         """
         flow_copy_path = os.path.join(
             self.stochICE.data_flow_files_path,
-            f"{self.flow}_{self.ice_thickness}_{self.phi}_{self.location[0]}_{self.location[1]}.f01"
+            f"{self.flow}_{self.ice_thickness}_{self.ice_cover_n}_{self.phi}_{self.location[0]}_{self.location[1]}.f01"
         )
         shutil.copyfile(self.stochICE.flow_file, flow_copy_path)
-
-
-
-
 
     def make_frequency_flood_map(self):
         """
@@ -742,53 +727,6 @@ class StochHECRAS:
         elapsed_time = time.time() - start_time
         print(f"Frequency flood map created successfully in {elapsed_time:.2f} seconds.")
 
-    # def make_frequency_flood_map(self):
-    #     """
-    #     Generates an ensemble frequency flood map by aggregating flood maps from multiple simulations.
-    #     The output is saved as a GeoTIFF file with pixel values representing the percentage of inundation.
-    
-    #     Args:
-    #         None
-    
-    #     Returns:
-    #         None
-    #     """
-        
-    #     start_time = time.time()
-        
-    #     flood_maps = os.listdir(self.stochICE.depth_tifs_path)
-    #     aggregated_map = None
-    
-    #     for count, flood_map in enumerate(flood_maps):
-    #         map_path = os.path.join(self.stochICE.depth_tifs_path, flood_map)
-    #         with rasterio.open(map_path) as tiff:
-    #             arr = tiff.read(1)  # Read the first band
-    #             arr = np.where(arr > 0.01, 1, 0)  # Convert non-zero values to 1 and others to 0
-    
-    #             if aggregated_map is None:
-    #                 aggregated_map = arr
-    #             else:
-    #                 aggregated_map += arr
-    
-    #     # Calculate the frequency of inundation as a percentage
-    #     frequency_map = (aggregated_map / self.stochICE.NSims) * 100
-    #     frequency_map = frequency_map.astype('uint8')  # Convert to integer for GeoTIFF storage
-    
-    #     # Define output path for the frequency flood map
-    #     floodmap_output = os.path.join(self.stochICE.frequency_tif_path, f"frequency_floodmap_{self.stochICE.ID}.tif")
-    
-    #     # Write the frequency map to a GeoTIFF file
-    #     with rasterio.open(
-    #         floodmap_output, 'w', driver='GTiff',
-    #         height=aggregated_map.shape[0], width=aggregated_map.shape[1],
-    #         count=1, dtype=frequency_map.dtype, crs=tiff.crs, transform=tiff.transform,
-    #         compress='deflate'  # Use Deflate compression for smaller file size
-    #     ) as result:
-    #         result.write(frequency_map, 1)
-            
-    #     elapsed_time = time.time() - start_time
-        
-    #     print(f"Frequency flood map created successfully in {elapsed_time:.2f} seconds.")
     
     def make_maximum_depth_map(self):
         """
